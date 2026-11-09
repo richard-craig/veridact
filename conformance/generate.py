@@ -1,6 +1,6 @@
 """Generate the Veridact verifier conformance vectors.
 
-    python conformance/generate.py            # writes conformance/vectors/verifier-v0.1.json
+    python conformance/generate.py            # writes conformance/vectors/verifier-v0.2.json
 
 The vectors are frozen: keys and signatures are random, so regenerating replaces
 every value. Commit the output; implementations test against the committed file.
@@ -22,7 +22,7 @@ from veridact_verify.testing.mock_network import (
     make_party,
 )
 
-OUT = Path(__file__).parent / "vectors" / "verifier-v0.1.json"
+OUT = Path(__file__).parent / "vectors" / "verifier-v0.2.json"
 NONCE = "9f2c41d0a7e3b5f8a1c2d3e4f5a6b7c8"
 LIMITS = {"currency": "ZAR", "perPayment": "500.00", "perDay": "2000.00"}
 
@@ -113,6 +113,24 @@ def build_cases(net: MockNetwork):
     yield ("deny-status-list-signer", "Status list signed by another issuer",
            rogue_status, {}, ("deny", "VERIFICATION_UNAVAILABLE", "STATUS_UNAVAILABLE"))
 
+    def stale_list(iat_offset, risk):
+        def build():
+            net.publish_status_list(net.agent_status_url, mutate=lambda p: p.update(
+                iat=NOW - iat_offset, exp=NOW - iat_offset + 4 * 3600))
+            return net.presentation(NONCE)
+        return build
+    yield ("allow-status-list-cached-low-risk", "Status list signed an hour ago; low-risk route",
+           stale_list(3600, "low"), {"risk": "low"}, ("allow", None, None))
+    yield ("deny-status-list-stale-high-risk", "Status list signed an hour ago; high-risk route",
+           stale_list(3600, "high"), {"risk": "high"},
+           ("deny", "VERIFICATION_UNAVAILABLE", "STATUS_STALE"))
+
+    def no_exp_list():
+        net.publish_status_list(net.agent_status_url, mutate=lambda p: p.pop("exp"))
+        return net.presentation(NONCE)
+    yield ("deny-status-list-without-exp", "Status list carries no exp",
+           no_exp_list, {}, ("deny", "VERIFICATION_UNAVAILABLE", "STATUS_UNAVAILABLE"))
+
     yield ("deny-cnf-mismatch", "cnf names a key other than the one that signed",
            vp(credentials=creds(agent=a(mutate=lambda p: p["credentialSubject"]["cnf"].update(
                kid=net.agent.did + "#key-2")))), {}, ("deny", "AUTH_FAILED", "CNF_MISMATCH"))
@@ -168,6 +186,7 @@ def main() -> int:
         now_files = net.snapshot()
         overrides = {u: b for u, b in now_files.items() if base.get(u) != b}
         net.fetcher.files = {u: b.encode() for u, b in base.items()}
+        net.revoked = {u: set() for u in net.revoked}
         cases.append({
             "name": name,
             "description": description,
@@ -190,10 +209,10 @@ def main() -> int:
     }
 
     doc = {
-        "about": ("Veridact verifier conformance vectors for specification v0.1 plus the v0.2 "
-                  "proposals in docs/proposals/0.2-verifier-gaps.md. Every case runs at 'now', "
+        "about": ("Veridact verifier conformance vectors for specification v0.2. Every case runs at 'now', "
                   "with 'nonce' issued by the relying party and unused. 'code' is normative; "
-                  "'reason' is the reference library's internal code and is informative."),
+                  "'reason' is the reference library's internal code and is informative. "
+                  "'request.risk' defaults to medium."),
         "now": NOW,
         "nonce": NONCE,
         "trustListUrl": TRUST_LIST_URL,

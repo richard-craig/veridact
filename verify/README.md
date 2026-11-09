@@ -5,7 +5,7 @@ authorisation server, an API gateway authoriser or any service) uses it to decid
 Verification reads only public, signed, cacheable files. With a warm cache it makes no network calls, and no
 issuer learns which agent was checked.
 
-Status: alpha, tracking specification v0.1 plus the [v0.2 proposals](../docs/proposals/0.2-verifier-gaps.md).
+Status: alpha, tracking specification v0.2.
 
 ## What it checks
 
@@ -71,8 +71,8 @@ exact action in `decision.context["intent"]`.
   allowlist or behind a member mirror (`FallbackFetcher([MirrorFetcher(mirror_url, HttpFetcher()), HttpFetcher()])`).
   Issuer DIDs are resolved only if the trust list names them.
 - **Caching.** DID documents and status lists are cached for 5 minutes and the trust list for 1 hour. On refresh
-  failure, the last good copy is used within the degraded-mode policy (default: flag medium-risk actions after 5
-  minutes, block high-risk; block everything after 4 hours). A file that fails verification is never cached, so a
+  failure, the last good copy is used within the degraded-mode policy. A status list's age is measured from its
+  `iat` (default: flag medium-risk actions after 5 minutes, block high-risk; block everything after 4 hours). A file that fails verification is never cached, so a
   tampered mirror cannot displace a good copy.
 - **Clock.** Inject `clock=` for tests. Production uses `time.time` with a 30-second skew allowance.
 

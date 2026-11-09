@@ -3,8 +3,7 @@
 Language-neutral test cases for anyone implementing a Veridact verifier. They are JSON, they need no network, and
 each case states the decision an implementation must reach.
 
-[`vectors/verifier-v0.1.json`](vectors/verifier-v0.1.json) covers specification v0.1 plus the
-[v0.2 proposals](../docs/proposals/0.2-verifier-gaps.md).
+[`vectors/verifier-v0.2.json`](vectors/verifier-v0.2.json) covers specification v0.2.
 
 ## Format
 
@@ -17,7 +16,8 @@ bundles[]
   artefacts        every published file, URL -> body (did:webvh logs, status lists, trust list)
   cases[]
     policy               { audience, minTier }
-    request              { scopes?, payment?: { amount, currency, spentToday? } }
+    request              { scopes?, risk? (low | medium | high, default medium),
+                           payment?: { amount, currency, spentToday? } }
     artefactOverrides    URL -> body, layered over the bundle's artefacts for this case only
     presentation         the VP-JWT the agent sends
     expected             { decision, code, reason }

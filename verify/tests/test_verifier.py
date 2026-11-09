@@ -532,3 +532,33 @@ async def test_operator_credential_over_tier_lifetime(env):
     cred = env.net.operator_credential(lifetime=400 * 86400)
     d = await run(env, lambda n: env.net.presentation(n, credentials=[env.net.agent_credential(), cred]))
     expect(d, Reason.VC_LIFETIME, PublicCode.AUTH_FAILED)
+
+
+async def test_status_age_is_measured_from_the_list_iat(env):
+    # A mirror serves an hour-old list on first fetch: the cache is fresh, the list is not.
+    now = int(env.clock.now)
+    env.net.publish_status_list(env.net.agent_status_url, mutate=lambda p: p.update(
+        iat=now - 3600, exp=now - 3600 + 4 * 3600))
+    d = await run(env, request=Request(risk=Risk.MEDIUM))
+    assert d.allowed and "STATUS_STALE_REVIEW" in d.flags
+    d = await run(env, request=Request(risk=Risk.HIGH))
+    expect(d, Reason.STATUS_STALE, PublicCode.VERIFICATION_UNAVAILABLE)
+
+
+async def test_status_list_lifetime_over_four_hours_refused(env):
+    env.net.publish_status_list(env.net.agent_status_url, mutate=lambda p: p.update(exp=p["iat"] + 4 * 3600 + 1))
+    expect(await run(env), Reason.STATUS_UNAVAILABLE, PublicCode.VERIFICATION_UNAVAILABLE)
+
+
+async def test_status_list_rollback_refused(env):
+    v = env.verifier()
+    env.net.revoke(env.net.agent_status_url, 48213)
+    # Newer list: issued now with the revocation.
+    assert (await run(env, verifier=v)).reason is Reason.STATUS_REVOKED
+    # Mirror serves an older, unrevoked list after the cache expires.
+    env.net.revoked[env.net.agent_status_url].clear()
+    env.net.publish_status_list(env.net.agent_status_url, mutate=lambda p: p.update(
+        iat=p["iat"] - 120, exp=p["exp"] - 120))
+    env.clock.now += 301
+    d = await run(env, lambda n: env.net.presentation(n, iat=int(env.clock.now) - 5), verifier=v)
+    assert d.reason is Reason.STATUS_REVOKED
