@@ -1,0 +1,38 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "veridact-verify"
+version = "0.1.0a1"
+description = "Reference verifier for Veridact agent presentations: did:webvh, VC-JOSE-COSE, Bitstring Status List, no call home."
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.11"
+authors = [{ name = "Richard Craig" }]
+keywords = ["verifiable-credentials", "did", "did:webvh", "ai-agents", "acme", "vc-jwt"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python :: 3",
+  "Topic :: Security :: Cryptography",
+]
+# Pinned for reproducible builds (spec: Security and threat model, supply chain).
+dependencies = [
+  "cryptography==50.0.2",
+  "did-webvh==1.0.1",
+  "aiohttp==3.14.5",
+]
+
+[project.optional-dependencies]
+test = ["pytest==8.*", "pytest-asyncio==0.*"]
+
+[project.urls]
+Specification = "https://github.com/richard-craig/veridact/blob/main/docs/specification.md"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/veridact_verify"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]

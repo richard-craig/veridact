@@ -25,9 +25,13 @@ issuance. Veridact works the same way.
 - [**Specification**](docs/specification.md): trust model, identifiers and keys, credential profiles, delegation,
   the ACME-A protocol, the verification checks and reason codes, the transparency log, the trust registry,
   security, privacy and resilience.
+- [**veridact-verify**](verify): the reference verifier library (Python, alpha). It runs all eight verification
+  checks with reason codes, caching and degraded mode, and makes no call home.
+- [**Conformance vectors**](conformance): language-neutral test cases for anyone implementing a verifier.
+- [**v0.2 proposals**](docs/proposals/0.2-verifier-gaps.md): gaps found while building the verifier, and the
+  choices it makes.
 
-This repository holds the open specification only. A reference verifier library (`veridact-verify`) and an
-agent client (`vbot`) are planned.
+An agent client (`vbot`) and an HTTP sidecar for the verifier are planned.
 
 ## Related project
 
