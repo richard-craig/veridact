@@ -20,6 +20,9 @@ STATUS_ENTRY_TYPE = "BitstringStatusListEntry"
 STATUS_LIST_TYPE = "BitstringStatusListCredential"
 MIN_LIST_BITS = 131_072
 MAX_LIST_BYTES = 16 * 1024 * 1024  # decompressed cap, against GZIP bombs
+# Issuers re-sign each list at least every 5 minutes, with exp at most 4 hours after
+# iat (spec v0.2). Verifiers measure a list's age from its iat.
+MAX_LIST_LIFETIME = 4 * 3600
 
 
 class StatusError(Exception):
@@ -40,6 +43,8 @@ class StatusList:
     purpose: str
     bits: bytes
     jws: jose.CompactJws
+    issued_at: int = 0
+    expires_at: int = 0
 
     def is_set(self, index: int) -> bool:
         if index < 0 or index >= len(self.bits) * 8:
@@ -117,6 +122,11 @@ def parse_status_list(url: str, token: str) -> StatusList:
     issuer = issuer.get("id") if isinstance(issuer, dict) else issuer
     if not isinstance(issuer, str):
         raise StatusError("status list has no issuer")
+    iat, exp = vc.get("iat"), vc.get("exp")
+    if not isinstance(iat, int) or not isinstance(exp, int) or isinstance(iat, bool) or isinstance(exp, bool):
+        raise StatusError("status list needs integer iat and exp")
+    if not 0 < exp - iat <= MAX_LIST_LIFETIME:
+        raise StatusError("status list exp must be within 4 hours of iat")
     # The list must say it is the list at this URL, so one list cannot stand in for another.
     if vc.get("id") != url and subject.get("id") not in (url, url + "#list"):
         raise StatusError("status list id does not match its URL")
@@ -126,6 +136,8 @@ def parse_status_list(url: str, token: str) -> StatusList:
         purpose=str(subject.get("statusPurpose")),
         bits=decode_bitstring(subject.get("encodedList")),
         jws=jws,
+        issued_at=iat,
+        expires_at=exp,
     )
 
 
@@ -143,12 +155,17 @@ class StatusLists:
         self.cache = cache
         self.ttl = ttl
         self.max_stale = max_stale
+        self._newest_iat: dict[str, int] = {}
 
     async def check(self, entry: StatusEntry, verify_list, *, expected_issuer: str) -> StatusResult:
         async def load() -> StatusList:
             body = await self.fetcher.fetch(entry.list_url)
             status_list = parse_status_list(entry.list_url, body.decode("ascii"))
             await verify_list(status_list)
+            # Refuse rollback to an older signed list, for example from a stale mirror.
+            if status_list.issued_at < self._newest_iat.get(entry.list_url, 0):
+                raise StatusError("status list is older than one already seen")
+            self._newest_iat[entry.list_url] = status_list.issued_at
             return status_list
 
         cached = await self.cache.get(
@@ -159,9 +176,10 @@ class StatusLists:
         # issuers could name the same URL, and the cached copy was verified for one.
         if status_list.issuer != expected_issuer:
             raise StatusError("status list issued by a different issuer")
-        exp = status_list.jws.payload.get("exp")
-        if isinstance(exp, int) and self.cache.clock() >= exp:
+        now = self.cache.clock()
+        if now >= status_list.expires_at:
             raise StatusError("status list has passed its own expiry")
         if status_list.purpose != entry.purpose:
             raise StatusError("status list purpose does not match the entry")
-        return StatusResult(entry, status_list.is_set(entry.index), cached.age, cached.stale)
+        age = max(0.0, now - status_list.issued_at)
+        return StatusResult(entry, status_list.is_set(entry.index), age, cached.stale)

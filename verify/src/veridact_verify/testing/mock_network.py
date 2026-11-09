@@ -160,8 +160,10 @@ class MockNetwork:
             "id": url,
             "type": ["VerifiableCredential", "BitstringStatusListCredential"],
             "issuer": signer.did,
-            "validFrom": iso(NOW - 600),
-            "iat": NOW - 600,
+            "validFrom": iso(NOW - 60),
+            "validUntil": iso(NOW - 60 + 4 * 3600),
+            "iat": NOW - 60,
+            "exp": NOW - 60 + 4 * 3600,
             "credentialSubject": {
                 "id": url + "#list",
                 "type": "BitstringStatusList",

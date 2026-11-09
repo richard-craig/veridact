@@ -1,6 +1,6 @@
 # Veridact: open specification for AI agent credentials
 
-Version 0.1 · 9 November 2026
+Version 0.2 · 9 November 2026 · [changes from v0.1](#changes-from-v01)
 
 ## Purpose and scope
 
@@ -58,7 +58,7 @@ The dashed line is the only link between relying parties and Veridact: cached re
 
 ## Trust model
 
-A relying party trusts an agent because a chain of signatures leads from the agent's key to an issuer that the trust registry lists for the required tier. Issuers vouch for organisations and the agents they operate; it never vouches for natural persons.
+A relying party trusts an agent because a chain of signatures leads from the agent's key to an issuer that the trust registry lists for the required tier. Issuers vouch for organisations and the agents they operate; they never vouch for natural persons.
 
 | Actor                       | Role                                                       | Trusts                                            |
 |-----------------------------|------------------------------------------------------------|---------------------------------------------------|
@@ -117,10 +117,10 @@ Veridact defines three credentials and one presentation, all W3C VC Data Model 2
 
 | Credential            | Issued by                                                          | Subject      | Key claims                                                                                                                                                    | Lifetime                                               |
 |-----------------------|--------------------------------------------------------------------|--------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------|
-| Operator Credential   | Veridact issuer                                                    | Operator DID | Validated domains, tier, legal entity name and CIPC number or LEI (Organisation tier), transparency log entry id                                              | 90 days at Domain tier, 12 months at Organisation tier |
-| Delegation Credential | An approver appointed by the operator (two above R1,000 a payment) | Agent DID    | Scopes, accountable role (a role title, never a person's name), maximum lifetime, environment, optional allowed audiences                                     | Up to 90 days                                          |
-| Agent Credential      | Veridact issuer                                                    | Agent DID    | Operator DID and Operator Credential id, tier, scopes capped by tier policy, accountable role, key binding (cnf), status entry | Default 8 hours, maximum 24 hours                      |
-| Agent Presentation    | The agent                                                          | —            | Enveloped Agent and Operator Credentials, aud, nonce, iat, exp                                                                                                | 120 seconds at most                                    |
+| Operator Credential   | Veridact issuer                                                    | Operator DID | Validated domains, tier, legal entity name and CIPC number or LEI (Organisation tier), transparency log entry id, status entry                                 | 90 days at Domain tier, 12 months at Organisation tier |
+| Delegation Credential | An approver appointed by the operator (two above R1,000 a payment) | Agent DID    | Scopes, delegation limits, accountable role (a role title, never a person's name), maximum lifetime, environment, optional allowed audiences                   | Up to 90 days                                          |
+| Agent Credential      | Veridact issuer                                                    | Agent DID    | Operator DID and Operator Credential id, tier, scopes capped by tier policy, delegation limits, accountable role, key binding (cnf), status entry              | Default 8 hours, maximum 24 hours                      |
+| Agent Presentation    | The agent                                                          | —            | holder (the agent DID), enveloped Agent and Operator Credentials, aud, nonce, iat, exp                                                                        | 120 seconds at most                                    |
 
 An Agent Credential, decoded:
 
@@ -147,6 +147,7 @@ An Agent Credential, decoded:
 "tier": "organisation",
 "scopes": ["fs:claims:read-status", "fs:quotes:create"],
 "accountableRole": "Head of Digital Claims",
+"limits": { "currency": "ZAR", "perPayment": "500.00", "perDay": "2000.00" },
 "cnf": { "kid": "did:webvh:QmX9…:operator.example:agents:a7f3k2#key-1" }
 },
 "credentialStatus": {
@@ -158,9 +159,43 @@ An Agent Credential, decoded:
 }
 ```
 
-Scopes come from a shared taxonomy that the governance authority owns, namespaced by sector (fs: for financial services). A relying party grants the intersection of the credential's scopes and its own policy, never more.
+Scopes come from a shared taxonomy that the governance authority owns, namespaced by sector (fs: for financial services). A relying party grants the intersection of the credential's scopes and its own policy, never more. Scopes outside the taxonomy are ignored, not treated as an error.
 
-Revocation uses Bitstring Status Lists of 131,072 entries, served as signed credentials from a CDN. Large lists give herd privacy: fetching one tells the issuer nothing about which agent a relying party is checking.
+**Delegation limits.** limits carries the per-payment and daily limits from the Delegation Credential, capped by each approver's own ceiling. Amounts are decimal strings, so no implementation loses cents to binary floating point. An Agent Credential with no limits, or none in the payment's currency, gives the agent no authority to pay without a person.
+
+**Status entries.** Both the Operator and the Agent Credential carry a BitstringStatusListEntry. Revoking either takes effect within 5 minutes; without one, a 12-month Organisation-tier Operator Credential would have no fast kill switch.
+
+**The presentation** follows VC-JOSE-COSE. verifiableCredential is an array of EnvelopedVerifiableCredential objects whose id is a data: URL holding the credential's compact JWS. It carries exactly one Agent Credential and one Operator Credential; bare JWT strings are not accepted. kid in the protected header must be one of the holder DID's authentication keys. Decoded:
+
+```
+{
+"alg": "ES256",
+"typ": "vp+jwt",
+"kid": "did:webvh:QmX9…:operator.example:agents:a7f3k2#key-1"
+}
+.
+{
+"@context": ["https://www.w3.org/ns/credentials/v2"],
+"type": ["VerifiablePresentation"],
+"holder": "did:webvh:QmX9…:operator.example:agents:a7f3k2",
+"verifiableCredential": [
+{ "@context": ["https://www.w3.org/ns/credentials/v2"], "type": "EnvelopedVerifiableCredential", "id": "data:application/vc+jwt,eyJhbGciOiJFUzI1NiIs…" },
+{ "@context": ["https://www.w3.org/ns/credentials/v2"], "type": "EnvelopedVerifiableCredential", "id": "data:application/vc+jwt,eyJhbGciOiJFUzI1NiIs…" }
+],
+"aud": "https://api.bank.example",
+"nonce": "9f2c41d0a7e3b5f8",
+"iat": 1792483500,
+"exp": 1792483560
+}
+```
+
+Revocation uses Bitstring Status Lists of 131,072 entries, served as signed credentials (vc+jwt) from a CDN. Large lists give herd privacy: fetching one tells the issuer nothing about which agent a relying party is checking. Each list:
+
+- names its own URL as its id, so one genuine list cannot be served in place of another;
+- is signed by the same issuer as the credentials that point at it, with a key the trust list lists;
+- is re-signed at least every 5 minutes, whether or not any bit changed, with exp no more than 4 hours after iat.
+
+Verifiers measure a status list's age from its iat. A list mirrored or cached for an hour is an hour old, wherever it was fetched from, so the degraded-mode table (see Resilience) means the same thing everywhere and a stale mirror is detected. A verifier refuses a list older than one it has already accepted for the same URL.
 
 ## Delegation and human intent
 
@@ -170,9 +205,9 @@ An agent's authority flows down a chain of signatures, and nobody in the chain c
 
 2.  **An approver delegates to an agent.** They choose purpose, scopes, a per-payment limit, a daily limit and a lifetime of at most 90 days, read a plain-language summary, and sign it with their passkey. Single payments above R1,000 need a second, different approver.
 
-3.  **The issuer checks the chain** before issuing the Agent Credential: each appointment is signed by the operator, each approver signed these exact terms, the scopes and limits are within each approver's own authority, and the two-person rule is met.
+3.  **The issuer checks the chain** before issuing the Agent Credential: each appointment is signed by the operator, each approver signed these exact terms, the scopes and limits are within each approver's own authority, and the two-person rule is met. It copies the scopes and limits into the Agent Credential.
 
-4.  **The agent acts alone inside the limits.** Relying parties enforce the per-payment and daily limits.
+4.  **The agent acts alone inside the limits.** Relying parties enforce the per-payment and daily limits from the Agent Credential's limits claim. The verifier keeps no ledger: the relying party supplies what it has already let the agent pay that day.
 
 5.  **Outside the limits, a person decides.** The relying party returns ask_person with an intent request: the exact action, why it was stopped, and the agent's own note. It is routed to the lowest-ranked approver with enough authority. Their approval is signed over a hash of that exact action, is single-use, and expires after 5 minutes.
 
@@ -243,27 +278,27 @@ The challenge in pattern B:
 HTTP/1.1 401 Unauthorized  
 WWW-Authenticate: Veridact realm="claims-api", nonce="9f2c41d0a7e3b5f8", tier="organisation", scope="fs:claims:read-status"
 
-The verifier library runs these checks in order and stops at the first failure:
+The verifier library runs these checks in order and stops at the first failure. All signatures are ES256; a verifier refuses any other alg before going further.
 
-1.  The presentation is a compact JWS with typ vp+jwt, its aud is this relying party, its nonce was issued here and unused, and it expires within 120 seconds.
+1.  The presentation is a compact JWS with typ vp+jwt, its aud is or includes this relying party, and its nonce was issued here and is still live. Its lifetime, exp minus iat, is at most 120 seconds, and the current time is no later than exp. Verifiers allow a configurable clock skew, 30 seconds by default. This check does not consume the nonce.
 
-2.  Resolve the agent DID, verify its did:webvh log hash chain, and verify the presentation signature with the key its kid names.
+2.  Resolve the holder's DID, verify its did:webvh log (hash chain, SCID, proofs and pre-rotation), and verify the presentation signature with the authentication key its kid names. Only then consume the nonce, atomically, so nobody can burn a nonce with a junk presentation and two parallel replays cannot both succeed.
 
-3.  Extract the enveloped Agent and Operator Credentials; check each signature against its issuer DID.
+3.  Extract the enveloped Agent and Operator Credentials and check each signature with an assertionMethod key of its issuer DID. Before resolving an issuer DID, confirm that the trust list names the issuer. If it does not, stop with check 4's result. This stops a presentation from making the verifier fetch arbitrary URLs.
 
-4.  Check that the trust registry lists each issuer as accredited for the credential's tier.
+4.  Check that the trust registry accredits each issuer for the credential type and tier, and lists the signing key for the credential's iat (see Trust registry).
 
-5.  Check validity windows and both status list entries.
+5.  Check validity windows, that iat and exp equal validFrom and validUntil, and lifetimes against the trust list's maxima. Check the status entries of both credentials, and apply degraded-mode policy to the status lists' age.
 
 6.  Check that the Agent Credential's subject is the presentation's holder, and its cnf key signed the presentation.
 
-7.  Check that the Agent Credential's operator matches the Operator Credential's subject.
+7.  Check that the Agent Credential's operator and operatorCredential match the Operator Credential's subject and id, and that the Agent Credential's tier does not rank above the Operator Credential's.
 
-8.  Apply relying-party policy: minimum tier, allowed operators, scopes requested against scopes held.
+8.  Apply relying-party policy: minimum tier, allowed operators, scopes requested against scopes held, and, for payments, the delegation limits.
 
-The library caches DID logs and status lists for up to 5 minutes, and the trust registry for an hour; with a warm cache it makes no network calls. When a status list cannot be refreshed, behaviour follows the relying party's degraded-mode policy rather than a single fail-closed rule (see Resilience).
+The library caches DID logs and status lists for up to 5 minutes, and the trust registry for an hour; with a warm cache it makes no network calls. A file that fails verification is never cached, so a tampered mirror cannot displace a good copy. When a status list cannot be refreshed, behaviour follows the relying party's degraded-mode policy rather than a single fail-closed rule (see Resilience).
 
-**Planned for relying parties:** veridact-verify, a verifier library; the same library packaged as an HTTP sidecar with a /verify endpoint for other stacks; reference integrations for an API gateway authoriser and a token-exchange handler.
+**For relying parties:** [veridact-verify](../verify), the reference verifier library, and [conformance vectors](../conformance) for other implementations. Planned: the same library packaged as an HTTP sidecar with a /verify endpoint for other stacks, and reference integrations for an API gateway authoriser and a token-exchange handler.
 
 ## Decisions and reason codes
 
@@ -271,13 +306,17 @@ The library caches DID logs and status lists for up to 5 minutes, and the trust 
 
 | Public code                      | Meaning                                      | What the caller should do                      |
 |----------------------------------|----------------------------------------------|------------------------------------------------|
-| CHALLENGE_REQUIRED               | Nonce missing, expired or reused             | Fetch a new challenge                          |
+| CHALLENGE_REQUIRED               | Nonce missing, expired or reused, or presentation expired | Fetch a new challenge                          |
 | CREDENTIAL_EXPIRED               | Outside its validity window                  | Renew; vbot does this automatically            |
 | ISSUER_UNTRUSTED                 | Issuer not accredited for this relying party | Obtain a credential from an accredited issuer  |
 | TIER_TOO_LOW                     | Operator's tier below the route's minimum    | Upgrade the operator's tier                    |
+| OPERATOR_NOT_ALLOWED             | The relying party does not accept this operator | Arrange onboarding with the relying party   |
 | SCOPE_NOT_HELD                   | Agent lacks the required scope               | Ask the operator to delegate it                |
 | LIMIT_PER_PAYMENT, LIMIT_PER_DAY | Outside the delegation's limits              | request_intent: a person decides               |
-| AUTH_FAILED                      | Any signature, tampering or binding failure  | None; details stay in the relying party's logs |
+| VERIFICATION_UNAVAILABLE         | The trust list, a DID log or a status list could not be fetched and no usable cached copy exists, or degraded-mode policy blocks the action | Retry later                                    |
+| AUTH_FAILED                      | Any signature, tampering or binding failure, and any revoked or suspended credential | None; details stay in the relying party's logs |
+
+Revocation and suspension deliberately return AUTH_FAILED. The operator already knows why its agent was revoked, and telling an attacker that a stolen credential has been revoked helps the attacker more than the operator.
 
 Advisory risk signals, such as operator age and revocation history, can be passed to the bank's fraud engine alongside the decision. They never override a cryptographic result, and there is no single trust score: a score cannot show a regulator who authorised an action.
 
@@ -301,7 +340,7 @@ Every Operator and Agent Credential is appended to a public, append-only Merkle 
 | The issuer               | Signer sets the status bit, recorded in the audit log                      | Policy breach, mis-issuance, failed re-validation |
 | The governance authority | Instruction to the issuer under the framework                                | Accreditation withdrawn                           |
 
-A revocation is visible in the published status list within 5 minutes. Short lifetimes do most of the work: an agent that is not renewed stops being valid within hours, without anyone revoking it.
+A revocation of an Agent or an Operator Credential is visible in the published status list within 5 minutes. Short lifetimes do most of the work: an agent that is not renewed stops being valid within hours, without anyone revoking it.
 
 In the target state every credential is logged in at least two transparency logs run by different operators, as Certificate Transparency requires for web certificates, so one log outage does not stop issuance.
 
@@ -318,6 +357,43 @@ The trust registry is the root that relying parties configure: a signed list of 
 - **Change control:** governance publishes each policy version with an effective date at least 14 days ahead, so components and relying parties can prepare. Emergency changes, such as removing a compromised issuer, take effect at once.
 
 This split keeps issuers honest: issuers run issuance, but the members decide whom relying parties trust. Removing an issuer from the list invalidates everything it issued, everywhere, within the trust-list cache period.
+
+### Trust list format
+
+The trust list is a compact JWS with typ trust-list+jwt and alg ES256. Its kid names a governance key that each relying party pins as a JWK in its own configuration. The key is never resolved through a DID, so compromising a DID host or a CDN cannot change the root. Payload:
+
+```
+{
+"iss": "https://trust.veridact.net",
+"version": "2026.11.1",
+"iat": 1794124800,
+"exp": 1794816000,
+"issuers": [{
+"id": "did:webvh:QmaT…:veridact.net:issuers:org-2026b",
+"tiers": ["domain", "organisation"],
+"credentialTypes": ["VeridactAgentCredential", "VeridactOperatorCredential"],
+"keys": [{ "kid": "did:webvh:QmaT…:veridact.net:issuers:org-2026b#key-3", "notBefore": 1789027200, "notAfter": 1796803200 }]
+}],
+"scopes": ["fs:claims:read-status", "fs:quotes:create", "fs:payments:initiate"],
+"policy": {
+"tierOrder": ["domain", "organisation"],
+"agentCredentialMaxLifetime": 86400,
+"presentationMaxLifetime": 120,
+"operatorCredentialMaxLifetime": { "domain": 7776000, "organisation": 31622400 }
+}
+}
+```
+
+Verifiers apply these rules:
+
+- **Key epochs.** notBefore and notAfter bound when a key may sign. A credential or status list is accepted only if its iat falls inside its signing key's window. This lets a 12-month Operator Credential outlive the 90-day key rotation. Removing a key from the list, for example after compromise, invalidates everything it signed.
+- **Rollback.** A verifier refuses a list whose iat is older than one it has already accepted, so a stale mirror cannot restore a removed issuer.
+- **Stale use.** A cached list may be used after a failed refresh until its own exp, never beyond.
+- **Scopes.** Credential scopes outside scopes are dropped.
+- **Tiers.** tierOrder ranks tiers from lowest to highest, for minimum-tier checks.
+- **Emergency lifetime extension** is a change to agentCredentialMaxLifetime.
+
+Accredited validators, transparency log witnesses and challenge rules will be added to this schema when verifiers use them.
 
 ### Issuer accreditation
 
@@ -378,7 +454,7 @@ No single operator, no single issuer included, can switch the network off: verif
 | Signer or issuer key                         | Veridact cannot sign                                                            | Other accredited issuers keep issuing; a compromised issuer is removed from the trust list                            |
 | All of Veridact                              | Network runs on member issuers, logs and mirrors                                | Veridact acts as coordinator and default operator, not the single point of failure                                    |
 
-**Degraded-mode policy.** Each relying party sets how its verifier behaves when status lists go stale. The default:
+**Degraded-mode policy.** Each relying party sets how its verifier behaves when status lists go stale. Age is measured from the list's iat; because issuers re-sign every 5 minutes, a list older than that means publication has stalled somewhere between the issuer and the verifier. The default:
 
 | Status list age          | Low-risk actions       | Medium-risk actions                     | High-risk actions         |
 |--------------------------|------------------------|-----------------------------------------|---------------------------|
@@ -391,6 +467,23 @@ No single operator, no single issuer included, can switch the network off: verif
 **Dual issuance.** The agent client can hold Agent Credentials from two accredited issuers at once and present either. Relying parties accept any issuer the trust registry lists for the tier, so failover needs no change on their side.
 
 **Emergency lifetime extension.** During a declared incident or before planned maintenance, the governance authority can raise the maximum agent credential lifetime, for example from 8 to 24 hours, through the trust list. Longer lifetimes buy recovery time at the cost of slower revocation, which is why the decision sits with governance rather than the operator.
+
+## Changes from v0.1
+
+v0.2 settles the gaps found while building the reference verifier ([proposal](proposals/0.2-verifier-gaps.md)):
+
+1. The Agent Credential carries delegation limits (limits), and no limits means no authority to pay alone.
+2. The Operator Credential carries a status entry, revocable within 5 minutes.
+3. The trust list has a normative format, with key epochs, rollback protection and bounded stale use.
+4. The presentation's encoding is specified: holder plus EnvelopedVerifiableCredential data: URLs.
+5. New public codes: VERIFICATION_UNAVAILABLE and OPERATOR_NOT_ALLOWED.
+6. Revoked and suspended credentials return AUTH_FAILED.
+7. Status lists name their own URL, are re-signed at least every 5 minutes with exp no more than 4 hours after iat, and their age is measured from iat.
+8. A verifier confirms the trust list names an issuer before resolving the issuer's DID.
+9. The nonce is consumed only after the presentation signature verifies.
+10. An Agent Credential's tier may not rank above its Operator Credential's.
+
+Also: grammar fix in Trust model, and check 1's 120-second rule stated as exp − iat ≤ 120 with a clock-skew allowance.
 
 ## Sources
 

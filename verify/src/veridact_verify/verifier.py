@@ -418,8 +418,9 @@ class Verifier:
         resolved = await self.dids.resolve(status_list.issuer)
         key = resolved.key_for(status_list.jws.kid or "", ASSERTION_METHOD)
         jose.verify(status_list.jws, key)
-        if issuer.key(status_list.jws.kid or "") is None:
-            raise StatusError("status list signed by a key the trust list does not list")
+        key_epoch = issuer.key(status_list.jws.kid or "")
+        if key_epoch is None or not key_epoch.not_before <= status_list.issued_at <= key_epoch.not_after:
+            raise StatusError("status list signed by a key the trust list does not list for its iat")
 
     # Check 6 ----------------------------------------------------------------------
 

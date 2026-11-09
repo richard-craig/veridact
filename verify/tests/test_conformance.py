@@ -13,11 +13,12 @@ from veridact_verify import (
     Payment,
     RelyingPartyPolicy,
     Request,
+    Risk,
     StaticFetcher,
     Verifier,
 )
 
-VECTORS = Path(__file__).resolve().parents[2] / "conformance" / "vectors" / "verifier-v0.1.json"
+VECTORS = Path(__file__).resolve().parents[2] / "conformance" / "vectors" / "verifier-v0.2.json"
 DOC = json.loads(VECTORS.read_text())
 
 
@@ -31,6 +32,7 @@ def _request(raw: dict) -> Request:
     payment = raw.get("payment")
     return Request(
         scopes=frozenset(raw.get("scopes", [])),
+        risk=Risk(raw.get("risk", "medium")),
         payment=Payment(Decimal(payment["amount"]), payment["currency"],
                         Decimal(payment.get("spentToday", "0"))) if payment else None,
     )
