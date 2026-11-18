@@ -8,6 +8,7 @@
   vbot issue                             # Agent Credential, valid for hours
   vbot call https://sandbox.veridact.net/claims/CLM-1001/status
   vbot run                               # keep renewing, two thirds through each lifetime
+  vbot token https://auth.bank.example   # pattern A: a DPoP-bound access token from the bank's IdP
 """
 
 from __future__ import annotations
@@ -22,7 +23,7 @@ from typing import Any
 
 from .acme import AcmeError
 from .core import Vbot, VbotError
-from .http import call
+from .http import call, exchange
 
 _DURATION = re.compile(r"^(\d+)([smhd]?)$")
 
@@ -120,6 +121,12 @@ async def run(args: argparse.Namespace) -> int:
         except ValueError:
             print(result.body.decode(errors="replace"))
         return 0 if result.status < 400 else 1
+    elif cmd == "token":
+        result = await exchange(bot, args.bridge, agent_id=args.agent or bot.default_agent(),
+                                scopes=args.scope)
+        print(f"HTTP {result.status}", file=sys.stderr)
+        _print(result.body)
+        return 0 if result.status == 200 else 1
     elif cmd == "revoke":
         await bot.revoke(args.target, args.reason)
         print(f"revoked {args.target}", file=sys.stderr)
@@ -179,6 +186,11 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--agent")
     p.add_argument("-X", "--method", default="GET")
     p.add_argument("--json", help="JSON request body")
+
+    p = sub.add_parser("token", help="exchange a presentation for an access token (pattern A)")
+    p.add_argument("bridge", help="token-exchange endpoint origin, e.g. https://auth.bank.example")
+    p.add_argument("--agent")
+    p.add_argument("--scope", action="append")
 
     p = sub.add_parser("revoke", help="revoke an agent's credential, or 'operator'")
     p.add_argument("target")
