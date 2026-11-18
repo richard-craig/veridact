@@ -1,0 +1,79 @@
+# The Veridact staging stack on one machine.
+#
+#   docker compose -f deploy/compose.yaml up -d --build
+#   alias vbot='docker compose -f deploy/compose.yaml run --rm vbot'
+#   vbot init --issuer https://staging.veridact.test/directory --domain operator.veridact.test \
+#     --route staging.veridact.test=http://issuer:8080 --route sandbox.veridact.test=http://sandbox:8070
+#   vbot operator && vbot agent new
+#   vbot delegate --scope fs:claims:read-status --role "Head of Digital Claims"
+#   vbot issue && vbot call https://sandbox.veridact.test/claims/CLM-1001/status
+#
+# Canonical names (*.veridact.test) are signed into every credential, DID and status list;
+# --route tells each component which container answers for them.
+
+x-image: &image
+  build:
+    context: ..
+    dockerfile: deploy/Dockerfile
+  image: veridact:dev
+
+x-health: &health
+  interval: 2s
+  timeout: 2s
+  retries: 30
+
+services:
+  issuer:
+    <<: *image
+    command:
+      - veridact-issuer
+      - serve
+      - --base-url=https://staging.veridact.test
+      - --data-dir=/data
+      - --route=operator.veridact.test=http://operator-site:8000
+      - --host=0.0.0.0
+      - --port=8080
+    volumes: [issuer-data:/data]
+    ports: ["8080:8080"]
+    healthcheck:
+      <<: *health
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/healthz')"]
+
+  # The operator's own website. vbot writes its DID log and did-configuration.json here.
+  operator-site:
+    <<: *image
+    command: ["python", "-m", "http.server", "8000", "--directory", "/vbot/publish"]
+    volumes: [vbot:/vbot]
+
+  sandbox:
+    <<: *image
+    command:
+      - veridact-sandbox
+      - --audience=https://sandbox.veridact.test
+      - --trust-list=https://staging.veridact.test/trust-list.jwt
+      - --governance-keys-url=https://staging.veridact.test/governance-keys.json
+      - --route=staging.veridact.test=http://issuer:8080
+      - --route=operator.veridact.test=http://operator-site:8000
+      - --status-ttl=0
+      - --host=0.0.0.0
+      - --port=8070
+    depends_on:
+      issuer: {condition: service_healthy}
+    ports: ["8070:8070"]
+    healthcheck:
+      <<: *health
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8070/healthz')"]
+
+  vbot:
+    <<: *image
+    profiles: [tools]
+    entrypoint: ["vbot"]
+    environment:
+      VBOT_HOME: /vbot
+    volumes: [vbot:/vbot]
+    depends_on:
+      sandbox: {condition: service_healthy}
+
+volumes:
+  issuer-data:
+  vbot:

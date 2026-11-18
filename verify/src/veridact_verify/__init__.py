@@ -11,14 +11,14 @@
 
 from .codes import Outcome, PublicCode, Reason
 from .decision import Decision
-from .fetch import FallbackFetcher, HttpFetcher, MirrorFetcher, StaticFetcher
+from .fetch import FallbackFetcher, HttpFetcher, MirrorFetcher, RoutedFetcher, StaticFetcher
 from .nonce import InMemoryNonceStore, NonceStore
 from .policy import DegradedModePolicy, Payment, RelyingPartyPolicy, Request, Risk
 from .verifier import Verifier
 
 __all__ = [
     "Decision", "DegradedModePolicy", "FallbackFetcher", "HttpFetcher", "InMemoryNonceStore",
-    "MirrorFetcher", "NonceStore", "Outcome", "Payment", "PublicCode", "Reason",
+    "MirrorFetcher", "NonceStore", "RoutedFetcher", "Outcome", "Payment", "PublicCode", "Reason",
     "RelyingPartyPolicy", "Request", "Risk", "StaticFetcher", "Verifier",
 ]
 __version__ = "0.1.0a1"
