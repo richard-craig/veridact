@@ -54,9 +54,12 @@ class StaticFetcher:
 class HttpFetcher:
     """HTTPS fetcher with a timeout and a response size cap."""
 
-    def __init__(self, *, timeout: float = 5.0, max_bytes: int = MAX_ARTEFACT_BYTES):
+    def __init__(self, *, timeout: float = 5.0, max_bytes: int = MAX_ARTEFACT_BYTES,
+                 allow_insecure: bool = False):
         self.timeout = timeout
         self.max_bytes = max_bytes
+        # Only RoutedFetcher sets this, for routes an operator configured explicitly.
+        self.allow_insecure = allow_insecure
         self._session = None
 
     async def _get_session(self):
@@ -72,7 +75,8 @@ class HttpFetcher:
     async def fetch(self, url: str) -> bytes:
         import aiohttp
 
-        if urlsplit(url).scheme != "https":
+        scheme = urlsplit(url).scheme
+        if scheme != "https" and not (self.allow_insecure and scheme == "http"):
             raise FetchError(f"only https is allowed: {url}")
         session = await self._get_session()
         try:
@@ -101,6 +105,68 @@ class MirrorFetcher:
     async def fetch(self, url: str) -> bytes:
         parts = urlsplit(url)
         return await self.inner.fetch(f"{self.base_url}/{parts.netloc}{parts.path}")
+
+
+def parse_routes(specs: Sequence[str] | Mapping[str, str] | None) -> dict[str, str]:
+    """Parse ``host=base_url`` strings (or a mapping) into a route table."""
+    if not specs:
+        return {}
+    if isinstance(specs, Mapping):
+        items = list(specs.items())
+    else:
+        items = []
+        for spec in specs:
+            host, sep, base = spec.partition("=")
+            if not sep or not host or not base:
+                raise ValueError(f"route must be host=base_url, got {spec!r}")
+            items.append((host, base))
+    routes = {}
+    for host, base in items:
+        if urlsplit(base).scheme not in ("http", "https"):
+            raise ValueError(f"route target must be an http(s) URL: {base!r}")
+        routes[host.lower()] = base.rstrip("/")
+    return routes
+
+
+def route_url(url: str, routes: Mapping[str, str]) -> str:
+    """Rewrite https://host/path to {route}/path when host has a route."""
+    parts = urlsplit(url)
+    base = routes.get(parts.netloc.lower())
+    if base is None:
+        return url
+    query = f"?{parts.query}" if parts.query else ""
+    return f"{base}{parts.path}{query}"
+
+
+class RoutedFetcher:
+    """Fetches https://host/... from another address for the hosts you configure.
+
+    For development and private networks: route ``staging.veridact.test`` to
+    ``http://issuer:8080`` and the artefact keeps its canonical https URL (the one
+    that is signed into credentials and DIDs) while the bytes come from the route.
+    As with MirrorFetcher, integrity comes from signatures, not the transport.
+    Hosts without a route are fetched by ``inner`` (HTTPS only by default).
+    """
+
+    def __init__(self, routes: Mapping[str, str], inner: Fetcher | None = None, *,
+                 timeout: float = 5.0):
+        self.routes = parse_routes(routes)
+        self.inner = inner or HttpFetcher(timeout=timeout)
+        self._routed = HttpFetcher(timeout=timeout, allow_insecure=True)
+
+    async def fetch(self, url: str) -> bytes:
+        if urlsplit(url).scheme != "https":
+            raise FetchError(f"only https is allowed: {url}")
+        target = route_url(url, self.routes)
+        if target == url:
+            return await self.inner.fetch(url)
+        return await self._routed.fetch(target)
+
+    async def close(self) -> None:
+        for fetcher in (self.inner, self._routed):
+            close = getattr(fetcher, "close", None)
+            if close is not None:
+                await close()
 
 
 class FallbackFetcher:

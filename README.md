@@ -27,11 +27,29 @@ issuance. Veridact works the same way.
   security, privacy and resilience.
 - [**veridact-verify**](verify): the reference verifier library (Python, alpha). It runs all eight verification
   checks with reason codes, caching and degraded mode, and makes no call home.
+- [**veridact-issuer**](issuer): a staging ACME-A issuer (alpha, Domain tier). It validates operators with dns-01 or
+  did-config-01 and agents with delegation-01, logs every credential before release, and publishes the issuer DID,
+  status lists and a staging trust list.
+- [**vbot**](vbot): the agent client. `vbot init`, `vbot operator`, `vbot agent new`, `vbot delegate`, `vbot issue`,
+  then `vbot call` any Veridact-protected API and `vbot run` to stay renewed.
+- [**veridact-sidecar**](sidecar): the verifier over HTTP (`/v1/challenge`, `/v1/verify`) for gateways and
+  authorisation servers in any language.
+- [**veridact-sandbox**](sandbox): Veridact Insurance, a pretend insurer API that challenges agents and explains every
+  decision.
 - [**Conformance vectors**](conformance): language-neutral test cases for anyone implementing a verifier.
-- [**v0.2 proposals**](docs/proposals/0.2-verifier-gaps.md): the gaps found while building the verifier, now
-  accepted into the specification.
+- [**Proposals**](docs/proposals): [v0.2](docs/proposals/0.2-verifier-gaps.md) (gaps found building the verifier,
+  accepted) and [v0.3](docs/proposals/0.3-issuer-gaps.md) (gaps found building the issuer and vbot, proposed).
 
-An agent client (`vbot`) and an HTTP sidecar for the verifier are planned.
+## Try it
+
+```sh
+python -m venv .venv && . .venv/bin/activate
+pip install -e ./verify -e './issuer[dns]' -e ./vbot -e ./sidecar -e ./sandbox
+deploy/local-demo.sh
+```
+
+That starts an issuer, an operator's website and the sandbox on your machine, then walks vbot from a new account
+to an allowed call, a denied scope and a revocation. [`deploy/`](deploy) also has a Docker Compose stack.
 
 ## Related project
 
@@ -41,7 +59,8 @@ calling.
 
 ## Status
 
-Version 0.2, a draft for review. Feedback is welcome: see [CONTRIBUTING.md](CONTRIBUTING.md), and report
+Specification v0.2, a draft for review. The issuer, vbot, sidecar and sandbox are alpha and run as a staging
+network; nothing here is accredited for production use yet. Feedback is welcome: see [CONTRIBUTING.md](CONTRIBUTING.md), and report
 security problems in the design through [SECURITY.md](SECURITY.md).
 
 ## Licence
