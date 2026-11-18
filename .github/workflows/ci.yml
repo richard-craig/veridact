@@ -22,10 +22,15 @@ jobs:
       - name: Install
         run: |
           pip install -e './verify[test]' -e './issuer[dns,test]' -e './vbot[test]' \
-                      -e './sidecar[test]' -e './sandbox[test]'
+                      -e './sidecar[test]' -e './sandbox[test]' \
+                      -e './integrations/aws-lambda[test]' cfn-lint
       - name: Verifier and conformance vectors
         run: pytest verify
       - name: End to end (issuer, vbot, sidecar, sandbox)
         run: pytest e2e
+      - name: Lambda authoriser
+        run: |
+          pytest integrations/aws-lambda
+          cfn-lint integrations/aws-lambda/template.yaml
       - name: Local demo
         run: deploy/local-demo.sh
