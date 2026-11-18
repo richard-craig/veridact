@@ -7,7 +7,8 @@
 
 from .acme import AcmeClient, AcmeError
 from .core import Vbot, VbotError
-from .http import audience_for, call, parse_challenge
+from .http import audience_for, call, dpop_proof, exchange, parse_challenge
 
-__all__ = ["AcmeClient", "AcmeError", "Vbot", "VbotError", "audience_for", "call", "parse_challenge"]
+__all__ = ["AcmeClient", "AcmeError", "Vbot", "VbotError", "audience_for", "call", "dpop_proof", "exchange",
+           "parse_challenge"]
 __version__ = "0.1.0a1"

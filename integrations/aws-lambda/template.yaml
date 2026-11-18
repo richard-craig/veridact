@@ -1,0 +1,169 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Veridact pattern B on API Gateway (REST): a Lambda authoriser that challenges agents,
+  verifies their presentations and passes the agent's identity to the backend.
+  Build with ./build.sh, then: sam deploy --guided
+
+Parameters:
+  Audience:
+    Type: String
+    Description: This API's https origin, as agents sign it (e.g. https://api.bank.example)
+  GovernanceKeys:
+    Type: String
+    NoEcho: false
+    Description: 'Pinned governance keys as JSON: {"kid": {"kty":"EC","crv":"P-256","x":"…","y":"…"}}'
+  TrustListUrl:
+    Type: String
+    Default: https://trust.veridact.net/trust-list.jwt
+  MinTier:
+    Type: String
+    Default: organisation
+    AllowedValues: [domain, organisation]
+  Routes:
+    Type: String
+    Default: '{"GET /claims/{id}/status": {"scopes": ["fs:claims:read-status"], "risk": "low"}}'
+    Description: Route -> scopes and risk. Unlisted routes are denied.
+
+Globals:
+  Function:
+    Runtime: python3.13
+    Architectures: [x86_64]
+    MemorySize: 512
+    Timeout: 10
+
+Resources:
+  NonceTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions: [{AttributeName: nonce, AttributeType: S}]
+      KeySchema: [{AttributeName: nonce, KeyType: HASH}]
+      TimeToLiveSpecification: {AttributeName: expires, Enabled: true}
+      SSESpecification: {SSEEnabled: true}
+
+  AuthoriserFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: build/
+      Handler: veridact_lambda.handler.handler
+      Description: Veridact presentation verifier (API Gateway REQUEST authoriser)
+      Environment:
+        Variables:
+          VERIDACT_CONFIG_JSON: !Sub '{"audience": "${Audience}", "governance_keys": ${GovernanceKeys}, "trust_list_url": "${TrustListUrl}", "min_tier": "${MinTier}"}'
+          VERIDACT_ROUTES: !Ref Routes
+          VERIDACT_NONCE_TABLE: !Ref NonceTable
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: [dynamodb:PutItem, dynamodb:GetItem, dynamodb:DeleteItem]
+              Resource: !GetAtt NonceTable.Arn
+
+  # A stand-in backend that echoes what the authoriser passed on.
+  ClaimsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      InlineCode: |
+        import json
+        def handler(event, context):
+            a = event["requestContext"]["authorizer"]
+            return {"statusCode": 200, "headers": {"Content-Type": "application/json"},
+                    "body": json.dumps({"claim": event["pathParameters"]["id"], "status": "approved",
+                                        "agent": a["veridactAgent"], "operator": a["veridactOperator"],
+                                        "scopes": a["veridactScopes"].split()})}
+      Handler: index.handler
+
+  Api:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub "${AWS::StackName}-veridact"
+      EndpointConfiguration: {Types: [REGIONAL]}
+
+  Authoriser:
+    Type: AWS::ApiGateway::Authorizer
+    Properties:
+      Name: veridact
+      RestApiId: !Ref Api
+      Type: REQUEST
+      AuthorizerUri: !Sub "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthoriserFunction.Arn}/invocations"
+      # Every presentation carries a fresh nonce, so results must never be cached. With caching off,
+      # no identity source is needed, and the authoriser also runs when Authorization is missing,
+      # which is exactly when it must issue a challenge.
+      AuthorizerResultTtlInSeconds: 0
+
+  AuthoriserPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt AuthoriserFunction.Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${Api}/authorizers/${Authoriser}"
+
+  # A Deny from the authoriser becomes ACCESS_DENIED. Make it a 401 that carries the challenge and
+  # the public code, and nothing else: the detailed reason stays in the authoriser's logs.
+  AccessDenied:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      RestApiId: !Ref Api
+      ResponseType: ACCESS_DENIED
+      StatusCode: "401"
+      ResponseParameters:
+        gatewayresponse.header.WWW-Authenticate: context.authorizer.wwwAuthenticate
+        gatewayresponse.header.Cache-Control: "'no-store'"
+      ResponseTemplates:
+        application/json: '{"decision": "$context.authorizer.decision", "code": "$context.authorizer.code"}'
+
+  AuthoriserFailed:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      RestApiId: !Ref Api
+      ResponseType: AUTHORIZER_FAILURE
+      StatusCode: "503"
+      ResponseTemplates:
+        application/json: '{"decision": "deny", "code": "VERIFICATION_UNAVAILABLE"}'
+
+  ClaimsResource:
+    Type: AWS::ApiGateway::Resource
+    Properties: {RestApiId: !Ref Api, ParentId: !GetAtt Api.RootResourceId, PathPart: claims}
+  ClaimIdResource:
+    Type: AWS::ApiGateway::Resource
+    Properties: {RestApiId: !Ref Api, ParentId: !Ref ClaimsResource, PathPart: "{id}"}
+  ClaimStatusResource:
+    Type: AWS::ApiGateway::Resource
+    Properties: {RestApiId: !Ref Api, ParentId: !Ref ClaimIdResource, PathPart: status}
+
+  ClaimStatusGet:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref Api
+      ResourceId: !Ref ClaimStatusResource
+      HttpMethod: GET
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref Authoriser
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ClaimsFunction.Arn}/invocations"
+
+  ClaimsPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt ClaimsFunction.Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${Api}/*/GET/claims/*/status"
+
+  Deployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: [ClaimStatusGet, AccessDenied, AuthoriserFailed]
+    Properties: {RestApiId: !Ref Api}
+
+  Stage:
+    Type: AWS::ApiGateway::Stage
+    Properties: {RestApiId: !Ref Api, DeploymentId: !Ref Deployment, StageName: prod}
+
+Outputs:
+  Endpoint:
+    Value: !Sub "https://${Api}.execute-api.${AWS::Region}.amazonaws.com/prod"
+  NonceTable:
+    Value: !Ref NonceTable

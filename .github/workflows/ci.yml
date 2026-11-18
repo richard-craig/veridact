@@ -22,10 +22,46 @@ jobs:
       - name: Install
         run: |
           pip install -e './verify[test]' -e './issuer[dns,test]' -e './vbot[test]' \
-                      -e './sidecar[test]' -e './sandbox[test]'
+                      -e './sidecar[test]' -e './sandbox[test]' \
+                      -e './integrations/aws-lambda[test]' -e './integrations/keycloak[test]' cfn-lint
       - name: Verifier and conformance vectors
         run: pytest verify
       - name: End to end (issuer, vbot, sidecar, sandbox)
         run: pytest e2e
+      - name: Lambda authoriser
+        run: |
+          pytest integrations/aws-lambda
+          cfn-lint integrations/aws-lambda/template.yaml
       - name: Local demo
         run: deploy/local-demo.sh
+
+  keycloak:
+    # Pattern A against a real Keycloak: the bridge, the JWT Authorization Grant and DPoP binding.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Start Keycloak 26.6
+        run: |
+          image=quay.io/keycloak/keycloak:26.6
+          docker pull -q "$image" || { image=quay.io/keycloak/keycloak:latest; docker pull -q "$image"; }
+          docker run -d --name kc --network host \
+            -e KC_BOOTSTRAP_ADMIN_USERNAME=admin -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin \
+            "$image" start-dev
+      - name: Install
+        run: |
+          pip install -e './verify[test]' -e './issuer[dns,test]' -e './vbot[test]' \
+                      -e './sidecar[test]' -e './sandbox[test]' -e './integrations/keycloak[test]'
+      - name: Wait for Keycloak
+        run: |
+          for i in $(seq 90); do curl -fs http://127.0.0.1:8080/realms/master >/dev/null && exit 0; sleep 2; done
+          docker logs kc | tail -100; exit 1
+      - name: Bridge against Keycloak
+        env:
+          KEYCLOAK_URL: http://127.0.0.1:8080
+        run: pytest e2e/test_keycloak_real.py -v -rs
+      - name: Keycloak logs
+        if: failure()
+        run: docker logs kc 2>&1 | grep -iE "warn|error|jwt|dpop|token" | tail -150

@@ -34,11 +34,16 @@ issuance. Veridact works the same way.
   then `vbot call` any Veridact-protected API and `vbot run` to stay renewed.
 - [**veridact-sidecar**](sidecar): the verifier over HTTP (`/v1/challenge`, `/v1/verify`) for gateways and
   authorisation servers in any language.
+- [**Lambda authoriser**](integrations/aws-lambda): pattern B on AWS API Gateway, with DynamoDB nonces and a SAM
+  template.
+- [**Keycloak bridge**](integrations/keycloak): pattern A for Keycloak 26.6+. An agent trades a presentation for a
+  DPoP-bound Keycloak access token through the JWT Authorization Grant, with no Keycloak extension.
 - [**veridact-sandbox**](sandbox): Veridact Insurance, a pretend insurer API that challenges agents and explains every
   decision.
 - [**Conformance vectors**](conformance): language-neutral test cases for anyone implementing a verifier.
 - [**Proposals**](docs/proposals): [v0.2](docs/proposals/0.2-verifier-gaps.md) (gaps found building the verifier,
-  accepted) and [v0.3](docs/proposals/0.3-issuer-gaps.md) (gaps found building the issuer and vbot, proposed).
+  accepted) and [v0.3](docs/proposals/0.3-issuer-gaps.md) (gaps found building the issuer, vbot and the
+  integrations, proposed).
 
 ## Try it
 
