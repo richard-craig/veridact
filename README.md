@@ -22,9 +22,9 @@ issuance. Veridact works the same way.
 
 ## What's here
 
-- [**Specification**](docs/specification.md) (v0.2): trust model, identifiers and keys, credential profiles, delegation,
-  the ACME-A protocol, the verification checks and reason codes, the transparency log, the trust registry,
-  security, privacy and resilience.
+- [**Specification**](docs/specification.md) (v0.4): trust model, identifiers and keys, credential profiles,
+  delegation and sub-agents, the ACME-A protocol, Agent Certificates, the verification checks and reason codes,
+  the transparency log, archival verification, the trust registry, security, privacy and resilience.
 - [**veridact-verify**](verify): the reference verifier library (Python, alpha). It runs all eight verification
   checks with reason codes, caching and degraded mode, and makes no call home.
 - [**veridact-issuer**](issuer): a staging ACME-A issuer (alpha, Domain tier). It validates operators with dns-01 or
@@ -42,8 +42,9 @@ issuance. Veridact works the same way.
   decision.
 - [**Conformance vectors**](conformance): language-neutral test cases for anyone implementing a verifier.
 - [**Proposals**](docs/proposals): [v0.2](docs/proposals/0.2-verifier-gaps.md) (gaps found building the verifier,
-  accepted) and [v0.3](docs/proposals/0.3-issuer-gaps.md) (gaps found building the issuer, vbot and the
-  integrations, proposed).
+  accepted), [v0.3](docs/proposals/0.3-issuer-gaps.md) (gaps found building the issuer, vbot and the
+  integrations, accepted) and [v0.4](docs/proposals/0.4-iiw42-proposals.md) (sub-agents, actor claims, Agent
+  Certificates and archival verification, from IIW 42, accepted).
 
 ## Try it
 
@@ -64,8 +65,9 @@ calling.
 
 ## Status
 
-Specification v0.2, a draft for review. The issuer, vbot, sidecar and sandbox are alpha and run as a staging
-network; nothing here is accredited for production use yet. Feedback is welcome: see [CONTRIBUTING.md](CONTRIBUTING.md), and report
+Specification v0.4, a draft for review. The reference code implements v0.3: sub-agent grants, actor claims,
+Agent Certificates and Verification Records are specified but not built yet. The issuer, vbot, sidecar and
+sandbox are alpha and run as a staging network; nothing here is accredited for production use yet. Feedback is welcome: see [CONTRIBUTING.md](CONTRIBUTING.md), and report
 security problems in the design through [SECURITY.md](SECURITY.md).
 
 ## Licence
