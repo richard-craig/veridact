@@ -22,7 +22,7 @@ issuance. Veridact works the same way.
 
 ## What's here
 
-- [**Specification**](docs/specification.md) (v0.2): trust model, identifiers and keys, credential profiles, delegation,
+- [**Specification**](docs/specification.md) (v0.3): trust model, identifiers and keys, credential profiles, delegation,
   the ACME-A protocol, the verification checks and reason codes, the transparency log, the trust registry,
   security, privacy and resilience.
 - [**veridact-verify**](verify): the reference verifier library (Python, alpha). It runs all eight verification
@@ -43,7 +43,7 @@ issuance. Veridact works the same way.
 - [**Conformance vectors**](conformance): language-neutral test cases for anyone implementing a verifier.
 - [**Proposals**](docs/proposals): [v0.2](docs/proposals/0.2-verifier-gaps.md) (gaps found building the verifier,
   accepted) and [v0.3](docs/proposals/0.3-issuer-gaps.md) (gaps found building the issuer, vbot and the
-  integrations, proposed).
+  integrations, accepted).
 
 ## Try it
 
@@ -64,7 +64,7 @@ calling.
 
 ## Status
 
-Specification v0.2, a draft for review. The issuer, vbot, sidecar and sandbox are alpha and run as a staging
+Specification v0.3, a draft for review. The issuer, vbot, sidecar and sandbox are alpha and run as a staging
 network; nothing here is accredited for production use yet. Feedback is welcome: see [CONTRIBUTING.md](CONTRIBUTING.md), and report
 security problems in the design through [SECURITY.md](SECURITY.md).
 

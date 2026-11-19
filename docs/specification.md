@@ -1,6 +1,6 @@
 # Veridact: open specification for AI agent credentials
 
-Version 0.2 · 9 November 2026 · [changes from v0.1](#changes-from-v01)
+Version 0.3 · 19 November 2026 · [changes from v0.2](#changes-from-v02) · [changes from v0.1](#changes-from-v01)
 
 ## Purpose and scope
 
@@ -97,9 +97,11 @@ Every issuer, operator and agent gets a did:webvh 1.0 identifier, and every sign
 | Veridact issuer        | did:webvh:{SCID}:veridact.net:issuers:{tier}-{epoch}          | veridact.net, with at least two member-run witnesses                                                           |
 | Operator               | did:webvh:{SCID}:{operator domain}                            | The operator's own domain                                                                                      |
 | Agent, operator-hosted | did:webvh:{SCID}:{operator domain}:agents:{agent id}          | The operator's domain                                                                                          |
-| Agent, Veridact-hosted | did:webvh:{SCID}:dids.veridact.net:{operator slug}:{agent id} | Veridact, for operators that cannot host DID logs; still bound to the operator through the Operator Credential |
+| Agent, Veridact-hosted | did:webvh:{SCID}:dids.veridact.net:{account slug}:{agent id} | Veridact, for operators that cannot host DID logs; still bound to the operator through the Operator Credential |
 
-Agent ids default to opaque random strings, because DIDs and the transparency log are public and descriptive names can leak business information.
+Agent ids and account slugs are opaque random strings, because DIDs and the transparency log are public and descriptive names can leak business information.
+
+These patterns are normative for issuers. An issuer accepts an operator DID only as did:webvh:{SCID}:{domain}, at the root of a domain the Operator Credential validates. It accepts an agent DID only under one of the operator's validated domains (…:agents:{agent id}), or under the ordering account's own slug on the issuer's DID hosting. A domain cannot vouch for a DID hosted elsewhere.
 
 | Key                       | Algorithm                                           | Custody                                                                          | Rotation                                                            |
 |---------------------------|-----------------------------------------------------|----------------------------------------------------------------------------------|---------------------------------------------------------------------|
@@ -193,7 +195,10 @@ Revocation uses Bitstring Status Lists of 131,072 entries, served as signed cred
 
 - names its own URL as its id, so one genuine list cannot be served in place of another;
 - is signed by the same issuer as the credentials that point at it, with a key the trust list lists;
-- is re-signed at least every 5 minutes, whether or not any bit changed, with exp no more than 4 hours after iat.
+- is re-signed at least every 5 minutes, whether or not any bit changed, with exp no more than 4 hours after iat, and at once when a credential on it is revoked or suspended, so the remaining delay is only the verifier's cache;
+- holds only one credential type: Agent and Operator Credentials use separate lists.
+
+Issuers allocate status list indexes at random within a list, so an index reveals nothing about when a credential was issued.
 
 Verifiers measure a status list's age from its iat. A list mirrored or cached for an hour is an hour old, wherever it was fetched from, so the degraded-mode table (see Resilience) means the same thing everywhere and a stale mirror is detected. A verifier refuses a list older than one it has already accepted for the same URL.
 
@@ -224,15 +229,18 @@ ACME-A is a profile of ACME ([RFC 8555](https://www.rfc-editor.org/rfc/rfc8555))
 | POST /authz/{id}          | Fetch an authorisation and its challenges           | None                                                                                      |
 | POST /chall/{id}          | Tell the issuer a challenge is ready                  | New challenge types below                                                                 |
 | POST /order/{id}/finalize | Submit the key-binding proof and request issuance   | A signed key-binding JWT replaces the CSR                                                 |
-| POST /cred/{id}           | Download the issued credential                      | Returns application/vc+jwt plus the transparency log receipt                              |
+| POST /cred/{id}           | Download the issued credential                      | Returns application/vc+jwt, with the transparency log receipt in a Veridact-Log-Receipt header |
 | POST /revoke-cred         | Revoke a credential                                 | Sets its status list bit instead of updating a CRL                                        |
-| GET /renewal-info/{id}    | Suggested renewal window                            | ACME Renewal Information ([RFC 9773](https://rfc-editor.org/rfc/rfc9773.html)), unchanged |
+| GET /renewal-info/{id}    | Suggested renewal window                            | ACME Renewal Information ([RFC 9773](https://rfc-editor.org/rfc/rfc9773.html)), keyed by the credential's UUID because ARI's certificate identifier does not apply |
+| POST {veridactDidHosting}/{agent id} | Upload or extend a Veridact-hosted agent DID log | New; listed in the directory as veridactDidHosting                              |
 
 | Challenge           | Proves                                        | How it is checked                                                                                                              |
 |---------------------|-----------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|
 | dns-01              | Control of the operator's domain              | Standard: a TXT record at \_acme-challenge.{domain} holding the key-authorisation digest                                       |
-| did-config-01 (new) | The operator's DID and domain belong together | A Domain Linkage Credential at https://{domain}/.well-known/did-configuration.json, signed by the operator DID                 |
-| delegation-01 (new) | The operator authorised this agent            | A Delegation Credential signed by an operator DID that holds a valid Operator Credential, with scopes inside the tier's policy |
+| did-config-01 (new) | The operator's DID and domain belong together | A Domain Linkage Credential at https://{domain}/.well-known/did-configuration.json, in the JWT form of the [DIF Well Known DID Configuration](https://identity.foundation/.well-known/resources/did-configuration/), signed by an assertionMethod key of did:webvh:{SCID}:{domain}, with origin https://{domain} |
+| delegation-01 (new) | The operator authorised this agent            | A Delegation Credential signed by an operator DID that holds a valid Operator Credential, with scopes inside the tier's policy. The client POSTs {"delegation": "&lt;vc+jwt&gt;"} to the challenge |
+
+Challenges validate synchronously when the client responds, and a failed challenge invalidates the order, as in RFC 8555.
 
 Domain checks run from at least three network vantage points, and all must agree, so that a local DNS or routing hijack cannot mint an Operator Credential. An optional \_veridact.{domain} TXT record pins which ACME-A accounts may order for the domain, much as a CAA record does for certificates.
 
@@ -264,6 +272,46 @@ Domain checks run from at least three network vantage points, and all must agree
 
 Rate limits apply per account and per operator domain, so a compromised account cannot flood the log.
 
+### Wire formats
+
+**Key-binding JWT.** The finalize request carries {"keyBinding": "&lt;compact JWS&gt;"}: ES256, typ veridact-kb+jwt, with kid naming a key of the subject DID. Payload:
+
+```
+{ "iss": "<subject DID>", "aud": "<this order's finalize URL>", "nonce": "<the ACME nonce of this finalize request>", "iat": 1794981300 }
+```
+
+The nonce is the one in the outer JWS's protected header, so the proof cannot be replayed into another request, and iat must be within 5 minutes. For an Agent Credential the key must be under the agent DID's authentication, and it becomes cnf. For an Operator Credential it must be under the operator DID's assertionMethod: the key that signs delegations.
+
+**Delegation Credential.** A vc+jwt signed by the operator DID:
+
+```
+{
+"type": ["VerifiableCredential", "VeridactDelegationCredential"],
+"issuer": "<operator DID>",
+"credentialSubject": {
+"id": "<agent DID>",
+"scopes": ["fs:claims:read-status"],
+"limits": { "currency": "ZAR", "perPayment": "500.00", "perDay": "2000.00" },
+"accountableRole": "Head of Digital Claims",
+"maxLifetime": 28800,
+"environment": "staging",
+"audiences": ["https://api.bank.example"]
+}
+}
+```
+
+environment must match the issuer's, so a staging delegation cannot obtain production credentials. The issuer rejects scopes outside the tier's policy (stricter than a verifier, which drops unknown scopes) and a delegation lifetime over 90 days.
+
+**Who may order for an agent.** The account placing an agent order must hold a valid Operator Credential for the delegation's issuer. Otherwise whoever holds an agent key and a copy of its delegation, a compromised agent host for example, could keep renewing from an account of their own, out of the operator's sight.
+
+**Orders, tiers and lifetimes.** An order carries one identifier. new-order takes an optional tier (default: the issuer's lowest) and an optional lifetime in seconds. An Agent Credential's lifetime is the smallest of the request (default 8 hours), the delegation's maxLifetime, the trust list's maximum, and the time left on the delegation and on the Operator Credential. If that is under 5 minutes, the issuer refuses.
+
+**Veridact-hosted agent DIDs.** The account POSTs {"log": "&lt;did.jsonl&gt;"}, ACME-signed, to {veridactDidHosting}/{agent id}. The issuer verifies the whole log before serving it, accepts only DIDs under the account's own slug, and accepts an update only if it extends the stored log: history is never rewritten.
+
+**Transparency log receipt.** The receipt travels in the Veridact-Log-Receipt response header as base64url JSON. Log entry ids, including the one an Operator Credential carries, are {log id}/{index, 9 digits}. An Operator Credential names its entry before it is signed, so the issuer serialises issuance and signs the next index in.
+
+**Two-person rule.** Until an issuer accepts Approver Credentials, it refuses any delegation whose perPayment exceeds R1,000 rather than skipping the second approver.
+
 ## Verification at the relying party
 
 The recommended integration is a token exchange at the bank's existing authorisation server: the agent trades one verified presentation for a short-lived, key-bound access token, so downstream APIs see only the JWTs they already accept. Direct verification at the API gateway suits relying parties without an authorisation server in the agent path.
@@ -277,6 +325,14 @@ The challenge in pattern B:
 
 HTTP/1.1 401 Unauthorized  
 WWW-Authenticate: Veridact realm="claims-api", nonce="9f2c41d0a7e3b5f8", tier="organisation", scope="fs:claims:read-status"
+
+In pattern B, the presentation's aud is the origin of the request URL. The challenge does not carry aud, so a man-in-the-middle cannot choose it.
+
+**Pattern A in detail.** Token exchange has no challenge step, so the nonce comes from the token endpoint itself, the way DPoP servers hand out nonces (RFC 9449 section 8). A request with no subject_token, or with a spent or unknown nonce, gets 400 {"error": "use_veridact_nonce"} and a Veridact-Nonce response header. The agent signs a presentation for that nonce, with aud set to the token endpoint's origin, and retries with:
+
+- subject_token: the presentation;
+- subject_token_type: urn:veridact:params:oauth:token-type:vp+jwt;
+- a DPoP proof made with the agent's Veridact key, the one the Agent Credential's cnf names, so the access token is bound to the same key as the credential.
 
 The verifier library runs these checks in order and stops at the first failure. All signatures are ES256; a verifier refuses any other alg before going further.
 
@@ -484,6 +540,25 @@ v0.2 settles the gaps found while building the reference verifier ([proposal](pr
 10. An Agent Credential's tier may not rank above its Operator Credential's.
 
 Also: grammar fix in Trust model, and check 1's 120-second rule stated as exp − iat ≤ 120 with a clock-skew allowance.
+
+## Changes from v0.2
+
+v0.3 settles the gaps found while building the issuer, vbot and the gateway integrations ([proposal](proposals/0.3-issuer-gaps.md)). Nothing in it changes what a relying party verifies.
+
+1. The key-binding JWT that replaces the CSR is specified (typ veridact-kb+jwt, aud the finalize URL, the request's ACME nonce).
+2. did-config-01 uses the DIF Well Known DID Configuration JWT form, and the operator DID must be did:webvh:{SCID}:{domain}.
+3. The Delegation Credential's claims are named, and environment must match the issuer's.
+4. Only the account that holds the operator's Operator Credential can place agent orders under its delegations.
+5. The agent DID patterns are normative for issuers.
+6. Veridact-hosted agent DIDs are uploaded to veridactDidHosting, and logs can only be extended.
+7. Orders carry one identifier, an optional tier and lifetime, and the lifetime rules are stated.
+8. The transparency log receipt travels in a Veridact-Log-Receipt header, and log entry ids are {log id}/{index}.
+9. In pattern B, aud is the origin of the request URL.
+10. Until approver chains exist, issuers refuse delegations above R1,000 a payment.
+11. In pattern A, the token endpoint issues nonces through use_veridact_nonce and a Veridact-Nonce header.
+12. In pattern A, subject_token_type is urn:veridact:params:oauth:token-type:vp+jwt, and the DPoP key must be the cnf key.
+
+Also: random status list indexes, separate lists for Agent and Operator Credentials, renewal-info keyed by credential UUID, synchronous challenge validation, and status lists re-signed at once on revocation.
 
 ## Sources
 
