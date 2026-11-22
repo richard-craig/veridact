@@ -38,10 +38,12 @@ class VerifierConfig:
     allowed_operators: list[str] | None = None
     allowed_scopes: list[str] | None = None
     require_operator_status: bool = True
+    # Selectively disclosable claims every presentation must show (spec v0.5, check 7).
+    required_disclosures: list[str] = field(default_factory=list)
     mirror_url: str | None = None
     # Development only: host=base_url routes (see RoutedFetcher).
     routes: dict[str, str] = field(default_factory=dict)
-    did_ttl: float = 300.0
+    metadata_ttl: float = 300.0
     status_ttl: float = 300.0
     trust_ttl: float = 3600.0
 
@@ -94,15 +96,16 @@ class VerifierConfig:
             allowed_operators=frozenset(self.allowed_operators) if self.allowed_operators else None,
             allowed_scopes=frozenset(self.allowed_scopes) if self.allowed_scopes else None,
             require_operator_status=self.require_operator_status,
+            required_disclosures=frozenset(self.required_disclosures),
         )
         kwargs.setdefault("fetcher", self.fetcher())
         return Verifier(policy, governance_keys=self.governance_keys,
-                        trust_list_url=self.trust_list_url, did_ttl=self.did_ttl,
+                        trust_list_url=self.trust_list_url, metadata_ttl=self.metadata_ttl,
                         status_ttl=self.status_ttl, trust_ttl=self.trust_ttl, **kwargs)
 
 
 def parse_request(raw: dict[str, Any] | None) -> Request:
-    """A verification Request from JSON: {scopes, risk, minTier, payment}."""
+    """A verification Request from JSON: {scopes, risk, minTier, payment, disclose}."""
     raw = raw or {}
     scopes = raw.get("scopes") or []
     if not isinstance(scopes, list) or not all(isinstance(s, str) for s in scopes):
@@ -124,7 +127,11 @@ def parse_request(raw: dict[str, Any] | None) -> Request:
     min_tier = raw.get("minTier")
     if min_tier is not None and not isinstance(min_tier, str):
         raise ConfigError("minTier must be a string")
-    return Request(scopes=frozenset(scopes), risk=risk, payment=payment, min_tier=min_tier)
+    disclose = raw.get("disclose") or []
+    if not isinstance(disclose, list) or not all(isinstance(s, str) for s in disclose):
+        raise ConfigError("disclose must be a list of claim names")
+    return Request(scopes=frozenset(scopes), risk=risk, payment=payment, min_tier=min_tier,
+                   disclose=frozenset(disclose))
 
 
 def decision_body(decision, *, include_log: bool = True) -> dict[str, Any]:
@@ -139,7 +146,11 @@ def decision_body(decision, *, include_log: bool = True) -> dict[str, Any]:
         "accountableRole": decision.accountable_role,
         "scopesGranted": decision.scopes_granted,
         "agentKeyId": decision.agent_key_id,
+        "agentJwk": decision.agent_jwk,
+        "agentCredential": decision.agent_credential_id,
         "agentCredentialExpires": decision.agent_credential_expires,
+        "limits": decision.limits,
+        "disclosed": decision.disclosed,
         "flags": decision.flags,
     }
     if "intent" in decision.context:

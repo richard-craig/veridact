@@ -47,7 +47,7 @@ class Network:
             trust_list_url=self.issuer.config.trust_list_url,
             routes=dict(self.routes),
             # No caching, so a revocation shows on the next call.
-            did_ttl=0, status_ttl=0, trust_ttl=0, **extra)
+            metadata_ttl=0, status_ttl=0, trust_ttl=0, **extra)
 
     async def start_sandbox(self) -> str:
         await self.serve(SANDBOX_HOST, create_sandbox(self.rp_config(f"https://{SANDBOX_HOST}")))

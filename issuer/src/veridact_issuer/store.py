@@ -30,14 +30,22 @@ CREATE TABLE IF NOT EXISTS credentials (
   id TEXT PRIMARY KEY, account_id TEXT NOT NULL, kind TEXT NOT NULL, subject TEXT NOT NULL,
   jwt TEXT NOT NULL, status_list TEXT NOT NULL, status_index INTEGER NOT NULL,
   iat INTEGER NOT NULL, exp INTEGER NOT NULL, revoked INTEGER NOT NULL DEFAULT 0,
-  log_index INTEGER, data TEXT NOT NULL);
+  log_index INTEGER, data TEXT NOT NULL, cnf_jkt TEXT);
 CREATE INDEX IF NOT EXISTS credentials_by_subject ON credentials(subject, kind);
+CREATE INDEX IF NOT EXISTS credentials_by_key ON credentials(cnf_jkt);
 CREATE TABLE IF NOT EXISTS status_lists (
   url TEXT PRIMARY KEY, kind TEXT NOT NULL, number INTEGER NOT NULL, bits BLOB NOT NULL,
   used BLOB NOT NULL, used_count INTEGER NOT NULL, jwt TEXT, signed_at INTEGER, dirty INTEGER NOT NULL);
-CREATE TABLE IF NOT EXISTS hosted_dids (
-  path TEXT PRIMARY KEY, account_id TEXT NOT NULL, did TEXT UNIQUE NOT NULL, log TEXT NOT NULL,
+CREATE TABLE IF NOT EXISTS hosted_agents (
+  path TEXT PRIMARY KEY, account_id TEXT NOT NULL, client_id TEXT UNIQUE NOT NULL, doc TEXT NOT NULL,
   updated INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS key_events (
+  id INTEGER PRIMARY KEY, account_id TEXT NOT NULL, subject TEXT NOT NULL, jkt TEXT NOT NULL,
+  action TEXT NOT NULL, ts INTEGER NOT NULL, log_index INTEGER NOT NULL);
+CREATE INDEX IF NOT EXISTS key_events_by_key ON key_events(subject, jkt);
+CREATE TABLE IF NOT EXISTS assistants (
+  id TEXT PRIMARY KEY, sub TEXT NOT NULL, credential TEXT NOT NULL, status_list TEXT NOT NULL,
+  status_index INTEGER NOT NULL, iat INTEGER NOT NULL, exp INTEGER NOT NULL, data TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS tlog (
   idx INTEGER PRIMARY KEY, leaf_hash TEXT NOT NULL, chain_hash TEXT NOT NULL,
   entry TEXT NOT NULL, ts INTEGER NOT NULL);
@@ -164,10 +172,20 @@ class Store:
 
     def add_credential(self, cred_id: str, account_id: str, kind: str, subject: str, jwt: str,
                        status_list: str, status_index: int, iat: int, exp: int,
-                       log_index: int, data: dict) -> None:
-        self.db.execute("INSERT INTO credentials VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", (
+                       log_index: int, data: dict, cnf_jkt: str | None = None) -> None:
+        self.db.execute("INSERT INTO credentials VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", (
             cred_id, account_id, kind, subject, jwt, status_list, status_index, iat, exp, 0,
-            log_index, json.dumps(data)))
+            log_index, json.dumps(data), cnf_jkt))
+
+    def credentials_for_key(self, subject: str, jkt: str) -> list[dict[str, Any]]:
+        """Unrevoked credentials whose cnf is this subject's key."""
+        return self._all("SELECT * FROM credentials WHERE subject=? AND cnf_jkt=? AND revoked=0",
+                         subject, jkt)
+
+    def update_credential_data(self, cred_id: str, **data: Any) -> None:
+        cred = self.credential(cred_id)
+        merged = {**(cred["data"] if cred else {}), **data}
+        self.db.execute("UPDATE credentials SET data=? WHERE id=?", (json.dumps(merged), cred_id))
 
     def credential(self, cred_id: str) -> dict[str, Any] | None:
         return self._one("SELECT * FROM credentials WHERE id=?", cred_id)
@@ -175,10 +193,10 @@ class Store:
     def credential_by_jwt(self, jwt: str) -> dict[str, Any] | None:
         return self._one("SELECT * FROM credentials WHERE jwt=?", jwt)
 
-    def latest_operator_credential(self, operator_did: str) -> dict[str, Any] | None:
+    def latest_operator_credential(self, operator: str) -> dict[str, Any] | None:
         return self._one(
             "SELECT * FROM credentials WHERE subject=? AND kind='operator' ORDER BY iat DESC LIMIT 1",
-            operator_did)
+            operator)
 
     def operator_credentials(self, account_id: str, now: int) -> list[dict[str, Any]]:
         """The account's unrevoked, unexpired Operator Credentials, newest first."""
@@ -200,9 +218,10 @@ class Store:
     def status_list(self, url: str) -> dict[str, Any] | None:
         return self._one("SELECT * FROM status_lists WHERE url=?", url)
 
-    def create_status_list(self, url: str, kind: str, number: int, nbytes: int) -> None:
+    def create_status_list(self, url: str, kind: str, number: int, entry_bytes: int,
+                           used_bytes: int) -> None:
         self.db.execute("INSERT INTO status_lists VALUES (?,?,?,?,?,?,?,?,?)", (
-            url, kind, number, bytes(nbytes), bytes(nbytes), 0, None, None, 1))
+            url, kind, number, bytes(entry_bytes), bytes(used_bytes), 0, None, None, 1))
 
     def save_status_list(self, url: str, *, bits: bytes | None = None, used: bytes | None = None,
                          used_count: int | None = None, jwt: str | None = None,
@@ -216,16 +235,42 @@ class Store:
         if sets:
             self.db.execute(f"UPDATE status_lists SET {', '.join(sets)} WHERE url=?", (*args, url))
 
-    # -- hosted DIDs -------------------------------------------------------------------
+    # -- Veridact-hosted agents (CIMDs) --------------------------------------------------
 
-    def hosted_did(self, path: str) -> dict[str, Any] | None:
-        return self._one("SELECT * FROM hosted_dids WHERE path=?", path)
+    def hosted_agent(self, path: str) -> dict[str, Any] | None:
+        return self._one("SELECT * FROM hosted_agents WHERE path=?", path)
 
-    def put_hosted_did(self, path: str, account_id: str, did: str, log: str, now: int) -> None:
+    def put_hosted_agent(self, path: str, account_id: str, client_id: str, doc: str, now: int) -> None:
         self.db.execute(
-            "INSERT INTO hosted_dids VALUES (?,?,?,?,?) ON CONFLICT(path) DO UPDATE SET "
-            "log=excluded.log, updated=excluded.updated",
-            (path, account_id, did, log, now))
+            "INSERT INTO hosted_agents VALUES (?,?,?,?,?) ON CONFLICT(path) DO UPDATE SET "
+            "doc=excluded.doc, updated=excluded.updated",
+            (path, account_id, client_id, doc, now))
+
+    # -- key events ---------------------------------------------------------------------
+
+    def add_key_event(self, account_id: str, subject: str, jkt: str, action: str, now: int,
+                      log_index: int) -> None:
+        self.db.execute("INSERT INTO key_events (account_id, subject, jkt, action, ts, log_index) "
+                        "VALUES (?,?,?,?,?,?)", (account_id, subject, jkt, action, now, log_index))
+
+    def key_events(self, subject: str, jkt: str) -> list[dict[str, Any]]:
+        return self._all("SELECT * FROM key_events WHERE subject=? AND jkt=? ORDER BY id", subject, jkt)
+
+    # -- known-assistant entries -----------------------------------------------------------
+
+    def put_assistant(self, entry_id: str, sub: str, credential: str, status_list: str,
+                      status_index: int, iat: int, exp: int, data: dict) -> None:
+        self.db.execute(
+            "INSERT INTO assistants VALUES (?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET "
+            "sub=excluded.sub, credential=excluded.credential, status_list=excluded.status_list, "
+            "status_index=excluded.status_index, iat=excluded.iat, exp=excluded.exp, data=excluded.data",
+            (entry_id, sub, credential, status_list, status_index, iat, exp, json.dumps(data)))
+
+    def assistant(self, entry_id: str) -> dict[str, Any] | None:
+        return self._one("SELECT * FROM assistants WHERE id=?", entry_id)
+
+    def assistants(self) -> list[dict[str, Any]]:
+        return self._all("SELECT * FROM assistants ORDER BY id")
 
     # -- transparency log ---------------------------------------------------------------
 

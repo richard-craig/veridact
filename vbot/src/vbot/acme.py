@@ -155,13 +155,16 @@ class AcmeClient:
     # -- orders -------------------------------------------------------------------
 
     async def new_order(self, identifier: dict[str, str], *, tier: str | None = None,
-                        lifetime: int | None = None) -> tuple[str, dict[str, Any]]:
+                        lifetime: int | None = None,
+                        formats: list[str] | None = None) -> tuple[str, dict[str, Any]]:
         directory = await self.directory()
         payload: dict[str, Any] = {"identifiers": [identifier]}
         if tier:
             payload["tier"] = tier
         if lifetime:
             payload["lifetime"] = lifetime
+        if formats:
+            payload["formats"] = formats
         resp = await self.post(directory["newOrder"], payload)
         return resp.headers["Location"], resp.json()
 
@@ -205,7 +208,13 @@ class AcmeClient:
                 raise AcmeError(resp.status, {"detail": "renewal-info unavailable"})
             return await resp.json(content_type=None)
 
-    async def upload_did(self, agent_id: str, did_log: str) -> str:
+    async def upload_metadata(self, agent_id: str, metadata: dict[str, Any]) -> str:
+        """Upload a Veridact-hosted agent's Client ID Metadata Document; returns its client_id."""
         directory = await self.directory()
-        resp = await self.post(f"{directory['veridactDidHosting']}/{agent_id}", {"log": did_log})
-        return resp.json()["did"]
+        resp = await self.post(f"{directory['veridactAgentMetadata']}/{agent_id}", {"metadata": metadata})
+        return resp.json()["client_id"]
+
+    async def key_event(self, subject: str, jkt: str, action: str) -> dict[str, Any]:
+        directory = await self.directory()
+        return (await self.post(directory["veridactKeyEvent"],
+                                {"subject": subject, "jkt": jkt, "action": action})).json()

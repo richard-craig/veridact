@@ -24,7 +24,7 @@ class IssuerConfig:
     # "staging" or "production". Delegations name their environment, and an issuer
     # refuses a delegation made for another one.
     environment: str = "staging"
-    # Issuer DID path segment after the host: did:webvh:{SCID}:{host}:issuers:{name}
+    # The issuer identifier is {base_url}/issuers/{issuer_name} (specification v0.5).
     issuer_name: str = "staging-2026a"
     tiers: tuple[str, ...] = ("domain",)
     scopes: tuple[str, ...] = DEFAULT_SCOPES
@@ -45,6 +45,8 @@ class IssuerConfig:
     # held apart from every issuer.
     publish_trust_list: bool = True
     trust_list_lifetime: int = 7 * 86400
+    # Known-assistant entries (specification v0.5, section 6) and their lifetime.
+    known_assistant_lifetime: int = 90 * 86400
     # Development: host=base_url routes for fetching operator domains (see RoutedFetcher).
     routes: dict[str, str] = field(default_factory=dict)
     # Per-account limits per hour, so a compromised account cannot flood the log.
@@ -67,18 +69,17 @@ class IssuerConfig:
 
     @property
     def host(self) -> str:
-        """Host in did:webvh form (a port becomes %3A)."""
-        netloc = urlsplit(self.base_url).netloc
-        return netloc.replace(":", "%3A")
+        return urlsplit(self.base_url).netloc
 
     @property
-    def issuer_did_path(self) -> str:
-        return f"{self.host}:issuers:{self.issuer_name}"
+    def issuer_url(self) -> str:
+        """The issuer identifier: the iss of everything it signs."""
+        return f"{self.base_url}/issuers/{self.issuer_name}"
 
     @property
-    def hosted_did_prefix(self) -> str:
-        """Veridact-hosted agent DIDs: did:webvh:{SCID}:{prefix}:{operator slug}:{agent id}."""
-        return f"{self.host}:dids"
+    def agent_hosting_url(self) -> str:
+        """Veridact-hosted agents: {agent_hosting_url}/{operator slug}/{agent id}, each a CIMD."""
+        return f"{self.base_url}/agents"
 
     @property
     def trust_list_url(self) -> str:

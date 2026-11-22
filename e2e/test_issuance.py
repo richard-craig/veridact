@@ -22,7 +22,7 @@ async def onboard(net: Network, *, hosted: bool = True) -> tuple[Vbot, str]:
     agent = await bot.create_agent(hosted=hosted)
     bot.delegate(agent["id"], ["fs:claims:read-status", "fs:quotes:create"],
                  role="Head of Digital Claims",
-                 limits={"currency": "ZAR", "perPayment": "500.00", "perDay": "2000.00"})
+                 limits={"currency": "ZAR", "per_payment": "500.00", "per_day": "2000.00"})
     await bot.issue(agent["id"])
     return bot, agent["id"]
 
@@ -31,7 +31,7 @@ def verifier(net: Network, **policy) -> Verifier:
     governance = json.loads(json.dumps(net.issuer.identity.governance_jwks))
     return Verifier(RelyingPartyPolicy(audience=AUD, **policy), governance_keys=governance,
                     fetcher=net.fetcher(), trust_list_url=net.issuer.config.trust_list_url,
-                    nonces=InMemoryNonceStore(), status_ttl=0, did_ttl=0)
+                    nonces=InMemoryNonceStore(), status_ttl=0, metadata_ttl=0)
 
 
 async def present(bot: Vbot, agent_id: str, v: Verifier, request: Request = Request()):
@@ -47,7 +47,9 @@ async def test_hosted_agent_verifies(network: Network):
     decision = await present(bot, agent_id, verifier(network),
                              Request(scopes=S({"fs:claims:read-status"})))
     assert decision.allowed, decision.log_record()
-    assert decision.operator == bot.operator()["did"]
+    assert decision.operator == bot.operator()["id"] == f"https://{OPERATOR_DOMAIN}"
+    assert decision.agent == bot.agent(agent_id)["id"]
+    assert decision.agent_key_id == bot.agent(agent_id)["jkt"]
     assert decision.operator_domains == [OPERATOR_DOMAIN]
     assert decision.tier == "domain"
     assert decision.scopes_granted == ["fs:claims:read-status"]
@@ -56,6 +58,6 @@ async def test_hosted_agent_verifies(network: Network):
 
 async def test_agent_on_operator_domain_verifies(network: Network):
     bot, agent_id = await onboard(network, hosted=False)
-    assert ":operator.veridact.test:agents:" in bot.agent(agent_id)["did"]
+    assert bot.agent(agent_id)["id"] == f"https://{OPERATOR_DOMAIN}/agents/{agent_id}"
     decision = await present(bot, agent_id, verifier(network))
     assert decision.allowed, decision.log_record()
