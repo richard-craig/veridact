@@ -8,7 +8,7 @@
 #   vbot delegate --scope fs:claims:read-status --role "Head of Digital Claims"
 #   vbot issue && vbot call https://sandbox.veridact.test/claims/CLM-1001/status
 #
-# Canonical names (*.veridact.test) are signed into every credential, DID and status list;
+# Canonical names (*.veridact.test) are signed into every credential, identifier and status list;
 # --route tells each component which container answers for them.
 
 x-image: &image
@@ -39,7 +39,7 @@ services:
       <<: *health
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/healthz')"]
 
-  # The operator's own website. vbot writes its DID log and did-configuration.json here.
+  # The operator's own website. vbot writes veridact-operator.json (and self-hosted agent metadata) here.
   operator-site:
     <<: *image
     command: ["python", "-m", "http.server", "8000", "--directory", "/vbot/publish"]

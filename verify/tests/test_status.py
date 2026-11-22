@@ -52,7 +52,6 @@ async def test_list_must_name_its_own_uri():
 
 
 def test_sd_jwt_round_trip_and_selection():
-    key = jose.b64url_encode  # noqa: F841 (keeps the import obviously used)
     from cryptography.hazmat.primitives.asymmetric import ec
     signer = ec.generate_private_key(ec.SECP256R1())
     token = sdjwt.issue({"kid": "k"}, {"iss": "https://i.example", "sub": "https://a.example"},
