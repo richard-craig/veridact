@@ -65,7 +65,7 @@ async def test_real_keycloak_issues_a_dpop_bound_token(real_kc):
     agent_jwk = jose.key_to_jwk(bot.keys.get(f"agent-{agent_id}").public_key())
     assert access["cnf"]["jkt"] == thumbprint(agent_jwk)
     assert "fs:claims:read-status" in access["scope"].split()
-    assert access["preferred_username"] == agent_username(bot.agent(agent_id)["did"])
+    assert access["preferred_username"] == agent_username(bot.agent(agent_id)["id"])
 
     # A second exchange reuses the provisioned user; Keycloak refuses replayed assertions on its own.
     again = await exchange(bot, BRIDGE, agent_id=agent_id)

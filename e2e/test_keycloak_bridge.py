@@ -53,7 +53,7 @@ async def test_presentation_for_a_dpop_bound_keycloak_token(kc_net):
     agent_jwk = jose.key_to_jwk(bot.keys.get(f"agent-{agent_id}").public_key())
     assert access["cnf"]["jkt"] == thumbprint(agent_jwk)  # bound to the agent's Veridact key
     assert access["scope"] == "fs:claims:read-status"
-    agent_did = bot.agent(agent_id)["did"]
+    agent_did = bot.agent(agent_id)["id"]
     (user,) = kc.users.values()
     assert user["username"] == agent_username(agent_did) == access["preferred_username"]
     assert user["links"] == {"veridact": agent_did}
@@ -78,7 +78,7 @@ async def _raw_exchange(network, bot, agent_id, *, scope=None, dpop="agent", rep
             assert r.status == 400 and (await r.json())["error"] == "use_veridact_nonce"
             nonce = r.headers["Veridact-Nonce"]
         vp = replay_vp or bot.presentation(agent_id, aud=BRIDGE, nonce=nonce)
-        form.update(subject_token=vp, subject_token_type="urn:veridact:params:oauth:token-type:vp+jwt")
+        form.update(subject_token=vp, subject_token_type="urn:veridact:params:oauth:token-type:sd-jwt-kb")
         headers = {}
         if dpop == "agent":
             headers["DPoP"] = dpop_proof(bot, agent_id, method="POST", url=meta["dpop_htu"])
@@ -96,6 +96,7 @@ async def test_dpop_is_required_and_must_use_the_agent_key(kc_net):
 
     other = await bot.create_agent()  # a real Veridact key, but not this agent's
     stranger = dpop_proof(bot, other["id"], method="POST", url=f"{kc.token_endpoint}")
+    assert other["jkt"] != bot.agent(agent_id)["jkt"]
     status, body, _ = await _raw_exchange(network, bot, agent_id, dpop=stranger)
     assert (status, body["error"]) == (400, "invalid_dpop_proof")
     assert "not the agent's Veridact key" in body["error_description"]
@@ -117,6 +118,36 @@ async def test_refusals_map_to_oauth_errors(kc_net):
     await bot.revoke(agent_id)
     status, body, _ = await _raw_exchange(network, bot, agent_id)
     assert (status, body) == (400, {"error": "invalid_grant", "error_description": "AUTH_FAILED"})
+
+
+async def test_pattern_c_client_attestation(kc_net):
+    """attest_jwt_client_auth_dpop: the Client Attestation names the client, the DPoP proof proves the key."""
+    network, kc, _ = kc_net
+    bot, agent_id = await onboard(network)
+    agent = await bot.issue(agent_id, attestation=True)
+    base = network.routes["bridge.veridact.test"]
+    async with aiohttp.ClientSession() as http:
+        async with http.get(f"{base}/.well-known/veridact-bridge") as r:
+            meta = await r.json()
+        assert "attest_jwt_client_auth_dpop" in meta["token_endpoint_auth_methods_supported"]
+
+        async def token(client_id: str, attestation: str, dpop_agent: str = agent_id):
+            headers = {"OAuth-Client-Attestation": attestation,
+                       "DPoP": dpop_proof(bot, dpop_agent, method="POST", url=meta["dpop_htu"])}
+            form = {"grant_type": "client_credentials", "client_id": client_id, "scope": "fs:quotes:create"}
+            async with http.post(f"{base}/token", data=form, headers=headers) as r:
+                return r.status, await r.json()
+
+        status, body = await token(agent["id"], agent["attestation"])
+        assert status == 200, body
+        access = claims(body["access_token"])
+        assert access["scope"] == "fs:quotes:create"
+        assert access["cnf"]["jkt"] == agent["jkt"]
+        status, body = await token(agent["id"] + "x", agent["attestation"])
+        assert (status, body["error"]) == (400, "invalid_grant")
+        other = await bot.create_agent()
+        status, body = await token(agent["id"], agent["attestation"], dpop_agent=other["id"])
+        assert (status, body["error"]) == (400, "invalid_grant")
 
 
 async def test_keycloak_trusts_only_the_bridge_key(kc_net, tmp_path):

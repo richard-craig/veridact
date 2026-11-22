@@ -3,8 +3,8 @@
 Keycloak's JWT Authorization Grant (RFC 7523, supported from 26.6) requires the
 assertion's subject to be an existing user linked to the identity provider. The bridge
 therefore gives each agent a Keycloak user the first time a presentation from it
-verifies: username ``agent-<hash of the DID>``, linked to the identity provider with
-the agent DID as the federated user id.
+verifies: username ``agent-<hash of the agent URL>``, linked to the identity provider with
+the agent URL (its Veridact identifier and OAuth client_id) as the federated user id.
 """
 
 from __future__ import annotations
@@ -28,9 +28,9 @@ class KeycloakError(Exception):
         self.status = status
 
 
-def agent_username(did: str) -> str:
-    """A stable Keycloak username for an agent DID (DIDs are too long and full of colons)."""
-    digest = hashlib.sha256(did.encode()).digest()
+def agent_username(agent: str) -> str:
+    """A stable Keycloak username for an agent URL (URLs are too long for usernames)."""
+    digest = hashlib.sha256(agent.encode()).digest()
     return "agent-" + base64.b32encode(digest).decode().rstrip("=").lower()[:26]
 
 
@@ -46,7 +46,7 @@ class Keycloak:
         self.config = config
         self._session = session
         self._admin_token: tuple[str, float] | None = None
-        self._provisioned: dict[str, str] = {}  # agent DID -> user id
+        self._provisioned: dict[str, str] = {}  # agent URL -> user id
 
     @property
     def session(self) -> aiohttp.ClientSession:
@@ -106,7 +106,7 @@ class Keycloak:
             return resp.status, body, dict(resp.headers)
 
     async def ensure_agent(self, did: str, attributes: dict[str, list[str]]) -> str:
-        """Return the Keycloak user id for an agent DID, creating and linking it if needed."""
+        """Return the Keycloak user id for an agent URL, creating and linking it if needed."""
         if did in self._provisioned:
             return self._provisioned[did]
         username = agent_username(did)
