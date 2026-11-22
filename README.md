@@ -1,6 +1,7 @@
 # Veridact
 
-**Short-lived, verifiable credentials for AI agents, issued the way Let's Encrypt issues certificates.**
+**Verifiable identity for AI agents: an HTTPS identifier every OAuth stack understands, and short-lived SD-JWT
+credentials that any bank or insurer can check inside its own systems.**
 
 When an AI agent calls a bank's or an insurer's API, the API needs answers to two questions before it serves the
 request: *which organisation operates this agent and answers for it?* and *what has that organisation allowed it
@@ -26,7 +27,7 @@ issuance. Veridact works the same way.
 
 ## What's here
 
-- [**Specification**](docs/specification.md) (v0.5): trust model, identifiers and keys, credential profiles,
+- [**Specification**](docs/specification.md) (v0.5, draft; also at [veridact.net/docs](https://veridact.net/docs/veridact/spec/)): trust model, identifiers and keys, credential profiles,
   delegation and sub-agents, known-assistant entries, the ACME-A protocol, Agent Certificates, the verification checks and reason codes,
   the transparency log, archival verification, the trust registry, security, privacy and resilience.
 - [**veridact-verify**](verify): the reference verifier library (Python, alpha). It runs all eight verification
