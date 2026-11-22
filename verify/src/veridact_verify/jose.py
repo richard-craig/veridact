@@ -117,30 +117,19 @@ def sign(header: dict[str, Any], payload: dict[str, Any], key: ec.EllipticCurveP
 
 # --- key encodings -----------------------------------------------------------
 
-_P256_MULTICODEC = b"\x80\x24"  # varint(0x1200), p256-pub
-_B58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
 
+def jwk_thumbprint(jwk: dict[str, Any]) -> str:
+    """RFC 7638 thumbprint (SHA-256, base64url) of a P-256 JWK. Veridact's key id."""
+    import hashlib
 
-def _b58decode(text: str) -> bytes:
-    num = 0
-    for ch in text:
-        idx = _B58.find(ch)
-        if idx < 0:
-            raise JoseError("invalid base58btc")
-        num = num * 58 + idx
-    body = num.to_bytes((num.bit_length() + 7) // 8, "big") if num else b""
-    pad = len(text) - len(text.lstrip("1"))
-    return b"\x00" * pad + body
-
-
-def _b58encode(data: bytes) -> str:
-    num = int.from_bytes(data, "big")
-    out = ""
-    while num:
-        num, rem = divmod(num, 58)
-        out = _B58[rem] + out
-    pad = len(data) - len(data.lstrip(b"\x00"))
-    return "1" * pad + out
+    if jwk.get("kty") != "EC" or jwk.get("crv") != "P-256":
+        raise JoseError("expected an EC P-256 JWK")
+    try:
+        canonical = json.dumps({"crv": jwk["crv"], "kty": jwk["kty"], "x": jwk["x"], "y": jwk["y"]},
+                               separators=(",", ":"), sort_keys=True)
+    except KeyError as err:
+        raise JoseError("JWK needs x and y") from err
+    return b64url_encode(hashlib.sha256(canonical.encode()).digest())
 
 
 def key_from_jwk(jwk: dict[str, Any]) -> ec.EllipticCurvePublicKey:
@@ -166,32 +155,3 @@ def key_to_jwk(key: ec.EllipticCurvePublicKey) -> dict[str, str]:
         "x": b64url_encode(nums.x.to_bytes(_COORD, "big")),
         "y": b64url_encode(nums.y.to_bytes(_COORD, "big")),
     }
-
-
-def key_from_multikey(multibase: str) -> ec.EllipticCurvePublicKey:
-    if not isinstance(multibase, str) or not multibase.startswith("z"):
-        raise JoseError("Multikey must be base58btc multibase")
-    raw = _b58decode(multibase[1:])
-    if not raw.startswith(_P256_MULTICODEC):
-        raise JoseError("Multikey is not p256-pub")
-    try:
-        return ec.EllipticCurvePublicKey.from_encoded_point(ec.SECP256R1(), raw[2:])
-    except ValueError as err:
-        raise JoseError("invalid P-256 point") from err
-
-
-def key_to_multikey(key: ec.EllipticCurvePublicKey) -> str:
-    from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
-
-    point = key.public_bytes(Encoding.X962, PublicFormat.CompressedPoint)
-    return "z" + _b58encode(_P256_MULTICODEC + point)
-
-
-def key_from_verification_method(vm: dict[str, Any]) -> ec.EllipticCurvePublicKey:
-    """Extract a P-256 key from a Multikey or JsonWebKey verification method."""
-    vm_type = vm.get("type")
-    if vm_type == "Multikey" and "publicKeyMultibase" in vm:
-        return key_from_multikey(vm["publicKeyMultibase"])
-    if vm_type in ("JsonWebKey", "JsonWebKey2020") and isinstance(vm.get("publicKeyJwk"), dict):
-        return key_from_jwk(vm["publicKeyJwk"])
-    raise JoseError(f"unsupported verification method type {vm_type!r}")

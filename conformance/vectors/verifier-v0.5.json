@@ -1,0 +1,834 @@
+{
+  "about": "Veridact verifier conformance vectors for specification v0.5 (SD-JWT VC, Token Status List, HTTPS identifiers). Every case runs at 'now', with 'nonce' issued by the relying party and unused. 'kind' says which verification to run. 'code' is normative; 'reason' is the reference library's internal code and is informative. 'request.risk' defaults to medium.",
+  "now": 1794211200,
+  "nonce": "9f2c41d0a7e3b5f8a1c2d3e4f5a6b7c8",
+  "trustListUrl": "https://trust.veridact.example/trust-list.jwt",
+  "bundles": [
+    {
+      "name": "organisation-tier",
+      "governanceKeys": {
+        "gov-test-2026a": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "bYWMbASSjo5mZKEE8SuDGhTOXZNmPzy65a5Q4ibzDF0",
+          "y": "Zv-t9SLE5Iatc6E8ATxInh0UBhNpfJsNdRu-wpBKQ_c"
+        }
+      },
+      "artefacts": {
+        "https://veridact.example/.well-known/jwt-vc-issuer/issuers/org-2026b": "{\"issuer\": \"https://veridact.example/issuers/org-2026b\", \"jwks\": {\"keys\": [{\"kty\": \"EC\", \"crv\": \"P-256\", \"x\": \"cGdYQhne96usosXl2gSQnAGiVSn1JciFlN8QgsjR8pw\", \"y\": \"_3LxNLekQNQnqfCJsfqtRN5GTJIoJ6xS6FRl3MrlcTg\", \"kid\": \"org-2026b-3\", \"use\": \"sig\", \"alg\": \"ES256\"}]}}",
+        "https://rogue.example/.well-known/jwt-vc-issuer/issuers/x": "{\"issuer\": \"https://rogue.example/issuers/x\", \"jwks\": {\"keys\": [{\"kty\": \"EC\", \"crv\": \"P-256\", \"x\": \"PY3Oy2qsWqVQq3fJE1alIzc29cCYt0q1QRA4qj-2X3E\", \"y\": \"SpHXEnU_7GEZuMOBzgtkmQ2Bxv5kAq0c-BCDvC4g7LE\", \"kid\": \"x-1\", \"use\": \"sig\", \"alg\": \"ES256\"}]}}",
+        "https://trust.veridact.example/trust-list.jwt": "eyJ0eXAiOiJ0cnVzdC1saXN0K2p3dCIsImtpZCI6Imdvdi10ZXN0LTIwMjZhIiwiYWxnIjoiRVMyNTYifQ.eyJpc3MiOiJodHRwczovL3RydXN0LnZlcmlkYWN0LmV4YW1wbGUiLCJ2ZXJzaW9uIjoiMjAyNi4xMS4xIiwiaWF0IjoxNzk0MTI0ODAwLCJleHAiOjE3OTQ4MTYwMDAsImlzc3VlcnMiOlt7ImlkIjoiaHR0cHM6Ly92ZXJpZGFjdC5leGFtcGxlL2lzc3VlcnMvb3JnLTIwMjZiIiwidGllcnMiOlsiZG9tYWluIiwib3JnYW5pc2F0aW9uIl0sInZjdHMiOlsiaHR0cHM6Ly92ZXJpZGFjdC5uZXQvdmN0L2FnZW50L3YxIiwiaHR0cHM6Ly92ZXJpZGFjdC5uZXQvdmN0L29wZXJhdG9yL3YxIiwiaHR0cHM6Ly92ZXJpZGFjdC5uZXQvdmN0L2tub3duLWFzc2lzdGFudC92MSJdLCJrZXlzIjpbeyJraWQiOiJvcmctMjAyNmItMyIsImprdCI6IldpYUZTRmxlM281N2o1Szh5Vl9TVThTRW9GRHZpbUQ2VkNoS3FnSlQ4LW8iLCJub3RCZWZvcmUiOjE3ODkwMjcyMDAsIm5vdEFmdGVyIjoxNzk2ODAzMjAwfV19XSwic2NvcGVzIjpbImZzOmNsYWltczpyZWFkLXN0YXR1cyIsImZzOnF1b3RlczpjcmVhdGUiLCJmczpwYXltZW50czppbml0aWF0ZSJdLCJwb2xpY3kiOnsidGllck9yZGVyIjpbImRvbWFpbiIsIm9yZ2FuaXNhdGlvbiJdLCJhZ2VudENyZWRlbnRpYWxNYXhMaWZldGltZSI6ODY0MDAsInByZXNlbnRhdGlvbk1heExpZmV0aW1lIjoxMjAsIm9wZXJhdG9yQ3JlZGVudGlhbE1heExpZmV0aW1lIjp7ImRvbWFpbiI6Nzc3NjAwMCwib3JnYW5pc2F0aW9uIjozMTYyMjQwMH0sImtub3duQXNzaXN0YW50TWF4TGlmZXRpbWUiOjc3NzYwMDB9fQ.0i27uJmqaT6FElstvslQyG7WQV8GeOV9RV6WdvpgM4ycM-RChFx5RkMYfevbLFrcHEZ7teR-sMQXHNstma08ug",
+        "https://status.veridact.example/org/agents/7": "eyJ0eXAiOiJzdGF0dXNsaXN0K2p3dCIsImtpZCI6Im9yZy0yMDI2Yi0zIiwiYWxnIjoiRVMyNTYifQ.eyJzdWIiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9hZ2VudHMvNyIsImlzcyI6Imh0dHBzOi8vdmVyaWRhY3QuZXhhbXBsZS9pc3N1ZXJzL29yZy0yMDI2YiIsImlhdCI6MTc5NDIxMTE0MCwiZXhwIjoxNzk0MjI1NTQwLCJ0dGwiOjMwMCwic3RhdHVzX2xpc3QiOnsiYml0cyI6MiwibHN0IjoiZU5ydHdRRUJBQUFBZ0pELXItNElDZ0FBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBWWdBQUFBUSJ9fQ.ao4MrOQ_x_MIV3HV32deVSqCDG54XGXjxGrK_MNulKGWmk4Kx1cqmfEjXx-VbGrrTxAtI-kl30CmP3SBr6hqUQ",
+        "https://status.veridact.example/org/operators/2": "eyJ0eXAiOiJzdGF0dXNsaXN0K2p3dCIsImtpZCI6Im9yZy0yMDI2Yi0zIiwiYWxnIjoiRVMyNTYifQ.eyJzdWIiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiIsImlzcyI6Imh0dHBzOi8vdmVyaWRhY3QuZXhhbXBsZS9pc3N1ZXJzL29yZy0yMDI2YiIsImlhdCI6MTc5NDIxMTE0MCwiZXhwIjoxNzk0MjI1NTQwLCJ0dGwiOjMwMCwic3RhdHVzX2xpc3QiOnsiYml0cyI6MiwibHN0IjoiZU5ydHdRRUJBQUFBZ0pELXItNElDZ0FBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBWWdBQUFBUSJ9fQ.l_iY4k1IpEglHHdiE_dUWm5tWpVbJkjZ66rO8dI56mZxtufyjoPx97lZtjBLrpElRMN-olTqDAfjJnyWmvNZoA",
+        "https://status.veridact.example/org/assistants/1": "eyJ0eXAiOiJzdGF0dXNsaXN0K2p3dCIsImtpZCI6Im9yZy0yMDI2Yi0zIiwiYWxnIjoiRVMyNTYifQ.eyJzdWIiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9hc3Npc3RhbnRzLzEiLCJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJpYXQiOjE3OTQyMTExNDAsImV4cCI6MTc5NDIyNTU0MCwidHRsIjozMDAsInN0YXR1c19saXN0Ijp7ImJpdHMiOjIsImxzdCI6ImVOcnR3UUVCQUFBQWdKRC1yLTRJQ2dBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQVlnQUFBQVEifX0.yJDyGPRaZce2uwoDBrnXPH_jOSwU14mFsZkpCGNoHhwDej73Ey_VQGm6keklOxHkIeU_XCgTLKvXbi6lhUsifw"
+      },
+      "cases": [
+        {
+          "name": "allow-basic",
+          "kind": "presentation",
+          "description": "Valid SD-JWT+KB at Organisation tier, every disclosure shown",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {
+            "scopes": [
+              "fs:claims:read-status"
+            ]
+          },
+          "artefactOverrides": {},
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ikl1a21RWXEyYTU0a1BNWkltLXE1NHhVcXkxX3FKLUFQZVRNZ0tmVUxXalEiLCJ5IjoidWlOUnFQQkkxOHV1T25ubmZ1eU9sdWYzS1hMQnRBVjFqQ3ozQWs0Nks0QSJ9fSwiY25mX2V2ZW50IjoidmVyaWRhY3QtbG9nLTIwMjYvMDAwMDAwNDU2Iiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6NDgyMTMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2FnZW50cy83In19LCJfc2QiOlsiUFZxYmRyRG41M3JGNEE3eWx6ZHpaZEhDbi1sX0ZPOUNDaXNKejRZcF9kWSIsIlY5Y0hlZnZac3dXYkhYTC0yWDY4VGdBUHFnMTc0MkE5emlfVzN6RGY5WmsiLCJZcU4xb2VqazhManpSWWk0MVZMTGViS0lHQ3ZKR1RXaWx2elBoSkFXNnJBIiwiYld5d1hOZXZPZ21xaTZMc1N2YS0yQ181YTVNYzdlQmVKRzgxTnNwZ1gtTSIsIm1VdGUxcWN6UHU3OWRoVE9abFdyLUh0Nmh0U3BaTjVobGp0b3YxRXRIVzQiXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.YX0Nf94h0aS-z9SAqcv0F0MkTM1V9p1IcrjNXcikyes_PZh7TognQkbYBWGObmU7KfJf-DII3oh2KpgkFX-lNw~WyIyMGxhRVk4VWt0ZnR6Xzdtd0VuVEZ3Iiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIk9wZXJhdG9yIEV4YW1wbGUgKFB0eSkgTHRkIl0~WyI4eV82Y3c3SGtwbXBKT0NUZzNOTi13Iiwib3BlcmF0b3JfcmVnaXN0cmF0aW9uIiwiMjAxOS8xMjM0NTYvMDciXQ~WyJ4d2xrWDBTdkVRZ0NWdmdUcmNLa3BnIiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoiNlZ6WUFxeURubVdBQm01YnlvZ0hFNnVJREF2TURfYmQ1NGd5MFFOYkNPdyJ9.B3n1XRVmd_e2ZpH5bvQj6XHxolMEAbaPfHQniVp4RNtelGSS57EzlWOWCP5VTIpJeqBXqYLt8eEUjqPW0rVHTQ",
+          "expected": {
+            "decision": "allow",
+            "code": null,
+            "reason": null
+          }
+        },
+        {
+          "name": "allow-no-disclosures",
+          "kind": "presentation",
+          "description": "The agent withholds every selectively disclosable claim",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "artefactOverrides": {},
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ikl1a21RWXEyYTU0a1BNWkltLXE1NHhVcXkxX3FKLUFQZVRNZ0tmVUxXalEiLCJ5IjoidWlOUnFQQkkxOHV1T25ubmZ1eU9sdWYzS1hMQnRBVjFqQ3ozQWs0Nks0QSJ9fSwiY25mX2V2ZW50IjoidmVyaWRhY3QtbG9nLTIwMjYvMDAwMDAwNDU2Iiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6NDgyMTMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2FnZW50cy83In19LCJfc2QiOlsiT3VTNXBFTkRWYm03Ti1qekpEMkp2c3dYNjRSQl93ckdMUWtZcElJcjE2WSIsIlVFM0VkcU5POFlEa2h2RWszWW9DUzdwVTVhZXI2M052MkQ3dThtdDN3bzgiLCJmajNUNC1pOUljUkxGejNLQlR6ZkhKUVlQdHF1V1FzZEhHVnpSNHM2Vk1nIiwiaFlLQVNqNUZkazRJM2RQOXJwc0ZkbHF1UjZkV2EtSmJyYndsUlhWSFhXcyIsImtNUHNOVXpnOHRLNUJRR1hEc20xSWI1c0RGcUpsS25hakxvSlJSY1V4SlEiXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.lDN1trVI0hlsRPlDw9pg2KVkNpTd0fdc_ZZUxBKhFxcaXQDGp0c1L5zscjVWUT3tE9mfMecxUwM_xbl0nypp3Q~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoiTTVRRHp3THVSYTl2SXppdTktcjE2d1paQno4dXZFS3lCUjNVbThFNXVHcyJ9.HPz3q6_yQVMqyMNXfQPlZyYak9zhX8xqP92OpK7s6B3xAL6VlkmxfT-7imLdM4tJYgmgw58gvbMTZcFAVCEqWQ",
+          "expected": {
+            "decision": "allow",
+            "code": null,
+            "reason": null
+          }
+        },
+        {
+          "name": "allow-required-disclosure-shown",
+          "kind": "presentation",
+          "description": "The route needs operator_legal_name and gets it",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {
+            "disclose": [
+              "operator_legal_name"
+            ]
+          },
+          "artefactOverrides": {},
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ikl1a21RWXEyYTU0a1BNWkltLXE1NHhVcXkxX3FKLUFQZVRNZ0tmVUxXalEiLCJ5IjoidWlOUnFQQkkxOHV1T25ubmZ1eU9sdWYzS1hMQnRBVjFqQ3ozQWs0Nks0QSJ9fSwiY25mX2V2ZW50IjoidmVyaWRhY3QtbG9nLTIwMjYvMDAwMDAwNDU2Iiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6NDgyMTMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2FnZW50cy83In19LCJfc2QiOlsiRElKaEdiXzlXQkthcUJ2dzZISktpNjE4dVlLLV9wcE1DaG9MV1ltb2hadyIsIkhDVUZPRzhMd256QnFCczdiOF8yajIyNVpLSGd1cWNOT3VuUTFnMUtlT3MiLCJROFpCd0dCVzlERHVuZXhUd202dTVsT2NmYjlzSlY0SVVZLWhDRmZvNHA0IiwiUmhTaU9WSjJDb0hkZ2pJaE1WcWh6SW5KSU9ZUXhzSDNEZF9NRGtUNWI5TSIsImdKbEltdmtybVhYTExOa1BKaHlKd25TTUFhSi0xZlJXNUVpZmthZU5SU0EiXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.jGnzXFSu1B7LeMpRmmFaRkoFhpIwO_fLN4UTs6MrKri-9xLefu-A7Lrja--PtJmMpGW4vW68ddOeqbyAIDCTow~WyJaemVQamlFYkVyVUVvWGlsRzJtcEJBIiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIk9wZXJhdG9yIEV4YW1wbGUgKFB0eSkgTHRkIl0~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoiRE8yemExLTFjcjV1eFY3X2QxU295S0c3WVhQcDdtSXF6alY4amc0YXpZUSJ9.FKNL9EjwV1p-pzPjQ_P3ekv2CJCp43eGWhw19Iuep4WRQjQAMIDoJZtzQmqNtAWlFrSrcrCyH5jgPVwfHbOLJg",
+          "expected": {
+            "decision": "allow",
+            "code": null,
+            "reason": null
+          }
+        },
+        {
+          "name": "deny-required-disclosure-withheld",
+          "kind": "presentation",
+          "description": "The route needs operator_legal_name; it is withheld",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {
+            "disclose": [
+              "operator_legal_name"
+            ]
+          },
+          "artefactOverrides": {},
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ikl1a21RWXEyYTU0a1BNWkltLXE1NHhVcXkxX3FKLUFQZVRNZ0tmVUxXalEiLCJ5IjoidWlOUnFQQkkxOHV1T25ubmZ1eU9sdWYzS1hMQnRBVjFqQ3ozQWs0Nks0QSJ9fSwiY25mX2V2ZW50IjoidmVyaWRhY3QtbG9nLTIwMjYvMDAwMDAwNDU2Iiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6NDgyMTMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2FnZW50cy83In19LCJfc2QiOlsiREwtYjBmcFkyUUZ6czY3NXhwbkxaMXVDQlkyWDVkQ3dVSkx2M3N3aDVoayIsIkVGZ0JtT3lGaTJGQjR0dkVPT3ViQVAyeF9XQUZJV1VJNV9RTUZHLXhqUEEiLCJMWVJrbmtDemotbWp1b2FVRmpYSS05OHZFRzQtRGg3Sl9MaWVNU19YUmJBIiwiZ1dDZFR5N2ZkMmlZRUF2V05idk9MbWZqTzEyaFFzb1plS01YYy01a2htayIsIndXS291LTVmZ21QUWhQQkw5SGVmUlAzSnM3cmRWcFBHNzNKVlROYll6XzAiXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.w7Apt50xLnhZKtmBWIKsx1umCyr8eCpZtliHK6aGKQ4EdCD51ItVmxtaEG5igk3U8nnd7maN69MBjDEmWea0WQ~WyJwcmRid1htUVdKUERRd0M5cHZQUVB3Iiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoiVDRqVm1MaURGNmdud04xeXY2U1FRX3I3NzduNUlqS3VfWGVLSEljRTk0WSJ9.QGFqXUVHjG4q6LMuDqBd34gEl_UU118-nRGT_SEJPwU5mc9RoZ6h7ENUKiFZRuyiZaFnt7G_zLzM8p4zf36fxA",
+          "expected": {
+            "decision": "deny",
+            "code": "AUTH_FAILED",
+            "reason": "CLAIMS_NOT_DISCLOSED"
+          }
+        },
+        {
+          "name": "deny-policy-disclosure-withheld",
+          "kind": "presentation",
+          "description": "The relying party's policy needs operator_registration",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation",
+            "requiredDisclosures": [
+              "operator_registration"
+            ]
+          },
+          "request": {},
+          "artefactOverrides": {},
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ikl1a21RWXEyYTU0a1BNWkltLXE1NHhVcXkxX3FKLUFQZVRNZ0tmVUxXalEiLCJ5IjoidWlOUnFQQkkxOHV1T25ubmZ1eU9sdWYzS1hMQnRBVjFqQ3ozQWs0Nks0QSJ9fSwiY25mX2V2ZW50IjoidmVyaWRhY3QtbG9nLTIwMjYvMDAwMDAwNDU2Iiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6NDgyMTMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2FnZW50cy83In19LCJfc2QiOlsiVWVRaXQ1VlNReFFtWHlIUGUzZkJfN21QalhQeElKQXJhR2swbjB1cmt6WSIsIldVanhWZ2NWLWY4aG15NWlnOGtfU1RZRnlaRy1OR2ZvclhfV1l3SHJxVUEiLCJndHFXbU9OWlliSEozQ2d5Zmhjc0o4TWNKODdaSUN6S0NKSVpqYmJiQml3IiwiaFowREhOX0x3ZzZtUk0xcllpRnN5RGg3dkM5UGctUjZNNDNDRlpnUnhDZyIsInBtYmc2V1R5b2VFbm1XX1JnN0FrZjNJMnhJYnVSeWd3N2dEWVZVdVl5RzQiXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.7yovhP-VQa2PgjppHgK8fSUbnhj4V7e-eBIGrBqzyma-aKFtMJmJRCZMUNnfmi7zVeNxxRddR-TbRfOMLa_ENg~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoiNkkwcmVHMFplbmU4YURKc0VWVTJ2dFdQUTRrNlpDdUZ6QW4yM2tzdWM1cyJ9.Z_utUcNyQZAFimzcqT7x3GWYgZuM9padIvqdpMLJZJUt5lmkbNNsdnFCyWEf4Bdk0OyIdB9FLdFc-XnuiG6R0A",
+          "expected": {
+            "decision": "deny",
+            "code": "AUTH_FAILED",
+            "reason": "CLAIMS_NOT_DISCLOSED"
+          }
+        },
+        {
+          "name": "deny-no-key-binding",
+          "kind": "presentation",
+          "description": "An SD-JWT with no KB-JWT",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "artefactOverrides": {},
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ikl1a21RWXEyYTU0a1BNWkltLXE1NHhVcXkxX3FKLUFQZVRNZ0tmVUxXalEiLCJ5IjoidWlOUnFQQkkxOHV1T25ubmZ1eU9sdWYzS1hMQnRBVjFqQ3ozQWs0Nks0QSJ9fSwiY25mX2V2ZW50IjoidmVyaWRhY3QtbG9nLTIwMjYvMDAwMDAwNDU2Iiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6NDgyMTMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2FnZW50cy83In19LCJfc2QiOlsiMU5QY05LZmxuOU95UGFKakJKSGF0OC1LZ1FPaGdQRkk4Um15dUJfa0szNCIsIjN0cFZpWUhTZ29EdEc5VkRiUmIyUlByR1BLWGpSWUpOc2liODZnYTRVTTAiLCJHLVE5Ym5hMWtpU0c5UnEydE14TVVrVm1rWVZjYXF1QmF1VEpaYk1jc3ZzIiwib2ZKQVRlVGhFb3N3Q250Q2tSMGx3SWdnZm50NnpKeHFFcWhraG81dF9vYyIsIndsNnJILWNhY0lBUlVlYXJvRzVSaE16anVGQnl5QURuaXZudnR0NUdNbFUiXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.NZ9cfKFUTYXAO3Fv_gJJONFk037NXseB9gMNZ9MlulrorbtJ9tRjZ4d2AI_6iI_Lc8Rf9DJ14ECdVCChkYyKPw~WyJPU0FjeXBfV2wycW0xYmtXWThfdmpBIiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIk9wZXJhdG9yIEV4YW1wbGUgKFB0eSkgTHRkIl0~WyJJUjItRHYwdWJibmlaQmRTMVZIWGJRIiwib3BlcmF0b3JfcmVnaXN0cmF0aW9uIiwiMjAxOS8xMjM0NTYvMDciXQ~WyItSjZ2RDFPQkVHUmNaM01nRGV4QWl3Iiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~",
+          "expected": {
+            "decision": "deny",
+            "code": "AUTH_FAILED",
+            "reason": "KB_MISSING"
+          }
+        },
+        {
+          "name": "deny-kb-typ",
+          "kind": "presentation",
+          "description": "KB-JWT typ is not kb+jwt",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "artefactOverrides": {},
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ikl1a21RWXEyYTU0a1BNWkltLXE1NHhVcXkxX3FKLUFQZVRNZ0tmVUxXalEiLCJ5IjoidWlOUnFQQkkxOHV1T25ubmZ1eU9sdWYzS1hMQnRBVjFqQ3ozQWs0Nks0QSJ9fSwiY25mX2V2ZW50IjoidmVyaWRhY3QtbG9nLTIwMjYvMDAwMDAwNDU2Iiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6NDgyMTMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2FnZW50cy83In19LCJfc2QiOlsiOTVVaV9GTzZXNnd4NTQzMUlhRmNlcWoyNk0zbXBFcmJ4VGNMOXFoYWZ3cyIsIkd1dEM0UUxGaFNwUE52anVuSmkzWVhoejg3YWRlS2plSGtrekhMc0JZYlkiLCJTYWZtS0I4ODZhSWhGcFBIWDVXVVBXUkpMQnZ1NkFDTjJUUHN1cVRZMnRjIiwiWFJRWVBXRmwwbGtxWXF1S2g5LV8zYU1kWmN0YmVKTDZzNmlWTkZ6X0tFayIsIlpMazVIOGx0NlFQeDBVTjB6VERCUUxLbGlobXJYMmdoOXNRbUFSTi1INGMiXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.934AlY6iauSLBiv-8ef0Kxfzd0-RduK7j1Vg1JQyV3epz39ZmlV_hkNZ-H6F_q9c4S0W8F1TsuqDJEGe3rxdMQ~WyJuV0FPUVhYQkpQRTlCWWZTNDVTZG5BIiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIk9wZXJhdG9yIEV4YW1wbGUgKFB0eSkgTHRkIl0~WyJSc0VBcUhtRUt0MzVvX2wzVVhvSnVRIiwib3BlcmF0b3JfcmVnaXN0cmF0aW9uIiwiMjAxOS8xMjM0NTYvMDciXQ~WyJ3MUdJd09Da1dVUERQY19LWkNsX1VRIiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoiWDZmQ29Dd2ZlcGpDeVVWbFZ1czYwNWNOSzZWXzNnMTdRcW5jZnpFZ3VpdyJ9.VeAtKlvyS6rasaWjrCCI3IDbSvYH7MjewdG46L5HPLIXmtxKigTuaivHceSG90DXey2rDH-hcZGosQiXAkW9xw",
+          "expected": {
+            "decision": "deny",
+            "code": "AUTH_FAILED",
+            "reason": "KB_TYP"
+          }
+        },
+        {
+          "name": "deny-kb-audience",
+          "kind": "presentation",
+          "description": "KB-JWT aud names another relying party",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "artefactOverrides": {},
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ikl1a21RWXEyYTU0a1BNWkltLXE1NHhVcXkxX3FKLUFQZVRNZ0tmVUxXalEiLCJ5IjoidWlOUnFQQkkxOHV1T25ubmZ1eU9sdWYzS1hMQnRBVjFqQ3ozQWs0Nks0QSJ9fSwiY25mX2V2ZW50IjoidmVyaWRhY3QtbG9nLTIwMjYvMDAwMDAwNDU2Iiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6NDgyMTMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2FnZW50cy83In19LCJfc2QiOlsiSTBRZlZDV21JaWNZeFZ6Um5DQlh1UmV4d2dkXzA1RUQ2X0tyZ2FHRml2ZyIsIlBpd0JzTVQ5UUFyS2RJdWlKTTFIM2ZUOUY5N0VYa1FXT3FkM0RYSUdKaEUiLCJZa2pBQWxSTkFVeUlXZDkwSWZ4ck16cHpYOEViS3RNaGZ4UDdoZUF0b0NBIiwiclZhajlJZGNDWWx2YW5WLVl6bndwOGhpVklIMmJjYnF2Tl8wU1NKUm1xWSIsInMyUUxOMnVGaHJ5LW5aUWN6MUF6cGdXanZTV19nR2pIWFN3OEtNRksxdGciXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.Y08nW5KCEpsERqM4TWA_4G0YeWABkvDIWuJpQ_wR-GexsHPHRb7ZnFip72nhQsb8jtyliqh0Ei4CK69pMrdjAw~WyIxay1iX2IzNGNmd1N6X19IQ3VnM1hBIiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIk9wZXJhdG9yIEV4YW1wbGUgKFB0eSkgTHRkIl0~WyI1eW05VEhERmtNbUZ5NEljSVV4V19nIiwib3BlcmF0b3JfcmVnaXN0cmF0aW9uIiwiMjAxOS8xMjM0NTYvMDciXQ~WyI2X0RPTVRFaDRTYXI5dkRMVC1wR2x3Iiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL290aGVyLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoieGR6Si1QU0c2Wl9aRk5kZjUzOXNJbEF3MGIwZTdZR1ZjRE8wRU9FdmtBbyJ9.YnnCGH_Fgj5mjYHY4G45MdLeWx47vKmbI0ipxrdj3y-DB-C0Ug7-4GNq03b1ovtm_9mx8vhI9oJXuzWVTXeDhg",
+          "expected": {
+            "decision": "deny",
+            "code": "AUTH_FAILED",
+            "reason": "KB_AUDIENCE"
+          }
+        },
+        {
+          "name": "challenge-nonce-unknown",
+          "kind": "presentation",
+          "description": "Nonce was not issued by this relying party",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "artefactOverrides": {},
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ikl1a21RWXEyYTU0a1BNWkltLXE1NHhVcXkxX3FKLUFQZVRNZ0tmVUxXalEiLCJ5IjoidWlOUnFQQkkxOHV1T25ubmZ1eU9sdWYzS1hMQnRBVjFqQ3ozQWs0Nks0QSJ9fSwiY25mX2V2ZW50IjoidmVyaWRhY3QtbG9nLTIwMjYvMDAwMDAwNDU2Iiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6NDgyMTMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2FnZW50cy83In19LCJfc2QiOlsiWEFaaWhQVlBNcjFqT245RlVWYUFkdU91Y0Q1d3gzZHo0NWREUElKRHNlMCIsImJGQXIxQTdKTUF2VGMzc1hRNkZoeGxPWHV3cjFOa25FUmNDXzRQWEVtR0kiLCJ0RXlPenJBRUFoMHBfNzhHa3pOT053QkZWU3NWNlBQZy1TLXlYUFVqNkNzIiwidTdsa0xHQzhqNDc2NGlhYkhoaEEzeTM5aFg5UXMyMFZzYXhXREhVTUdmRSIsIng5R0dvb2NfTllkTDh0Q1RYM0lCbjhjWWxtZ1lIVWM5aE16dDA1emVWOWMiXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.xXl6vHyGmhFqI5netbt_zx7XvIFYjezxapPQW2wLNf9KhMMg1AGY5jTo2dKW0WS0M0YWOMzzu4avEsoBjWpNMw~WyJEY25URFpnUkgtQjNtYjczTHBOa3JnIiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIk9wZXJhdG9yIEV4YW1wbGUgKFB0eSkgTHRkIl0~WyI5cVpZV0oyeUs2QzFNVVp5Y1JIY1ZRIiwib3BlcmF0b3JfcmVnaXN0cmF0aW9uIiwiMjAxOS8xMjM0NTYvMDciXQ~WyItazViQlU1Y2N5T2V5VEdvUy1nMlpBIiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwIiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoiX0hFUTA2aUlRWTM2b2pmQXp3MHlrcWk1NFduREtNeldpLV9qVVh1LTlNNCJ9.v0WTr_vrfif4yKMI34IlPYoLpkq01mm88NSYfo0BnqtURlc5R__Aj3JvFVjEiPUWrjXd3OXq7Nz_YGdpGwNw_Q",
+          "expected": {
+            "decision": "challenge",
+            "code": "CHALLENGE_REQUIRED",
+            "reason": "NONCE_UNKNOWN"
+          }
+        },
+        {
+          "name": "challenge-kb-expired",
+          "kind": "presentation",
+          "description": "KB-JWT signed 200 seconds ago",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "artefactOverrides": {},
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ikl1a21RWXEyYTU0a1BNWkltLXE1NHhVcXkxX3FKLUFQZVRNZ0tmVUxXalEiLCJ5IjoidWlOUnFQQkkxOHV1T25ubmZ1eU9sdWYzS1hMQnRBVjFqQ3ozQWs0Nks0QSJ9fSwiY25mX2V2ZW50IjoidmVyaWRhY3QtbG9nLTIwMjYvMDAwMDAwNDU2Iiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6NDgyMTMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2FnZW50cy83In19LCJfc2QiOlsiMFdpU3RxdktQNHpQcThXUk91NjZFbm80di1mckJ6eUE5eE92SUpMMzU4dyIsIjNCVUQwTTJmbHVSUGRCNE5JSURYbERvN2UyNFZ5UW5YWnJSWXR4ZXRzMDAiLCI0UEJFSy1IUUtJcGF3N0ZCVXFucVRBSmZFbTNUNDcwODhzRkktejFLZWZvIiwiNXBYTVhKLXMwdWpCMHQxZ0Q2MDRoYkQ1bmNuRTlqeDNfVG53QkdPVWQ5ZyIsIk1uQjhwcU5McFVlcWtrMW9iNkZtSHJuc3Jzal9zdG9SMUwzWVgtRVJVVkEiXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.WQPcETYZfTXfYarEJ9kHCyMkvTjvSO6QjAtGfWj2rOo6IJHjT_FbGmXoSFEDxRaDsFt6ySG5k0mhPZT9U9jQTg~WyJ4TVItNXZ1TmxSb3pvcVpxZmFORXl3Iiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIk9wZXJhdG9yIEV4YW1wbGUgKFB0eSkgTHRkIl0~WyI2WldIcmJSNFhQMEVBeUVtVmdFeHlnIiwib3BlcmF0b3JfcmVnaXN0cmF0aW9uIiwiMjAxOS8xMjM0NTYvMDciXQ~WyJZQ0kxakNlSVN5aUIxdmtITkk5U1B3Iiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMDAwLCJzZF9oYXNoIjoiNDJBSmg3MHBhUzI0dGU2R0RPOFFyUF9od3F6QzBPZm1hY3B6aVM4VHdJSSJ9.PfoAFu1O9YqhAiHydtvyCAVxrYfhZo-z4T3yXzp5-GxY3qHTc-wr85JDWjbxAeHL4gFa86pHiZ1_bQNcku6Y_A",
+          "expected": {
+            "decision": "challenge",
+            "code": "CHALLENGE_REQUIRED",
+            "reason": "KB_EXPIRED"
+          }
+        },
+        {
+          "name": "deny-sd-hash",
+          "kind": "presentation",
+          "description": "KB-JWT sd_hash does not cover the presented disclosures",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "artefactOverrides": {},
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ikl1a21RWXEyYTU0a1BNWkltLXE1NHhVcXkxX3FKLUFQZVRNZ0tmVUxXalEiLCJ5IjoidWlOUnFQQkkxOHV1T25ubmZ1eU9sdWYzS1hMQnRBVjFqQ3ozQWs0Nks0QSJ9fSwiY25mX2V2ZW50IjoidmVyaWRhY3QtbG9nLTIwMjYvMDAwMDAwNDU2Iiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6NDgyMTMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2FnZW50cy83In19LCJfc2QiOlsiRVFScWRpenhiRTg5T3dfZVZkLTJUVjh3Qks2Ykd1ZVE3Uk0zU2ZaQjlqayIsImZDZXBfUGNnRmltellPTWt3dlBMZy1pSURZSmViMDExU052LWtxcEw1aHMiLCJpWDVoNW8xcWxOc3pnWUhDYXgzREdoNlFjV3BhWmVhbm5lTGNoMUN4NUFVIiwieV9vSkJiWHhkZkZxektCMWZqZDNxYW5pZE1iRzl5d1VvaVJIMUxrZm1YdyIsInpOeV9TbnpUWU1UbVZoMy11enpsTFpkcVl5MGpNZVdhREdyWklpWXJGaHciXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.PHf2xZfEVxLkDzsDid0JrsuTt3cbkDsEuSeSmkgayUwxLMcWIvIfikM1OfziCHPmxcmJBqWPKl-hI1x0PIKS7g~WyJiaXBvbk10UjhNd29UVVlnLUE1MVpRIiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIk9wZXJhdG9yIEV4YW1wbGUgKFB0eSkgTHRkIl0~WyJrUlJCZEoxWFZvWE1Bd2tkRFl5aFNRIiwib3BlcmF0b3JfcmVnaXN0cmF0aW9uIiwiMjAxOS8xMjM0NTYvMDciXQ~WyJFN09la0tVQnFhT2RWaVFmTXRIZk13Iiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoiQUFBQSJ9.dz0IHh6v7Bh4mMdhRCAg2JdGyEYQo6g545XqMoFjtmmI7SwQyoDA4OWUmzmfR_7nAjSkPYQqHv_-NUIgJ5Jfpw",
+          "expected": {
+            "decision": "deny",
+            "code": "AUTH_FAILED",
+            "reason": "SD_HASH_MISMATCH"
+          }
+        },
+        {
+          "name": "deny-disclosure-dropped-after-binding",
+          "kind": "presentation",
+          "description": "A disclosure removed after the KB-JWT was signed",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "artefactOverrides": {},
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ikl1a21RWXEyYTU0a1BNWkltLXE1NHhVcXkxX3FKLUFQZVRNZ0tmVUxXalEiLCJ5IjoidWlOUnFQQkkxOHV1T25ubmZ1eU9sdWYzS1hMQnRBVjFqQ3ozQWs0Nks0QSJ9fSwiY25mX2V2ZW50IjoidmVyaWRhY3QtbG9nLTIwMjYvMDAwMDAwNDU2Iiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6NDgyMTMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2FnZW50cy83In19LCJfc2QiOlsiR2hXZWoySEFmRjBkRzViWjRUUy1Nd1RXaXh6RjFEN2FYdTkwTko4MVJmNCIsIlBndXEyNGc4aGtBa1AzamNlbkNfb0pwNnVBRDFDYUNkc1MwVm5nTGU5am8iLCJidlVSSzRhVEtuRnRFdUNkaHY4NjVSWWg5Z0xGbHhoRG5kWUxZR0I5alVNIiwibEZIdTFhYTJmeDBBMU1rLVBTbkItNF9zSHZxY1djQTFKcWdEd3lQc29ENCIsIm8ydExRMmlibmp0cmQzZ3VWazdXYWxBZURJcFpobUtuM1lzXy1SNTVSejAiXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.j_6p4MT8wuBBbtDmWqBKBXocwQBvB_O_uBMvGbpYkjby5EcY8ud_XCryYUexWBDsHTE8KADqgwAQ24M9fLoU7g~WyI3VFFiSFlzZmhNclFrSy10YVJHVDhBIiwib3BlcmF0b3JfcmVnaXN0cmF0aW9uIiwiMjAxOS8xMjM0NTYvMDciXQ~WyJkMFFmMmI5TWRjYWhLZzFPaHFtdjdnIiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoiMlZ3eVVBeHI2aUgxZlI2OV82OHduNnZycUdWZXBkZ3k2VEVUcWFfaUhydyJ9.-uriu5iw0zf5swKUkgEHXRw-ROeSi3ulnRUCIdiv8t_HP796fcmVWoDELtSaZxUfFtlSw50KAe0-ooEjcXRkBg",
+          "expected": {
+            "decision": "deny",
+            "code": "AUTH_FAILED",
+            "reason": "SD_HASH_MISMATCH"
+          }
+        },
+        {
+          "name": "deny-kb-signature",
+          "kind": "presentation",
+          "description": "KB-JWT signed by a key other than cnf.jwk",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "artefactOverrides": {},
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ikl1a21RWXEyYTU0a1BNWkltLXE1NHhVcXkxX3FKLUFQZVRNZ0tmVUxXalEiLCJ5IjoidWlOUnFQQkkxOHV1T25ubmZ1eU9sdWYzS1hMQnRBVjFqQ3ozQWs0Nks0QSJ9fSwiY25mX2V2ZW50IjoidmVyaWRhY3QtbG9nLTIwMjYvMDAwMDAwNDU2Iiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6NDgyMTMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2FnZW50cy83In19LCJfc2QiOlsiNUh4OTM1X0hJckpCUGdMZjdiQW94WHlvN3BSN2ZtZVQ0b0s2ckRmUF9VbyIsIlN1eVprRUVqUE96bXhWTjJxWG9kYzdKNXlRS3V3SERUYXpMMV8yUzlTbUkiLCJWLVBRUGw0Si1pbnVoVkVyajlGZWJEcjJGUTM3aUd0a053TUphYkIyeE9nIiwiWDJnakFUMXRPRURENkc2ZEZkaExjMVRFbjZuVWM1SFkxWHJvWVJscHVPayIsImpsVjlpR2JnMVFYeDJpSldZWHJuLVpzVkQ5Z1VTWU5kLXNVYjlZWGFEQ2siXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.Tflwz6_etd6Oamb2ZwwihA6lPzbhMFn1a3hmv6B4yIsZl4oVsnm3xuvgHgBEW5_t7KTT8DtS8Tda9qDBQGjptQ~WyJvcmZXaHprV2luQ0drTGktYmtEVVVRIiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIk9wZXJhdG9yIEV4YW1wbGUgKFB0eSkgTHRkIl0~WyJNRmZTV1BVVkhpUktfVllFakJxUHpRIiwib3BlcmF0b3JfcmVnaXN0cmF0aW9uIiwiMjAxOS8xMjM0NTYvMDciXQ~WyI1Y3pReEhfNHdMdk4yYlpadnZjUHJRIiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoidFAzQ05Ic0hNR3dzNzRJUjVCWkJxSkI2dDdGSl8wX1l1VDR5alJYMlVHcyJ9.c9Ts2quxn0FajG-eLtVLjjF8zAEOMP8BzGtmf5FQMsPey-S8vruT9cayXMN9ITh-rvyyiCRW9_hPCxbtiTPSYw",
+          "expected": {
+            "decision": "deny",
+            "code": "AUTH_FAILED",
+            "reason": "KB_SIGNATURE"
+          }
+        },
+        {
+          "name": "deny-agent-credential-tampered",
+          "kind": "presentation",
+          "description": "Scope added to a signed Agent Credential",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "artefactOverrides": {},
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpwYXltZW50czppbml0aWF0ZSJdLCJhY2NvdW50YWJsZV9yb2xlIjoiSGVhZCBvZiBEaWdpdGFsIENsYWltcyIsImNuZiI6eyJqd2siOnsia3R5IjoiRUMiLCJjcnYiOiJQLTI1NiIsIngiOiJJdWttUVlxMmE1NGtQTVpJbS1xNTR4VXF5MV9xSi1BUGVUTWdLZlVMV2pRIiwieSI6InVpTlJxUEJJMTh1dU9ubm5mdXlPbHVmM0tYTEJ0QVYxakN6M0FrNDZLNEEifX0sImNuZl9ldmVudCI6InZlcmlkYWN0LWxvZy0yMDI2LzAwMDAwMDQ1NiIsInN0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjQ4MjEzLCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9hZ2VudHMvNyJ9fSwiX3NkIjpbIjJrOGxUSENCWm9vLXRQSHZkanFkX1pwem01TVlwTVNxOFFMaE9rRjFtSEEiLCI1TDM2Q1RQdm8xMkN3RVQ1eUd3MmlWUDdDemF5VTVlbFNfalRQS090dGNVIiwiU0xmR014Z1o2dHZHR20zQU15bjhSNWN4ekdOaEpNZG84QkxSeFBhMThPSSIsImdWcDVneUtyVk16aEVSdUFRSWQyVDhZS05VMXU5MkJGaDNLNjFWNzZ6T0UiLCJ4N08yQlB6VVd4cW96UVVvSk1FLUFOU3hqOElodnBwenA4aUxZS2EyZUx3Il0sIl9zZF9hbGciOiJzaGEtMjU2In0.404XIUNVAv18rELm2-Ky-xqv6nlLP0gw_pgsIRlo7JHTB7ARuJX99xxX-YcpZtCTshRmpzLv_Amh8QOx3hMzEA~WyJ3cjRiTThKVWkwa1RJZ3Rtdk0xYnpnIiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIk9wZXJhdG9yIEV4YW1wbGUgKFB0eSkgTHRkIl0~WyJNYmRZLWRsS0RYcm9RbFoxSzZ3UkVBIiwib3BlcmF0b3JfcmVnaXN0cmF0aW9uIiwiMjAxOS8xMjM0NTYvMDciXQ~WyI3QjBUVk01elc0djhCdDVncjV4RXh3Iiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoiZGt4NTNNS1pUOUNVWkp3b1I5TVBpb09vU0E2LVhEa0VUVllHMWlYZldYayJ9.AQ4FDROvQGSEqb28hbwZInju7NgmlL2cQNYk2lAODgFq8bfB8WCYV_q02TZosK6mttEKVqXxsraNvLXqF2MpBA",
+          "expected": {
+            "decision": "deny",
+            "code": "AUTH_FAILED",
+            "reason": "VC_SIGNATURE"
+          }
+        },
+        {
+          "name": "deny-disclosure-forged",
+          "kind": "presentation",
+          "description": "A disclosure the issuer never signed a digest for",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "artefactOverrides": {},
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ikl1a21RWXEyYTU0a1BNWkltLXE1NHhVcXkxX3FKLUFQZVRNZ0tmVUxXalEiLCJ5IjoidWlOUnFQQkkxOHV1T25ubmZ1eU9sdWYzS1hMQnRBVjFqQ3ozQWs0Nks0QSJ9fSwiY25mX2V2ZW50IjoidmVyaWRhY3QtbG9nLTIwMjYvMDAwMDAwNDU2Iiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6NDgyMTMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2FnZW50cy83In19LCJfc2QiOlsiMDFkbmVLc3BrTHBpZlhKa2Z5UWxpQnlubmVwb1FDMVJ6ZmhWeEd2bS1IYyIsIjc3NHlqNFlNSVhqVUlsRng5R2pRd0N0OHhMckEtaG56eUpMbTVJaGVvWUkiLCJKTmdRZjFubHo0ZE1rZm9LNW9CaW16TXZvbDN0ckRjLUI4aHlSNDN2VXhZIiwia29qZVU4YU5LMzVKdWI0VExQRWhPRDFFVVBIUHQyZ2ZRcjNnOThidHFwMCIsInh0VjhOcHVQbS1zV3pKaEc4VjN4Qm8wMl9KRjhpbnBRNDBZNm9GQTkwbjAiXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.kBwZgngWa5zvy_atC-jECb4vOsXApD1E1qvXRVVUq6RkpouWEJVtLYXJpzPXhrMmfZMOHaATgLkyQthdp4OQ6A~WyJVUHhYcnpaMmNhRDFUZEFkMXFJeGx3Iiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIkJpZyBCYW5rIEx0ZCJd~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoibFI0dXdjZzhhMFhqMGFKUjVaRm5TcHZOWTRGT2g1bW5Yekh2b1Z1ZVpLcyJ9.gw2ORGZmZ4bTrgejziQNT3WVo0hJxfZNEOaFVtelAV7Gw_S5DlvqsY9wnnsUagt_oIHbzob33HhJRs228_5G8A",
+          "expected": {
+            "decision": "deny",
+            "code": "AUTH_FAILED",
+            "reason": "DISCLOSURE_INVALID"
+          }
+        },
+        {
+          "name": "deny-issuer-unlisted",
+          "kind": "presentation",
+          "description": "Agent Credential from an issuer not in the trust list",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "artefactOverrides": {},
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJ4LTEiLCJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJodHRwczovL3JvZ3VlLmV4YW1wbGUvaXNzdWVycy94IiwidmN0IjoiaHR0cHM6Ly92ZXJpZGFjdC5uZXQvdmN0L2FnZW50L3YxIiwianRpIjoidXJuOnV1aWQ6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDBjMDNkIiwic3ViIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlL2FnZW50cy9hN2YzazIiLCJpYXQiOjE3OTQyMDc2MDAsIm5iZiI6MTc5NDIwNzYwMCwiZXhwIjoxNzk0MjM2NDAwLCJvcGVyYXRvciI6Imh0dHBzOi8vb3BlcmF0b3IuZXhhbXBsZSIsIm9wZXJhdG9yX2NyZWRlbnRpYWwiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDEiLCJvcGVyYXRvcl9zdGF0dXMiOnsic3RhdHVzX2xpc3QiOnsiaWR4IjoxNywidXJpIjoiaHR0cHM6Ly9zdGF0dXMudmVyaWRhY3QuZXhhbXBsZS9vcmcvb3BlcmF0b3JzLzIifX0sInRpZXIiOiJvcmdhbmlzYXRpb24iLCJzY29wZXMiOlsiZnM6Y2xhaW1zOnJlYWQtc3RhdHVzIiwiZnM6cXVvdGVzOmNyZWF0ZSJdLCJhY2NvdW50YWJsZV9yb2xlIjoiSGVhZCBvZiBEaWdpdGFsIENsYWltcyIsImNuZiI6eyJqd2siOnsia3R5IjoiRUMiLCJjcnYiOiJQLTI1NiIsIngiOiJJdWttUVlxMmE1NGtQTVpJbS1xNTR4VXF5MV9xSi1BUGVUTWdLZlVMV2pRIiwieSI6InVpTlJxUEJJMTh1dU9ubm5mdXlPbHVmM0tYTEJ0QVYxakN6M0FrNDZLNEEifX0sImNuZl9ldmVudCI6InZlcmlkYWN0LWxvZy0yMDI2LzAwMDAwMDQ1NiIsInN0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjQ4MjEzLCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9hZ2VudHMvNyJ9fSwiX3NkIjpbIjFlVmpvaG1iZ0RVUHNkZG1XcXh6Z0dnZjBDa3RjWHh6VDBFMGRseUNwWmMiLCJFUld6Y2hIQkk5eVpnc1EzWXpwb25BeXdJOVEyTVRiaWc0WWtIMWR6X1I0IiwiRVZ0SlJLN0hfVVNSbzVkeXRqU0lGRElYRzV6Nk9QOW5nMGswSmVsU0RNSSIsIk5zYW8wcVBEaklvSmwwcXVOWVJWckVEMTlRd2VDcWE5aWkzSWpTa1hqbDQiLCJPQUFwZFFwWk44MmR4eEJRajNldUoyQkR5ZmoxX2dRSDhwRWJKQzJyOXdvIl0sIl9zZF9hbGciOiJzaGEtMjU2In0.taEjOaf10sC8pyFgS7LwWigchRuRo7kLo4UABCFPI5kqSJtK2Lr9jqKzLpQ5hh-FHNfZ56m20-CTjelFIIvNIg~WyJ2YVF0VURTTnowdTBpd1BSMzRJeW9nIiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIk9wZXJhdG9yIEV4YW1wbGUgKFB0eSkgTHRkIl0~WyJ2alBvVUttOThkY1dWZlAwanFwd0FRIiwib3BlcmF0b3JfcmVnaXN0cmF0aW9uIiwiMjAxOS8xMjM0NTYvMDciXQ~WyJXV3FPSW94b1FqRThMM1d6MklZOHhRIiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoibGYwS0JiR2tFTUt4MG5qU0VtbWl0Tnd2N2lXX01sZ1AteWtmM0JJV2hsNCJ9.5ZIqAVuvUXK8Sz_-NH6jT0AO_kzzY86G1UfY9eXTA0k2xgJ8_VPzhGTGO8dEcj7oRo2WXAU_yvaOwDbUhUza4A",
+          "expected": {
+            "decision": "deny",
+            "code": "ISSUER_UNTRUSTED",
+            "reason": "ISSUER_NOT_LISTED"
+          }
+        },
+        {
+          "name": "deny-metadata-key-not-pinned",
+          "kind": "presentation",
+          "description": "Issuer metadata serves a key the trust list does not pin",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "artefactOverrides": {
+            "https://veridact.example/.well-known/jwt-vc-issuer/issuers/org-2026b": "{\"issuer\": \"https://veridact.example/issuers/org-2026b\", \"jwks\": {\"keys\": [{\"kty\": \"EC\", \"crv\": \"P-256\", \"x\": \"6EPC-ydanaWApW9Gw0B9lAa3TWXZJ9tZ8ylDVeb9kjE\", \"y\": \"0g8PHPA4Wx1V9mSt-WnPJ2fRr3f9mwFWbvp5dZr365M\", \"kid\": \"org-2026b-3\", \"use\": \"sig\", \"alg\": \"ES256\"}]}}"
+          },
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ikl1a21RWXEyYTU0a1BNWkltLXE1NHhVcXkxX3FKLUFQZVRNZ0tmVUxXalEiLCJ5IjoidWlOUnFQQkkxOHV1T25ubmZ1eU9sdWYzS1hMQnRBVjFqQ3ozQWs0Nks0QSJ9fSwiY25mX2V2ZW50IjoidmVyaWRhY3QtbG9nLTIwMjYvMDAwMDAwNDU2Iiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6NDgyMTMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2FnZW50cy83In19LCJfc2QiOlsiSExacXR5eXFBOE40bzljWHNoVnNxdnhBaEhiVWFiREx1LVlmQmdXZWxOWSIsIlZMWGtaS1QzVmcxYTEwTGFiWmh2OVJfUGFNaXE3QVhYbVZuMkpFaXFDQkUiLCJiSzgwTkdZNHFZUXM5X1BzMVVlOEZTa09uQlhmTzhoVEJoOFp4V1NzTU00IiwiZTUwa1Q0MUIxTi11N1N6SkJuaVd1UlYwTGVDREsxVlJ0MnBDTGVQSWh2RSIsImpKSXJHLWc3dWZoalY4YkV3STJfZEl6X0ZFLVZRcGVpZzRaSk40Rm5ycFkiXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.fhLg0HVHUY00ptslYAXSklb6syWG0GxbyqhevyBT1N9Q79fDNgbUF3cq6nOiJtDQ1RWa7JFxwiGUJgkw2kjY9g~WyJLQ1Z0SnBNb1FkemFJX2lIOC1Td1lnIiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIk9wZXJhdG9yIEV4YW1wbGUgKFB0eSkgTHRkIl0~WyJNblI5blpYVDJSV2NkUk1hdXItcXBBIiwib3BlcmF0b3JfcmVnaXN0cmF0aW9uIiwiMjAxOS8xMjM0NTYvMDciXQ~WyJCVGIyV3BadHZjUTNIc09pZElkNDlBIiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoib3psckYyZmgxajEtMmtxN2k2YmpCdE1KSnRqVWxITk5XU1VwY0gtbDgzayJ9.H2liOhG9r9PHYs37Qej7kTCyZ9N8KEGIGQEO8_IMx0QePfQ7Q9Z6-Sjmuhkjaq-eKQ6TTiLH5yMV7PCMRnxxNQ",
+          "expected": {
+            "decision": "deny",
+            "code": "ISSUER_UNTRUSTED",
+            "reason": "ISSUER_KEY_NOT_LISTED"
+          }
+        },
+        {
+          "name": "deny-issuer-tier",
+          "kind": "presentation",
+          "description": "Issuer accredited for Domain tier only",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "artefactOverrides": {
+            "https://trust.veridact.example/trust-list.jwt": "eyJ0eXAiOiJ0cnVzdC1saXN0K2p3dCIsImtpZCI6Imdvdi10ZXN0LTIwMjZhIiwiYWxnIjoiRVMyNTYifQ.eyJpc3MiOiJodHRwczovL3RydXN0LnZlcmlkYWN0LmV4YW1wbGUiLCJ2ZXJzaW9uIjoiMjAyNi4xMS4xIiwiaWF0IjoxNzk0MTI0ODAwLCJleHAiOjE3OTQ4MTYwMDAsImlzc3VlcnMiOlt7ImlkIjoiaHR0cHM6Ly92ZXJpZGFjdC5leGFtcGxlL2lzc3VlcnMvb3JnLTIwMjZiIiwidGllcnMiOlsiZG9tYWluIl0sInZjdHMiOlsiaHR0cHM6Ly92ZXJpZGFjdC5uZXQvdmN0L2FnZW50L3YxIiwiaHR0cHM6Ly92ZXJpZGFjdC5uZXQvdmN0L29wZXJhdG9yL3YxIiwiaHR0cHM6Ly92ZXJpZGFjdC5uZXQvdmN0L2tub3duLWFzc2lzdGFudC92MSJdLCJrZXlzIjpbeyJraWQiOiJvcmctMjAyNmItMyIsImprdCI6IldpYUZTRmxlM281N2o1Szh5Vl9TVThTRW9GRHZpbUQ2VkNoS3FnSlQ4LW8iLCJub3RCZWZvcmUiOjE3ODkwMjcyMDAsIm5vdEFmdGVyIjoxNzk2ODAzMjAwfV19XSwic2NvcGVzIjpbImZzOmNsYWltczpyZWFkLXN0YXR1cyIsImZzOnF1b3RlczpjcmVhdGUiLCJmczpwYXltZW50czppbml0aWF0ZSJdLCJwb2xpY3kiOnsidGllck9yZGVyIjpbImRvbWFpbiIsIm9yZ2FuaXNhdGlvbiJdLCJhZ2VudENyZWRlbnRpYWxNYXhMaWZldGltZSI6ODY0MDAsInByZXNlbnRhdGlvbk1heExpZmV0aW1lIjoxMjAsIm9wZXJhdG9yQ3JlZGVudGlhbE1heExpZmV0aW1lIjp7ImRvbWFpbiI6Nzc3NjAwMCwib3JnYW5pc2F0aW9uIjozMTYyMjQwMH0sImtub3duQXNzaXN0YW50TWF4TGlmZXRpbWUiOjc3NzYwMDB9fQ.bdufJ3l4Ro1nFb_NgeeIYjGwhsWMM_IH7ylSo_zEFyfZd6U42l3KDLKdJ7Z2hS2A1MWB3c-t9QFbRZ0ckZjmcQ"
+          },
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ikl1a21RWXEyYTU0a1BNWkltLXE1NHhVcXkxX3FKLUFQZVRNZ0tmVUxXalEiLCJ5IjoidWlOUnFQQkkxOHV1T25ubmZ1eU9sdWYzS1hMQnRBVjFqQ3ozQWs0Nks0QSJ9fSwiY25mX2V2ZW50IjoidmVyaWRhY3QtbG9nLTIwMjYvMDAwMDAwNDU2Iiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6NDgyMTMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2FnZW50cy83In19LCJfc2QiOlsiRkZwYkp2ekdwTmRrd0ZEN3FUZU10cW1uZDVrbFV6YS1fT2xMdjdndmVMNCIsIlNnd0h0YkxJZk9sWlQ0dUNnNUdiYVRuUm1TUEh6VExvWHRPNmpBVGgxOGMiLCJUY1BYaGVrTEczLVNFMW1WUXRvMGgwUXluM1d5cnNoM3B2SmZwSFZsLThBIiwiVUtrcGs3Rk5DUGVzczl3Tl96TFNwLVo2NDJ4OGdmbXFfdzhIdHZrdUNkayIsInVWNlFzYWQ2cVQyZ1NUa3FJX0VqY2tBc1dzbG9JdUVaVUZYM1JyS0dZME0iXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.AOOCWyyVf_BUgeuj_CJhu5MPJPHtP-Y-3S2J7exy2k7fhvwmEysAZZn_d-voonBYusOxfe_PCtkfpZq0B3BANQ~WyJXZ2hqVHE1c1Z2LU9FVFRrX243V3NnIiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIk9wZXJhdG9yIEV4YW1wbGUgKFB0eSkgTHRkIl0~WyJ1T0RHdmFlR2hOTHVXWXhvbVlfN1R3Iiwib3BlcmF0b3JfcmVnaXN0cmF0aW9uIiwiMjAxOS8xMjM0NTYvMDciXQ~WyJVeTF1UkhvZUx3R2hVRE9PZ2pid3lnIiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoiZmpGeDNRd1BUa1ZZMWdsdF9rZ2Z4T1Q3MkEyU3BTeHNZMm5hRkN2LTVlZyJ9.ib3_8AcJubINFCOu10-Fz_Jqb8zx3w2Lp_9fAviIySe3fZE64X0gWwQrEZgOAL127YO1C6_mTLAEycSjQ-y-2g",
+          "expected": {
+            "decision": "deny",
+            "code": "ISSUER_UNTRUSTED",
+            "reason": "ISSUER_NOT_ACCREDITED_FOR_TIER"
+          }
+        },
+        {
+          "name": "deny-trust-list-signature",
+          "kind": "presentation",
+          "description": "Trust list signed by a key that is not pinned",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "artefactOverrides": {
+            "https://trust.veridact.example/trust-list.jwt": "eyJ0eXAiOiJ0cnVzdC1saXN0K2p3dCIsImtpZCI6Imdvdi10ZXN0LTIwMjZhIiwiYWxnIjoiRVMyNTYifQ.eyJpc3MiOiJodHRwczovL3RydXN0LnZlcmlkYWN0LmV4YW1wbGUiLCJ2ZXJzaW9uIjoiMjAyNi4xMS4xIiwiaWF0IjoxNzk0MTI0ODAwLCJleHAiOjE3OTQ4MTYwMDAsImlzc3VlcnMiOlt7ImlkIjoiaHR0cHM6Ly92ZXJpZGFjdC5leGFtcGxlL2lzc3VlcnMvb3JnLTIwMjZiIiwidGllcnMiOlsiZG9tYWluIiwib3JnYW5pc2F0aW9uIl0sInZjdHMiOlsiaHR0cHM6Ly92ZXJpZGFjdC5uZXQvdmN0L2FnZW50L3YxIiwiaHR0cHM6Ly92ZXJpZGFjdC5uZXQvdmN0L29wZXJhdG9yL3YxIiwiaHR0cHM6Ly92ZXJpZGFjdC5uZXQvdmN0L2tub3duLWFzc2lzdGFudC92MSJdLCJrZXlzIjpbeyJraWQiOiJvcmctMjAyNmItMyIsImprdCI6IldpYUZTRmxlM281N2o1Szh5Vl9TVThTRW9GRHZpbUQ2VkNoS3FnSlQ4LW8iLCJub3RCZWZvcmUiOjE3ODkwMjcyMDAsIm5vdEFmdGVyIjoxNzk2ODAzMjAwfV19XSwic2NvcGVzIjpbImZzOmNsYWltczpyZWFkLXN0YXR1cyIsImZzOnF1b3RlczpjcmVhdGUiLCJmczpwYXltZW50czppbml0aWF0ZSJdLCJwb2xpY3kiOnsidGllck9yZGVyIjpbImRvbWFpbiIsIm9yZ2FuaXNhdGlvbiJdLCJhZ2VudENyZWRlbnRpYWxNYXhMaWZldGltZSI6ODY0MDAsInByZXNlbnRhdGlvbk1heExpZmV0aW1lIjoxMjAsIm9wZXJhdG9yQ3JlZGVudGlhbE1heExpZmV0aW1lIjp7ImRvbWFpbiI6Nzc3NjAwMCwib3JnYW5pc2F0aW9uIjozMTYyMjQwMH0sImtub3duQXNzaXN0YW50TWF4TGlmZXRpbWUiOjc3NzYwMDB9fQ.vdtXoA2cfxirhCH9Rc9Cj_TLVIT6Cu3BqvJMfweJC9iscUVsVPyZTfa3MLU7LAa0cPy1s6Bj5cPiPdgtY8aT7w"
+          },
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ikl1a21RWXEyYTU0a1BNWkltLXE1NHhVcXkxX3FKLUFQZVRNZ0tmVUxXalEiLCJ5IjoidWlOUnFQQkkxOHV1T25ubmZ1eU9sdWYzS1hMQnRBVjFqQ3ozQWs0Nks0QSJ9fSwiY25mX2V2ZW50IjoidmVyaWRhY3QtbG9nLTIwMjYvMDAwMDAwNDU2Iiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6NDgyMTMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2FnZW50cy83In19LCJfc2QiOlsiRG0wU1FTRW1uN2l6YVA4UmxvdUFadk5LdWdkOThTS1hxU0lDTDRIam9QYyIsIl91MkNKTVI2UmI3M1ktQ1VIcmpXVENlMEdsdGRzV2JYbFdRTUtrdy1xMXMiLCJzTWtvTG56eEJ5Vm1HMVctN251aEpiTmc0WlpuclVtSUpQZTRzWkwyX2dZIiwieUdfY01FeERSa2czMGk3NVZmRmNhZzdfVnNYZjFISFJTSFBxNDMxMFNDQSIsInpYU1hpZ0l6UndUWW5Cb1hnZHdZakNDbHd4elhrRm1oNDFsSXZYczd2LTQiXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.whsT57teg08i8PPBbngTeueTPDQQh2ZEHUpDSIHLUPT5b-q3_Z__7SO3euwp72XAT2Y_6DPm7_vsNz_0VU8asw~WyIycDY2eUxRbGxsVWlVMnN3dUFWelRBIiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIk9wZXJhdG9yIEV4YW1wbGUgKFB0eSkgTHRkIl0~WyJkV3JJR19xMEJSYmtCVEV0dGxZaHNnIiwib3BlcmF0b3JfcmVnaXN0cmF0aW9uIiwiMjAxOS8xMjM0NTYvMDciXQ~WyJfUUxSZnFSbHhzRmtLcllBVVdvMVVBIiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoiYmtISkFjWEF2d1FuVDdYRERPWnFDN1ljdEZVSGZPQjNaUzVJY2hxZEoxbyJ9.CJ9SqpLKLYC2iAF4Q0HhprMXVP8MuUpl4_mIQWh-XxQsdrev-gtGw6Z8viak-N29SAf2BO_TM6ux1ijpKQdsmA",
+          "expected": {
+            "decision": "deny",
+            "code": "VERIFICATION_UNAVAILABLE",
+            "reason": "TRUST_LIST_UNAVAILABLE"
+          }
+        },
+        {
+          "name": "deny-agent-credential-expired",
+          "kind": "presentation",
+          "description": "Agent Credential past exp",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "artefactOverrides": {},
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDE3ODgwMCwibmJmIjoxNzk0MTc4ODAwLCJleHAiOjE3OTQyMDc2MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ikl1a21RWXEyYTU0a1BNWkltLXE1NHhVcXkxX3FKLUFQZVRNZ0tmVUxXalEiLCJ5IjoidWlOUnFQQkkxOHV1T25ubmZ1eU9sdWYzS1hMQnRBVjFqQ3ozQWs0Nks0QSJ9fSwiY25mX2V2ZW50IjoidmVyaWRhY3QtbG9nLTIwMjYvMDAwMDAwNDU2Iiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6NDgyMTMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2FnZW50cy83In19LCJfc2QiOlsiRXgzMmc4X1R3b043a2RCZWFzSFJweGhRN3c2elZybkJJU3NRM3F1d0VONCIsIk5XeTVrQ3hmWWttRFpaQ3FRQmdtN2F1M21KUlcwWGQ2YmVwTFdJanh4cW8iLCJPenJsTzZ5cFVuOEo3amRJWEY3TWF3SUNXOVJObml4c011eGRwT1ZyUEVjIiwiYWJKNDdDaWNiQnBJaUlQUkt2TU81YjhCMEIzSy02Z1RidkJ6X0pyMExkSSIsImdMSGtQUGxGb1h2MkxRc2pkajZOVU1VWW1QaFlDbnZpVmNpaktHdnVwWm8iXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.UZllgjPCeEtraVJwJF373gZmjEsDii04COsiXAJQDp__v9A96qHEIIN0HnkQUnvdDblPy0mQONSvRFMqI-ghnQ~WyJrY1FYQmNuYlZ4QnhmQWpBUjN3aW5nIiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIk9wZXJhdG9yIEV4YW1wbGUgKFB0eSkgTHRkIl0~WyI2b3RITjFTTUhyOHUyRko3d1JUeTNRIiwib3BlcmF0b3JfcmVnaXN0cmF0aW9uIiwiMjAxOS8xMjM0NTYvMDciXQ~WyJPWnR0OUhLMkxfbF9paFh2X19YYlNRIiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoiSjZ6R1FLZHBmZDVHdXgxNnY5NndDNVRRc3RLeS0zTGE0Wnd4YmE2X05YNCJ9.3GMvdqe5lUyuGDtms-JbCQ46f5MNnu-hjJiw16ZBxHJl7GrmT-_5iPOYfmA6pdi-WkGQsUXS5PMs5EaB-lmmag",
+          "expected": {
+            "decision": "deny",
+            "code": "CREDENTIAL_EXPIRED",
+            "reason": "VC_EXPIRED"
+          }
+        },
+        {
+          "name": "deny-agent-credential-lifetime",
+          "kind": "presentation",
+          "description": "Agent Credential lifetime 25 hours",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "artefactOverrides": {},
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyOTc2MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ikl1a21RWXEyYTU0a1BNWkltLXE1NHhVcXkxX3FKLUFQZVRNZ0tmVUxXalEiLCJ5IjoidWlOUnFQQkkxOHV1T25ubmZ1eU9sdWYzS1hMQnRBVjFqQ3ozQWs0Nks0QSJ9fSwiY25mX2V2ZW50IjoidmVyaWRhY3QtbG9nLTIwMjYvMDAwMDAwNDU2Iiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6NDgyMTMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2FnZW50cy83In19LCJfc2QiOlsiM0RkNlNSbnZ6ZE1WNkpIdk90UDFyaVM1Z1ZKeUVod0JGOXZlUEEtSXhqayIsIjZrZjVUVlFENzVyb0JWNE5FSHFUWEcwUE9ZdU1ZTlFwRnpWWnM5YU5FSDQiLCI3bjRLM0lUUmRzYzc2ck5tN2FmV2tnWFBCZTIwU1dOWGplU3NOUFdvNGtvIiwiU1B1YVhTTTFpVTVyd2xhTXdUcWpyVHFVcFZzU1k3N1FPeG1hbWtYbUE5QSIsImc1dTZ4emRvZXpsb293d05Ccm5rLUdBRElOQ0lGc1I4OVJXaU8wYkFRcFEiXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.W25KzLy-PZQPNNfgSAZ9d9PWDgNbgU0sXcU80I6OAoQQpi7PvfULPqDuEO_sHE1X7I8vT9IuMjgs4srwyOuItw~WyJXVUdVdjQ0TlVsbFhzNzRlZExad0VnIiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIk9wZXJhdG9yIEV4YW1wbGUgKFB0eSkgTHRkIl0~WyI4TFNGSTU1Y2ZUbjFHSWNwZ3RCQWV3Iiwib3BlcmF0b3JfcmVnaXN0cmF0aW9uIiwiMjAxOS8xMjM0NTYvMDciXQ~WyJkcUV2VlE4Znlsbnp2NF9nYmRsRkhnIiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoiN0Q4d1EyZU5RXzRkZlo2WV9RQXBWcnRCU2JUVmVxM184eWVpVkgtT3EwOCJ9.Iqwqa4fbjmoeUFY0UadwkFNsQ3-2wsXcx9FASrQKQDDY5lbYbWPVFMR-E0kAnJxBm9eEQxIo313rIPS6smqKQw",
+          "expected": {
+            "decision": "deny",
+            "code": "AUTH_FAILED",
+            "reason": "VC_LIFETIME"
+          }
+        },
+        {
+          "name": "deny-agent-revoked",
+          "kind": "presentation",
+          "description": "Agent Credential's status entry is INVALID",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "artefactOverrides": {
+            "https://status.veridact.example/org/agents/7": "eyJ0eXAiOiJzdGF0dXNsaXN0K2p3dCIsImtpZCI6Im9yZy0yMDI2Yi0zIiwiYWxnIjoiRVMyNTYifQ.eyJzdWIiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9hZ2VudHMvNyIsImlzcyI6Imh0dHBzOi8vdmVyaWRhY3QuZXhhbXBsZS9pc3N1ZXJzL29yZy0yMDI2YiIsImlhdCI6MTc5NDIxMTE0MCwiZXhwIjoxNzk0MjI1NTQwLCJ0dGwiOjMwMCwic3RhdHVzX2xpc3QiOnsiYml0cyI6MiwibHN0IjoiZU5ydDBERU5BQUFNQTZBZTlhLTVKdllzQVFra0FBQUFBQUFBQUFBQUFBRHdWQlVBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUhjR3c3c0FCUSJ9fQ._IzzB5suiUBuzxEen7SbTvBuTEWCnGJ1k0yyARTRJjePXHsf_s51yuoWdls9zkde08DIARQJkmDweXkHtWIBSA"
+          },
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ikl1a21RWXEyYTU0a1BNWkltLXE1NHhVcXkxX3FKLUFQZVRNZ0tmVUxXalEiLCJ5IjoidWlOUnFQQkkxOHV1T25ubmZ1eU9sdWYzS1hMQnRBVjFqQ3ozQWs0Nks0QSJ9fSwiY25mX2V2ZW50IjoidmVyaWRhY3QtbG9nLTIwMjYvMDAwMDAwNDU2Iiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6NDgyMTMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2FnZW50cy83In19LCJfc2QiOlsiN3k1ejZEamY4TFJ1dDNaR1M3WFpsWE1GSnJKUGt5NjdGaDkxTEZRN3FiSSIsIk82c28zeXJFdDFtNFZQM1ZpSUplTC05Z1hkRVhzYnpBM1BzeUdNN1htOFkiLCJmdHQ3Qk1na0ZCTFV0eE9USU5kSlMta2pvallEZ0xLRVlxNHZUc3lpSU9NIiwiZzRBNzhYcGM1dGhJNURQZFNKZTV5VThHY2JBWVBlV3VrZ0VXcmE5QmE3RSIsInhoNmI3OVNsRTh4YVVKVV9tN18yR0oyeVB0ZUNtejNIMlJ5Z0NmVFJYeEkiXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.w-J-klijjQZR1XvBFvJ7rUTZfX1I-g52Pm_vSyBD5nrMKAn4OAMqiQ0ac1me1F6Dw7gAFK2DV4rn8X9KFlUpzg~WyJpQlZIc1BROW4xWXdBM0FlMEJ1OURBIiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIk9wZXJhdG9yIEV4YW1wbGUgKFB0eSkgTHRkIl0~WyJwbjR2cFVrVGRNU0JXdGFUUFlFRURBIiwib3BlcmF0b3JfcmVnaXN0cmF0aW9uIiwiMjAxOS8xMjM0NTYvMDciXQ~WyJvYll4QmcyRlY4aTNVTTJwZ21CcjBRIiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoidmdlVGdTbDRFZ0ZHcWQtaHl4ZEJpQlNpX0hiZk9PcHdIb3plRnN5STJGcyJ9.BzBwd-tdBU_v-SCDF-EUiPLy_DyHqtrgFTf5prexw4hODoymrnrw5uLPiANtTDj7-C77SdZht95ImHdhIjpfNg",
+          "expected": {
+            "decision": "deny",
+            "code": "AUTH_FAILED",
+            "reason": "STATUS_REVOKED"
+          }
+        },
+        {
+          "name": "deny-agent-suspended",
+          "kind": "presentation",
+          "description": "Agent Credential's status entry is SUSPENDED",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "artefactOverrides": {
+            "https://status.veridact.example/org/agents/7": "eyJ0eXAiOiJzdGF0dXNsaXN0K2p3dCIsImtpZCI6Im9yZy0yMDI2Yi0zIiwiYWxnIjoiRVMyNTYifQ.eyJzdWIiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9hZ2VudHMvNyIsImlzcyI6Imh0dHBzOi8vdmVyaWRhY3QuZXhhbXBsZS9pc3N1ZXJzL29yZy0yMDI2YiIsImlhdCI6MTc5NDIxMTE0MCwiZXhwIjoxNzk0MjI1NTQwLCJ0dGwiOjMwMCwic3RhdHVzX2xpc3QiOnsiYml0cyI6MiwibHN0IjoiZU5ydDBERU5BQUFNQTZDZTlhLTRKdllzQVFra0FBQUFBQUFBQUFBQUFBRHdWQlVBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUhjR0I0VUFDUSJ9fQ.oBR6cknY52eNk3cWliZKMmgzZKc6_-MQ1qcbUrrcpS1Le1zDV8CLHvlhqpzJLHPTT7JHEwQ_iTi3141x2W-X4Q"
+          },
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ikl1a21RWXEyYTU0a1BNWkltLXE1NHhVcXkxX3FKLUFQZVRNZ0tmVUxXalEiLCJ5IjoidWlOUnFQQkkxOHV1T25ubmZ1eU9sdWYzS1hMQnRBVjFqQ3ozQWs0Nks0QSJ9fSwiY25mX2V2ZW50IjoidmVyaWRhY3QtbG9nLTIwMjYvMDAwMDAwNDU2Iiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6NDgyMTMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2FnZW50cy83In19LCJfc2QiOlsiV3lsNGdlOHUxczhmdEI3MC0xOTQwaF92MzlscEkwYmV0SEdNdzlwckdXRSIsImVMOFVyalZkLUFkUFgxNjR1MDViYWlkWWdrLV9qYmZnWnZORi1BWnVsOEkiLCJpczBNeUd5aEJnS2ZpQmZTLXF6ZElzREVPSzdZZ3BURnBNUjdUaEYyOVlNIiwianl2dDRHR0NueE5PVkYycXpjN0o0MUwycV84Q0U3ak01b3h5MUYyUEJqMCIsIm5oSU5zUWh0ZUVGbk5RSUtKa1U1LWprWmg2a0w0emtMdUZIV3BkZWwwVlEiXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.uosjIF3qU96ov-e27R_vHbFFOcADyKRhG_u4f5Nb1EzcvIImPREEtZRn5sGnoSiuXum879zGYj-6nz-uZwjF2w~WyI2LWQ4aTRuWWw5dDRmUDhfbm9IZ3R3Iiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIk9wZXJhdG9yIEV4YW1wbGUgKFB0eSkgTHRkIl0~WyJXdXJxVlZIa2pUY0x2RXRSR0hQSVRBIiwib3BlcmF0b3JfcmVnaXN0cmF0aW9uIiwiMjAxOS8xMjM0NTYvMDciXQ~WyJsRnFqRDVPWVd0UEVLM0p0akltRjhRIiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoiMmF5ZURZOGdtd2xhNjlQX2YzRnZPemM3TC0xc0ZjdmcxNjZ6X0JNRGJLUSJ9.3BZmuXgn9FS7D3uBhr46DZZTm9FidnwgmRe7mVH81xZeDWDKHfpymET6v2SW1vkVpw40QUoZ2j6m4OPLa-x_Cw",
+          "expected": {
+            "decision": "deny",
+            "code": "AUTH_FAILED",
+            "reason": "STATUS_SUSPENDED"
+          }
+        },
+        {
+          "name": "deny-operator-revoked",
+          "kind": "presentation",
+          "description": "The operator_status entry is INVALID",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "artefactOverrides": {
+            "https://status.veridact.example/org/operators/2": "eyJ0eXAiOiJzdGF0dXNsaXN0K2p3dCIsImtpZCI6Im9yZy0yMDI2Yi0zIiwiYWxnIjoiRVMyNTYifQ.eyJzdWIiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiIsImlzcyI6Imh0dHBzOi8vdmVyaWRhY3QuZXhhbXBsZS9pc3N1ZXJzL29yZy0yMDI2YiIsImlhdCI6MTc5NDIxMTE0MCwiZXhwIjoxNzk0MjI1NTQwLCJ0dGwiOjMwMCwic3RhdHVzX2xpc3QiOnsiYml0cyI6MiwibHN0IjoiZU5ydHdURUJBQUFNdzZBYzg2OTVRZ3BVWFFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQ3c3UUdBRGdBRiJ9fQ.CaTgEgwsuYO-Evq-eJVJZ053iEgkis7vfkgL3LYMfyD6TdRopSefXu3LaF0ogerKnjoJEfLE-pEk2K2SiFl2kg"
+          },
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ikl1a21RWXEyYTU0a1BNWkltLXE1NHhVcXkxX3FKLUFQZVRNZ0tmVUxXalEiLCJ5IjoidWlOUnFQQkkxOHV1T25ubmZ1eU9sdWYzS1hMQnRBVjFqQ3ozQWs0Nks0QSJ9fSwiY25mX2V2ZW50IjoidmVyaWRhY3QtbG9nLTIwMjYvMDAwMDAwNDU2Iiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6NDgyMTMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2FnZW50cy83In19LCJfc2QiOlsiSVZERzlSWWloUFA1VnZJTGtLTXpHVTRUTmlOZVk3RzhXMXFWRElEbEVsRSIsIlhFZmdhVUdIVldQY01lTFdYSHVxbHBOT0Rvenlua3RLMkhhXzdQbEx5Nk0iLCJpRDRXTVgyd2ZkOHZ3SmRHRlZNMzczRWlSaHR5N3dWMTN0U18tNVcwTnNRIiwia1JFOUlOWXFvOFcwNkJIaE1FcjNNVjJ1aUtyNnhsUEMwbmtXcG5oSk81USIsInRRZ2FQQ0VuSGxFcnRaVzhLamxBYW9WYVRJWUJYaVFrUjVoNEI4R1pFUFUiXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.TFCwwxy75j5Pbr7tRr9X2Vd3s-ZkFQVV_ZkGqeDULwuSLrtNOBNCnH-4qM3lKo6_z6jAfaOdyGwx8rclQE1NtA~WyIxUmFrekoyVGZTMEI4bjhpLVVsclNBIiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIk9wZXJhdG9yIEV4YW1wbGUgKFB0eSkgTHRkIl0~WyJUOG0tT1d3WlVrVEpyV3Fvc1BjbHNRIiwib3BlcmF0b3JfcmVnaXN0cmF0aW9uIiwiMjAxOS8xMjM0NTYvMDciXQ~WyJKczQtNDNfZnI3YTdLVjc5SDV6bTJ3Iiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoiU0toSXdRSXB0MWZ1Y3Q3TVZ4ZXNLTzYyd2lvdXcyYVpzS3NHX1hUQW1CNCJ9.EOqApSpT5993uSqyYoZqoFdESDoSDAZT_iFPjfrNCp5q2X3X4bqiepjcYxVn2HKp7Tb9cfsow2jpE86R2qk6eA",
+          "expected": {
+            "decision": "deny",
+            "code": "AUTH_FAILED",
+            "reason": "OPERATOR_REVOKED"
+          }
+        },
+        {
+          "name": "allow-neighbour-revoked",
+          "kind": "presentation",
+          "description": "Entries either side of the agent's are INVALID",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "artefactOverrides": {
+            "https://status.veridact.example/org/agents/7": "eyJ0eXAiOiJzdGF0dXNsaXN0K2p3dCIsImtpZCI6Im9yZy0yMDI2Yi0zIiwiYWxnIjoiRVMyNTYifQ.eyJzdWIiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9hZ2VudHMvNyIsImlzcyI6Imh0dHBzOi8vdmVyaWRhY3QuZXhhbXBsZS9pc3N1ZXJzL29yZy0yMDI2YiIsImlhdCI6MTc5NDIxMTE0MCwiZXhwIjoxNzk0MjI1NTQwLCJ0dGwiOjMwMCwic3RhdHVzX2xpc3QiOnsiYml0cyI6MiwibHN0IjoiZU5ydDBERU5BQUFNQTZCYXFILXpOYkZuQ1VnZ0FRQUFBQUFBQUFBQUFBQ0FwNm9BQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUxnejMtWUFFZyJ9fQ.zBnGBVv3fNYoEuDy4eCgr3QLBee4kjTDuZDK7cYeI3F-a-WP5hUxUHy26Ci7NkcHo3bK2pkh7oFMxR-B0A_flQ"
+          },
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ikl1a21RWXEyYTU0a1BNWkltLXE1NHhVcXkxX3FKLUFQZVRNZ0tmVUxXalEiLCJ5IjoidWlOUnFQQkkxOHV1T25ubmZ1eU9sdWYzS1hMQnRBVjFqQ3ozQWs0Nks0QSJ9fSwiY25mX2V2ZW50IjoidmVyaWRhY3QtbG9nLTIwMjYvMDAwMDAwNDU2Iiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6NDgyMTMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2FnZW50cy83In19LCJfc2QiOlsiSE03MkZMVWM2MThiSzBXSE8wOGR6OGZRc0w1TktMUEJ6eTJyNFI2SzFMWSIsIlVrSkxkZUhxNVU3dmsxZEFFVWdJMnpoTFA1Q1hWRlN5RHI4UkI2MFo2ZFEiLCJXWTUzUlRFcmozT3FqbDRMUVltVExqOUV5NG9NcWJqczBrdVBaZjlYZTdZIiwiWnpfVWFqLXlQRXBOejZLU2ZJNmcyTTNpdmE2VTVGQ0pSRGw2VG9yaDVNRSIsIm5GN29fQ0JHdFRleVF4ZEppMGo4V2lvMGhNbmpLbEUtY2hyMVRENjhpdmciXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.7auzH6C-dhw0BkxiyeUBt2eEfBoTW1hefiQBGWSXInU2_9VOhCvjWcoMZc89rkxSSehOGTWJDcy4lK524sUneQ~WyJvaXNsQzN4YVZTT2xwU0h1MGJwX0hBIiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIk9wZXJhdG9yIEV4YW1wbGUgKFB0eSkgTHRkIl0~WyI4dlBTQ2thOHFaSTl4ZGVMNkwwOG93Iiwib3BlcmF0b3JfcmVnaXN0cmF0aW9uIiwiMjAxOS8xMjM0NTYvMDciXQ~WyJETXdGNkZRNWdtcTcxR2duQ1RMRHBRIiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoiMVNVRkRVcUhwSmhWb0tUQjVzRW9WcFVndEladmt6ZjZTeVFVbHhGbF9HOCJ9.hS0SeZ4bvx70JdSS8JrvOfVfj5ZEKY7rnz2BjpMMjZEFujp4LkxVVHrM-mN0g9Lx-lXzVixya6DcH6-rvUvBmw",
+          "expected": {
+            "decision": "allow",
+            "code": null,
+            "reason": null
+          }
+        },
+        {
+          "name": "deny-status-list-signer",
+          "kind": "presentation",
+          "description": "Status list signed by another issuer",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "artefactOverrides": {
+            "https://status.veridact.example/org/agents/7": "eyJ0eXAiOiJzdGF0dXNsaXN0K2p3dCIsImtpZCI6IngtMSIsImFsZyI6IkVTMjU2In0.eyJzdWIiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9hZ2VudHMvNyIsImlzcyI6Imh0dHBzOi8vcm9ndWUuZXhhbXBsZS9pc3N1ZXJzL3giLCJpYXQiOjE3OTQyMTExNDAsImV4cCI6MTc5NDIyNTU0MCwidHRsIjozMDAsInN0YXR1c19saXN0Ijp7ImJpdHMiOjIsImxzdCI6ImVOcnR3UUVCQUFBQWdKRC1yLTRJQ2dBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQVlnQUFBQVEifX0._X6gt6PprXm7aS0mZwRR-KB2wQ_BzW564xSmLN3-XAaBqhs-AckR5HOlVK2lKcur-RzcaVsxm8y3HJWbR9cW0g"
+          },
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ikl1a21RWXEyYTU0a1BNWkltLXE1NHhVcXkxX3FKLUFQZVRNZ0tmVUxXalEiLCJ5IjoidWlOUnFQQkkxOHV1T25ubmZ1eU9sdWYzS1hMQnRBVjFqQ3ozQWs0Nks0QSJ9fSwiY25mX2V2ZW50IjoidmVyaWRhY3QtbG9nLTIwMjYvMDAwMDAwNDU2Iiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6NDgyMTMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2FnZW50cy83In19LCJfc2QiOlsiOTViNzlDbGZOLTJGWEVXdTFSZ190SFQ2WkVfOUNsSmE4cGFsaXl6ZXVKRSIsIlVwd3BrVG82VExZS19vRnRSblVjNGJSOXFHVnRvaWVYMlFJc2w3VE5hSDgiLCJYb2loeG5EQVRIVGVLRV9uTUVhVEt5eTd2T0ZoeDhvRXJfMjdSTlFJSVhFIiwib2JwcEdNeEpDZzFydXNUU3hTUHZIYjRZdVBOSU5aWHFhTmQ2WTFTZDFlayIsInFTNk5HZllLNEJkVW1sZk9jX2dfY3dHd2hUUE1ocHM4NDI2S0ZWelNrRWMiXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.oefWJti4NJ3A6M-uFubbdX_1MwZCB4e-BiyL_pZLEpPwHiSw6uHfSL6q4LAAN3UqW9kkNNnMTQjloo9FfgA2dg~WyJiRjRsSEp6U2c4YmhEeFRNMldhUExnIiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIk9wZXJhdG9yIEV4YW1wbGUgKFB0eSkgTHRkIl0~WyJaTVpmWkpSY2owVGRFMDdoa0JPTHJBIiwib3BlcmF0b3JfcmVnaXN0cmF0aW9uIiwiMjAxOS8xMjM0NTYvMDciXQ~WyJjU1pDaHhuQzNkSGQzSmRQUVgxT0JBIiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoiOWxuM3kxOVBNenc0Unc0R21lYUFvaEMwWm1peHEzbHZFQ3JTS1MxVnNMUSJ9.gObvRrMqhXIqKz7uHmtD03l0wJpm7Jh3b8UBYHq4xfyOU1MqwD9s3f5Br5M1C4khQ8UPDiuX0MhKQg8FqFvTkg",
+          "expected": {
+            "decision": "deny",
+            "code": "VERIFICATION_UNAVAILABLE",
+            "reason": "STATUS_UNAVAILABLE"
+          }
+        },
+        {
+          "name": "allow-status-list-hour-old-low-risk",
+          "kind": "presentation",
+          "description": "Status list signed an hour ago; low-risk route",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {
+            "risk": "low"
+          },
+          "artefactOverrides": {
+            "https://status.veridact.example/org/agents/7": "eyJ0eXAiOiJzdGF0dXNsaXN0K2p3dCIsImtpZCI6Im9yZy0yMDI2Yi0zIiwiYWxnIjoiRVMyNTYifQ.eyJzdWIiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9hZ2VudHMvNyIsImlzcyI6Imh0dHBzOi8vdmVyaWRhY3QuZXhhbXBsZS9pc3N1ZXJzL29yZy0yMDI2YiIsImlhdCI6MTc5NDIwNzYwMCwiZXhwIjoxNzk0MjIyMDAwLCJ0dGwiOjMwMCwic3RhdHVzX2xpc3QiOnsiYml0cyI6MiwibHN0IjoiZU5ydHdRRUJBQUFBZ0pELXItNElDZ0FBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBWWdBQUFBUSJ9fQ.LsDoXEeWzmwxhbqb0A26dknpchaYUIZFG9JmRDbt-VfroxWAKjBvz-y-32jDKl-ddtprkEGD2wCrVBMsj2zK_w"
+          },
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ikl1a21RWXEyYTU0a1BNWkltLXE1NHhVcXkxX3FKLUFQZVRNZ0tmVUxXalEiLCJ5IjoidWlOUnFQQkkxOHV1T25ubmZ1eU9sdWYzS1hMQnRBVjFqQ3ozQWs0Nks0QSJ9fSwiY25mX2V2ZW50IjoidmVyaWRhY3QtbG9nLTIwMjYvMDAwMDAwNDU2Iiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6NDgyMTMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2FnZW50cy83In19LCJfc2QiOlsiNzBkSVRsakcyQ2lITWhjN2FHcFJ5NDRTWlNBTXhHZE5GN0pCOTNZdXV0YyIsIkYxMThPU3VzVmlQZWNGb0h5QkJScHRIeVR3Y3RRTkU2LXVnZHh2bU15OTQiLCJUd3RZczVtUkpaeE9tN3A3dmZ3dWZNLUNBY3lEcDAtTkJkZ3JTbHdmcUVFIiwiWndWV042MGNlQWcwVWhaa01tb0J0YWFSVU5Vc0VtWjl0NmQ5bDFSaUo1WSIsImNBeGNpQThYZHVVSlMyNS1vLWJkdFVIa3lpTEtZQ3hhazBjWUxic2twSW8iXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.44TjQrt4068knlma8SXe9ICKeAFoJwNfdPvs9rRKlBx8iJnZ0skvR6tXWFbxCNJ6hIYZCCGpzpvqk5Bz6TNHrg~WyJBbWtGVGVSdXZQbTlCLS1NbG40YXpRIiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIk9wZXJhdG9yIEV4YW1wbGUgKFB0eSkgTHRkIl0~WyJoRmNLM1phZktTd0h2RS1nSFRic0JnIiwib3BlcmF0b3JfcmVnaXN0cmF0aW9uIiwiMjAxOS8xMjM0NTYvMDciXQ~WyJ2TE5QdFF3MFpzNTgwendSVmVSVmdRIiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoiblNuOHM2UTQwVzIzMmFJcWlBZXBRWlhJWHhkQk9yNmNOcFc2QWpmSWJXQSJ9.sV4wdAI_rVigIH7T9NDp5UHNXz2DaWLmHLKV4E9Es5qozThaZ3gA8hsM201Kn7us-5w4mmdZXhyCsRZdIvzAaQ",
+          "expected": {
+            "decision": "allow",
+            "code": null,
+            "reason": null
+          }
+        },
+        {
+          "name": "deny-status-list-stale-high-risk",
+          "kind": "presentation",
+          "description": "Status list signed an hour ago; high-risk route",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {
+            "risk": "high"
+          },
+          "artefactOverrides": {
+            "https://status.veridact.example/org/agents/7": "eyJ0eXAiOiJzdGF0dXNsaXN0K2p3dCIsImtpZCI6Im9yZy0yMDI2Yi0zIiwiYWxnIjoiRVMyNTYifQ.eyJzdWIiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9hZ2VudHMvNyIsImlzcyI6Imh0dHBzOi8vdmVyaWRhY3QuZXhhbXBsZS9pc3N1ZXJzL29yZy0yMDI2YiIsImlhdCI6MTc5NDIwNzYwMCwiZXhwIjoxNzk0MjIyMDAwLCJ0dGwiOjMwMCwic3RhdHVzX2xpc3QiOnsiYml0cyI6MiwibHN0IjoiZU5ydHdRRUJBQUFBZ0pELXItNElDZ0FBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBWWdBQUFBUSJ9fQ.X3OLQBh29y7arbLv6mJ2L3bMi85bO5vK4E1GbiljBBOuIZtTTC9dRo4YfheAVu4qqBT_1ss7zdYULn67BgOTOg"
+          },
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ikl1a21RWXEyYTU0a1BNWkltLXE1NHhVcXkxX3FKLUFQZVRNZ0tmVUxXalEiLCJ5IjoidWlOUnFQQkkxOHV1T25ubmZ1eU9sdWYzS1hMQnRBVjFqQ3ozQWs0Nks0QSJ9fSwiY25mX2V2ZW50IjoidmVyaWRhY3QtbG9nLTIwMjYvMDAwMDAwNDU2Iiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6NDgyMTMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2FnZW50cy83In19LCJfc2QiOlsiN3J1RjRXUGU1dzRobzZPT0NzSXNFa2hKTUlkb2dJZTJaQ2xhMGtBdE5wWSIsIkNjRTA4bGt0VzBRTU1XQzM5TW1BVXFFbFQzQ3VqdEM2bFlEcTIyUnY3aWMiLCJGSmhRczV2NFY2ejdadGJKc1BUUFdWeEdOWjROc09oMW4zZ1RNLWUzZ1UwIiwiYWdOY29vaEM0NjE1UlI4eS1lVDVzQ2dGdTVJQVREYjhfMkJHRTFfMFYtTSIsImpzRExzdHdTczZXR3BwUEpWVlU1SVV0cHpubUVzYXE4eXdIOWJ4c1RSMjQiXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.vjgFvxrrLxrjRN8JEPFggnB65-DY3lbHykmGslfTihFwt2xj9w9ZHbvw2zDScuZPMbuNOBoIYD4NwMZPw39sFg~WyJMRkRPS2pWdTNObFNjRUhpMGVVY3VnIiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIk9wZXJhdG9yIEV4YW1wbGUgKFB0eSkgTHRkIl0~WyJITWswcmNpVXZTdHA2V2hRWThQR1lBIiwib3BlcmF0b3JfcmVnaXN0cmF0aW9uIiwiMjAxOS8xMjM0NTYvMDciXQ~WyJ3T0J0a281Q09xRjBRRkxMc2Y2SlRBIiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoiWkZ3UUFFd3FpVEh0dDdoMkxqTWdtTVpCQnktZUNud2h1d2RaUEpaamRuWSJ9.XgWGmAulD6tAwUQGIlbsiuxYnvvueDfKBn3m9ZJE4gM49b78yULMBSJ3ctGn9IeYvAHbKZNrE6Fzn-j54Aq0EA",
+          "expected": {
+            "decision": "deny",
+            "code": "VERIFICATION_UNAVAILABLE",
+            "reason": "STATUS_STALE"
+          }
+        },
+        {
+          "name": "deny-cnf-not-logged",
+          "kind": "presentation",
+          "description": "The cnf key has no logged add event (cnf_event missing)",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "artefactOverrides": {},
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ikl1a21RWXEyYTU0a1BNWkltLXE1NHhVcXkxX3FKLUFQZVRNZ0tmVUxXalEiLCJ5IjoidWlOUnFQQkkxOHV1T25ubmZ1eU9sdWYzS1hMQnRBVjFqQ3ozQWs0Nks0QSJ9fSwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6NDgyMTMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2FnZW50cy83In19LCJfc2QiOlsiTEpNeC0taEpxX1M4LVg4SDhiVVRDWGo2UFJCWjgzaXNNdnlDTkZqcUphMCIsImFfX2ZJdFdrQTJoUlhhODg4TkEwNW4tTmYtbTNWbUlucXhHODdJZE9iSmMiLCJvQXRIR1Q3YlR1RnQyam5QVWphU1VyaWNUR3hFNnpsTXBDYXJza1ZPd1g4IiwicWxReURIRXdaWWx5bkZsSnlvb1VPWkdhVjVHZmdGZ3d1Z2t1X1otZlFLbyIsInRSbDRxM0hXak93UE1hZWxKeVZKSGdNS1dIa2hRRmR5Y1FaaEdCVldjSXciXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.rsOxPr7DSEbSApemP_srZfZ3BWy6dBMgQLCkNzyZkwI8DCBw1YSmLNLXZi6CAcXXl4OBBLemRd4LI0DRsovodQ~WyIwMXdEUlJ1bm85WlVZeWVCUTgtb2p3Iiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIk9wZXJhdG9yIEV4YW1wbGUgKFB0eSkgTHRkIl0~WyJBT1FJdzh2bFp2TnNpenlRQkZUUlFRIiwib3BlcmF0b3JfcmVnaXN0cmF0aW9uIiwiMjAxOS8xMjM0NTYvMDciXQ~WyJubHJkdHU1UDBZMU9NLTNIcXBuYUZ3Iiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoiVzJHVTdENUJlWFFSRWVXZUFSOVZOSjlxS3lBSW1Hd2xfS0FiRjZYc1l4TSJ9.o-6Ekc8oBCevCq9tC4sUjJZHUxfTZ7MxpV90KeXE93uumvE6ku4hOS61T8XHcZ6vSCsCyWxyB0NUdhGe9cayNA",
+          "expected": {
+            "decision": "deny",
+            "code": "AUTH_FAILED",
+            "reason": "KEY_NOT_LOGGED"
+          }
+        },
+        {
+          "name": "deny-scope-not-held",
+          "kind": "presentation",
+          "description": "Route needs a scope the agent was not delegated",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {
+            "scopes": [
+              "fs:payments:initiate"
+            ]
+          },
+          "artefactOverrides": {},
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6Ikl1a21RWXEyYTU0a1BNWkltLXE1NHhVcXkxX3FKLUFQZVRNZ0tmVUxXalEiLCJ5IjoidWlOUnFQQkkxOHV1T25ubmZ1eU9sdWYzS1hMQnRBVjFqQ3ozQWs0Nks0QSJ9fSwiY25mX2V2ZW50IjoidmVyaWRhY3QtbG9nLTIwMjYvMDAwMDAwNDU2Iiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6NDgyMTMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2FnZW50cy83In19LCJfc2QiOlsiMU8tTko0UXVGQ1Eyejh1enJtZFUxd3BCNUNrU0c4Yzg4NENBWmk5OERlVSIsIl9TRmh0ZXdfd0o3SGdUNDJ2YW8xeDJFYWFoaHhvTkppY2Y0RmNOSk5QSE0iLCJoaDVtZzFQU0wwai1MZjhRNFg4QnhIRHJXRUNHU3FaaE1USUNETFdpTDhVIiwicURxdVRBYURqMlRaYlQyWUZuUnB1ZHhCRzVYY1BGSG9PcW9ocEdoRGRmbyIsInVFZUdRQjVqZ0k3NDNNcUprM1hFMWEwb2pNa3JlR19ZRjBqSG9OT2UtczAiXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.uAhVwLHye32q4Gn4rzsHZf6pSzNDE3c5HFNYSqex4dx3q4zRgXISbP2H1o5D51Ddra67AGr7CT3uCfG9vj7QJg~WyJicVRBbnBvaFhCdXBzNlFLaDREa3lBIiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIk9wZXJhdG9yIEV4YW1wbGUgKFB0eSkgTHRkIl0~WyJ1RjFXak80dFlyQ2FKZnNMNHU5UElRIiwib3BlcmF0b3JfcmVnaXN0cmF0aW9uIiwiMjAxOS8xMjM0NTYvMDciXQ~WyJNemQzcjBpSWtkZ0ZSMDBPa0ZUTGVRIiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoiZlh6Y2FESWRlaWJCUmpnTnJGOHViUGhZXzZLMWx6R1JMakk1dE1ac0NTOCJ9.nWh_5uG3k24c3EBYV53SRv2WK8SIHkBB0nsCzRMKJ15rO3FAT9XINmO0lHjwYZ0ehtyK9Lw3fJYgNMqodrztVA",
+          "expected": {
+            "decision": "deny",
+            "code": "SCOPE_NOT_HELD",
+            "reason": "SCOPE_NOT_HELD"
+          }
+        },
+        {
+          "name": "allow-payment-within-limits",
+          "kind": "presentation",
+          "description": "R499.99 with R1,000 already paid today",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {
+            "scopes": [
+              "fs:payments:initiate"
+            ],
+            "payment": {
+              "amount": "499.99",
+              "currency": "ZAR",
+              "spentToday": "1000"
+            }
+          },
+          "artefactOverrides": {},
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpwYXltZW50czppbml0aWF0ZSJdLCJhY2NvdW50YWJsZV9yb2xlIjoiSGVhZCBvZiBEaWdpdGFsIENsYWltcyIsImNuZiI6eyJqd2siOnsia3R5IjoiRUMiLCJjcnYiOiJQLTI1NiIsIngiOiJJdWttUVlxMmE1NGtQTVpJbS1xNTR4VXF5MV9xSi1BUGVUTWdLZlVMV2pRIiwieSI6InVpTlJxUEJJMTh1dU9ubm5mdXlPbHVmM0tYTEJ0QVYxakN6M0FrNDZLNEEifX0sImNuZl9ldmVudCI6InZlcmlkYWN0LWxvZy0yMDI2LzAwMDAwMDQ1NiIsInN0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjQ4MjEzLCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9hZ2VudHMvNyJ9fSwibGltaXRzIjp7ImN1cnJlbmN5IjoiWkFSIiwicGVyX3BheW1lbnQiOiI1MDAuMDAiLCJwZXJfZGF5IjoiMjAwMC4wMCJ9LCJfc2QiOlsiRnF0NWhWb29NR0x4alpNbVZHWGdNc3F2TnlKLU9BRURneFVmSF9VenhIOCIsIlREZ0xMQm85N09KWDBBNy1NSl9oTmI5Ui1jd0lUN0VONC0zVTYwd1hsLTgiLCJrbkpkQ0cwdURidUR6M01POWhyUXdiT1hWOUhXd1FDSmZRUzBuMi0tWDlJIiwic0lSSUZkeWs1Tk1rR256Y2RzVV9kRjVTVTB5SkVxQmxBalh1a1ZaOXZlayIsInRZVWdkM3NFS1JnaFZ2aVFtVFIzWUtBcDJENTlLUFd0SnpQTUdWcHY5cjQiXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.uizUp8ofu-owHoCqVq2cq2eQGw6DEDdBUNgvi50BbTpbbbep0FO4HUA9jKe7EDmi2JPeO4qJLM_RPEtTJyg4Zg~WyJtZzB4ZU01RThjb1dkNjFrY2VVOFhnIiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIk9wZXJhdG9yIEV4YW1wbGUgKFB0eSkgTHRkIl0~WyJra01CbTFWQUlVT3E2VlBGR1ZlNkVBIiwib3BlcmF0b3JfcmVnaXN0cmF0aW9uIiwiMjAxOS8xMjM0NTYvMDciXQ~WyJmSnJBcnE3N1ZHTHNZVC00N3pPS2JnIiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoicWJ4OVhjaEk3V3A3Y3pYWE12MGhuTGpfMzE3dGtINFB3R1pwYzhJYTdDayJ9.5tTKaJpkCL5tafEUyY6hYha3DL5OCu6k6OENy4qEuAEDEMLDhSHRCG8HXlPSYfSrR1aD8BRbTQnXIGoFMaMKRg",
+          "expected": {
+            "decision": "allow",
+            "code": null,
+            "reason": null
+          }
+        },
+        {
+          "name": "ask-person-per-payment",
+          "kind": "presentation",
+          "description": "R500.01 against a R500 per-payment limit",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {
+            "scopes": [
+              "fs:payments:initiate"
+            ],
+            "payment": {
+              "amount": "500.01",
+              "currency": "ZAR"
+            }
+          },
+          "artefactOverrides": {},
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpwYXltZW50czppbml0aWF0ZSJdLCJhY2NvdW50YWJsZV9yb2xlIjoiSGVhZCBvZiBEaWdpdGFsIENsYWltcyIsImNuZiI6eyJqd2siOnsia3R5IjoiRUMiLCJjcnYiOiJQLTI1NiIsIngiOiJJdWttUVlxMmE1NGtQTVpJbS1xNTR4VXF5MV9xSi1BUGVUTWdLZlVMV2pRIiwieSI6InVpTlJxUEJJMTh1dU9ubm5mdXlPbHVmM0tYTEJ0QVYxakN6M0FrNDZLNEEifX0sImNuZl9ldmVudCI6InZlcmlkYWN0LWxvZy0yMDI2LzAwMDAwMDQ1NiIsInN0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjQ4MjEzLCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9hZ2VudHMvNyJ9fSwibGltaXRzIjp7ImN1cnJlbmN5IjoiWkFSIiwicGVyX3BheW1lbnQiOiI1MDAuMDAiLCJwZXJfZGF5IjoiMjAwMC4wMCJ9LCJfc2QiOlsiRnF0NWhWb29NR0x4alpNbVZHWGdNc3F2TnlKLU9BRURneFVmSF9VenhIOCIsIlREZ0xMQm85N09KWDBBNy1NSl9oTmI5Ui1jd0lUN0VONC0zVTYwd1hsLTgiLCJrbkpkQ0cwdURidUR6M01POWhyUXdiT1hWOUhXd1FDSmZRUzBuMi0tWDlJIiwic0lSSUZkeWs1Tk1rR256Y2RzVV9kRjVTVTB5SkVxQmxBalh1a1ZaOXZlayIsInRZVWdkM3NFS1JnaFZ2aVFtVFIzWUtBcDJENTlLUFd0SnpQTUdWcHY5cjQiXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.uizUp8ofu-owHoCqVq2cq2eQGw6DEDdBUNgvi50BbTpbbbep0FO4HUA9jKe7EDmi2JPeO4qJLM_RPEtTJyg4Zg~WyJtZzB4ZU01RThjb1dkNjFrY2VVOFhnIiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIk9wZXJhdG9yIEV4YW1wbGUgKFB0eSkgTHRkIl0~WyJra01CbTFWQUlVT3E2VlBGR1ZlNkVBIiwib3BlcmF0b3JfcmVnaXN0cmF0aW9uIiwiMjAxOS8xMjM0NTYvMDciXQ~WyJmSnJBcnE3N1ZHTHNZVC00N3pPS2JnIiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoicWJ4OVhjaEk3V3A3Y3pYWE12MGhuTGpfMzE3dGtINFB3R1pwYzhJYTdDayJ9.0WtGMokfYA_uM2r0_gEWPzfIPMFZqKvfOR-dFIwFElrioUYDl4-TVk4UaOkAgsfGy_17p6EymzTKY3hOndGOcw",
+          "expected": {
+            "decision": "ask_person",
+            "code": "LIMIT_PER_PAYMENT",
+            "reason": "LIMIT_PER_PAYMENT"
+          }
+        },
+        {
+          "name": "ask-person-per-day",
+          "kind": "presentation",
+          "description": "R400 with R1,700 already paid against R2,000 a day",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {
+            "scopes": [
+              "fs:payments:initiate"
+            ],
+            "payment": {
+              "amount": "400",
+              "currency": "ZAR",
+              "spentToday": "1700"
+            }
+          },
+          "artefactOverrides": {},
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpwYXltZW50czppbml0aWF0ZSJdLCJhY2NvdW50YWJsZV9yb2xlIjoiSGVhZCBvZiBEaWdpdGFsIENsYWltcyIsImNuZiI6eyJqd2siOnsia3R5IjoiRUMiLCJjcnYiOiJQLTI1NiIsIngiOiJJdWttUVlxMmE1NGtQTVpJbS1xNTR4VXF5MV9xSi1BUGVUTWdLZlVMV2pRIiwieSI6InVpTlJxUEJJMTh1dU9ubm5mdXlPbHVmM0tYTEJ0QVYxakN6M0FrNDZLNEEifX0sImNuZl9ldmVudCI6InZlcmlkYWN0LWxvZy0yMDI2LzAwMDAwMDQ1NiIsInN0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjQ4MjEzLCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9hZ2VudHMvNyJ9fSwibGltaXRzIjp7ImN1cnJlbmN5IjoiWkFSIiwicGVyX3BheW1lbnQiOiI1MDAuMDAiLCJwZXJfZGF5IjoiMjAwMC4wMCJ9LCJfc2QiOlsiRnF0NWhWb29NR0x4alpNbVZHWGdNc3F2TnlKLU9BRURneFVmSF9VenhIOCIsIlREZ0xMQm85N09KWDBBNy1NSl9oTmI5Ui1jd0lUN0VONC0zVTYwd1hsLTgiLCJrbkpkQ0cwdURidUR6M01POWhyUXdiT1hWOUhXd1FDSmZRUzBuMi0tWDlJIiwic0lSSUZkeWs1Tk1rR256Y2RzVV9kRjVTVTB5SkVxQmxBalh1a1ZaOXZlayIsInRZVWdkM3NFS1JnaFZ2aVFtVFIzWUtBcDJENTlLUFd0SnpQTUdWcHY5cjQiXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.uizUp8ofu-owHoCqVq2cq2eQGw6DEDdBUNgvi50BbTpbbbep0FO4HUA9jKe7EDmi2JPeO4qJLM_RPEtTJyg4Zg~WyJtZzB4ZU01RThjb1dkNjFrY2VVOFhnIiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIk9wZXJhdG9yIEV4YW1wbGUgKFB0eSkgTHRkIl0~WyJra01CbTFWQUlVT3E2VlBGR1ZlNkVBIiwib3BlcmF0b3JfcmVnaXN0cmF0aW9uIiwiMjAxOS8xMjM0NTYvMDciXQ~WyJmSnJBcnE3N1ZHTHNZVC00N3pPS2JnIiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoicWJ4OVhjaEk3V3A3Y3pYWE12MGhuTGpfMzE3dGtINFB3R1pwYzhJYTdDayJ9.0PGvTFWgkmIpRA7UoPfOylpLYC1S3_2IsO2wqhCWaiahN4tHkQxhDpe6uErRRxjA_WWO7vdDj0Y5pQHujJ38AA",
+          "expected": {
+            "decision": "ask_person",
+            "code": "LIMIT_PER_DAY",
+            "reason": "LIMIT_PER_DAY"
+          }
+        },
+        {
+          "name": "allow-client-attestation",
+          "kind": "client-attestation",
+          "description": "Attestation for this client, bound to its DPoP key",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {
+            "scopes": [
+              "fs:quotes:create"
+            ]
+          },
+          "artefactOverrides": {},
+          "attestation": "eyJ0eXAiOiJvYXV0aC1jbGllbnQtYXR0ZXN0YXRpb24rand0Iiwia2lkIjoib3JnLTIwMjZiLTMiLCJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwiZXhwIjoxNzk0MjM2NDAwLCJjbmYiOnsiandrIjp7Imt0eSI6IkVDIiwiY3J2IjoiUC0yNTYiLCJ4IjoiSXVrbVFZcTJhNTRrUE1aSW0tcTU0eFVxeTFfcUotQVBlVE1nS2ZVTFdqUSIsInkiOiJ1aU5ScVBCSTE4dXVPbm5uZnV5T2x1ZjNLWExCdEFWMWpDejNBazQ2SzRBIn19LCJzdGF0dXMiOnsic3RhdHVzX2xpc3QiOnsiaWR4Ijo0ODIxMywidXJpIjoiaHR0cHM6Ly9zdGF0dXMudmVyaWRhY3QuZXhhbXBsZS9vcmcvYWdlbnRzLzcifX0sInZlcmlkYWN0Ijp7Im9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwib3BlcmF0b3Jfc3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6MTcsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL29wZXJhdG9ycy8yIn19LCJjcmVkZW50aWFsIjoidXJuOnV1aWQ6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDBjMDNkIn19.0zogA8Gff7upjs92hWhxOu2S5aQ28MMTD5UP75zE-EziNUKmm96M1PxpObxzP4LJsducngfJXwvlF0UEBYO0Cg",
+          "clientId": "https://operator.example/agents/a7f3k2",
+          "dpopJkt": "mVA8zOH_BS6f3OwQl9HvWnbXUCAACfGvAJKgk3hVR10",
+          "expected": {
+            "decision": "allow",
+            "code": null,
+            "reason": null
+          }
+        },
+        {
+          "name": "deny-attestation-other-client",
+          "kind": "client-attestation",
+          "description": "Attestation names another client_id",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "artefactOverrides": {},
+          "attestation": "eyJ0eXAiOiJvYXV0aC1jbGllbnQtYXR0ZXN0YXRpb24rand0Iiwia2lkIjoib3JnLTIwMjZiLTMiLCJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwiZXhwIjoxNzk0MjM2NDAwLCJjbmYiOnsiandrIjp7Imt0eSI6IkVDIiwiY3J2IjoiUC0yNTYiLCJ4IjoiSXVrbVFZcTJhNTRrUE1aSW0tcTU0eFVxeTFfcUotQVBlVE1nS2ZVTFdqUSIsInkiOiJ1aU5ScVBCSTE4dXVPbm5uZnV5T2x1ZjNLWExCdEFWMWpDejNBazQ2SzRBIn19LCJzdGF0dXMiOnsic3RhdHVzX2xpc3QiOnsiaWR4Ijo0ODIxMywidXJpIjoiaHR0cHM6Ly9zdGF0dXMudmVyaWRhY3QuZXhhbXBsZS9vcmcvYWdlbnRzLzcifX0sInZlcmlkYWN0Ijp7Im9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwib3BlcmF0b3Jfc3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6MTcsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL29wZXJhdG9ycy8yIn19LCJjcmVkZW50aWFsIjoidXJuOnV1aWQ6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDBjMDNkIn19.VhVcjZzUmMYWY5n_L3ji_u6FI5WzDayDegPDDboNrOHusT_ryZhlGPaDXc162vmbNRyyiH8ztHya0mwvK_Hhqg",
+          "clientId": "https://operator.example/agents/other",
+          "dpopJkt": "mVA8zOH_BS6f3OwQl9HvWnbXUCAACfGvAJKgk3hVR10",
+          "expected": {
+            "decision": "deny",
+            "code": "AUTH_FAILED",
+            "reason": "CLIENT_MISMATCH"
+          }
+        },
+        {
+          "name": "deny-attestation-other-dpop-key",
+          "kind": "client-attestation",
+          "description": "The DPoP proof was made with a different key",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "artefactOverrides": {},
+          "attestation": "eyJ0eXAiOiJvYXV0aC1jbGllbnQtYXR0ZXN0YXRpb24rand0Iiwia2lkIjoib3JnLTIwMjZiLTMiLCJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwiZXhwIjoxNzk0MjM2NDAwLCJjbmYiOnsiandrIjp7Imt0eSI6IkVDIiwiY3J2IjoiUC0yNTYiLCJ4IjoiSXVrbVFZcTJhNTRrUE1aSW0tcTU0eFVxeTFfcUotQVBlVE1nS2ZVTFdqUSIsInkiOiJ1aU5ScVBCSTE4dXVPbm5uZnV5T2x1ZjNLWExCdEFWMWpDejNBazQ2SzRBIn19LCJzdGF0dXMiOnsic3RhdHVzX2xpc3QiOnsiaWR4Ijo0ODIxMywidXJpIjoiaHR0cHM6Ly9zdGF0dXMudmVyaWRhY3QuZXhhbXBsZS9vcmcvYWdlbnRzLzcifX0sInZlcmlkYWN0Ijp7Im9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwib3BlcmF0b3Jfc3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6MTcsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL29wZXJhdG9ycy8yIn19LCJjcmVkZW50aWFsIjoidXJuOnV1aWQ6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDBjMDNkIn19.UPGqPf_M7H1J3gRyhQWlQZLiFsPCLsUFDrZA9s6tNZ6zOxq5aidKdZIxH_qMbyz7BIOJ7c50MLRY_nBvwkwPEg",
+          "clientId": "https://operator.example/agents/a7f3k2",
+          "dpopJkt": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+          "expected": {
+            "decision": "deny",
+            "code": "AUTH_FAILED",
+            "reason": "DPOP_KEY_MISMATCH"
+          }
+        },
+        {
+          "name": "deny-attestation-revoked",
+          "kind": "client-attestation",
+          "description": "Revoking the Agent Credential revokes its attestation",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "artefactOverrides": {
+            "https://status.veridact.example/org/agents/7": "eyJ0eXAiOiJzdGF0dXNsaXN0K2p3dCIsImtpZCI6Im9yZy0yMDI2Yi0zIiwiYWxnIjoiRVMyNTYifQ.eyJzdWIiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9hZ2VudHMvNyIsImlzcyI6Imh0dHBzOi8vdmVyaWRhY3QuZXhhbXBsZS9pc3N1ZXJzL29yZy0yMDI2YiIsImlhdCI6MTc5NDIxMTE0MCwiZXhwIjoxNzk0MjI1NTQwLCJ0dGwiOjMwMCwic3RhdHVzX2xpc3QiOnsiYml0cyI6MiwibHN0IjoiZU5ydDBERU5BQUFNQTZBZTlhLTVKdllzQVFra0FBQUFBQUFBQUFBQUFBRHdWQlVBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUhjR3c3c0FCUSJ9fQ.9dWheMx-8V4JuLzSy6iPvNcBlpsmEICX_GZbPYLMmSsoFNVzC6jwRMR9JhhOUMDTtv35Thk9EG-iMFA2hEWBZQ"
+          },
+          "attestation": "eyJ0eXAiOiJvYXV0aC1jbGllbnQtYXR0ZXN0YXRpb24rand0Iiwia2lkIjoib3JnLTIwMjZiLTMiLCJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwiZXhwIjoxNzk0MjM2NDAwLCJjbmYiOnsiandrIjp7Imt0eSI6IkVDIiwiY3J2IjoiUC0yNTYiLCJ4IjoiSXVrbVFZcTJhNTRrUE1aSW0tcTU0eFVxeTFfcUotQVBlVE1nS2ZVTFdqUSIsInkiOiJ1aU5ScVBCSTE4dXVPbm5uZnV5T2x1ZjNLWExCdEFWMWpDejNBazQ2SzRBIn19LCJzdGF0dXMiOnsic3RhdHVzX2xpc3QiOnsiaWR4Ijo0ODIxMywidXJpIjoiaHR0cHM6Ly9zdGF0dXMudmVyaWRhY3QuZXhhbXBsZS9vcmcvYWdlbnRzLzcifX0sInZlcmlkYWN0Ijp7Im9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwidGllciI6Im9yZ2FuaXNhdGlvbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwib3BlcmF0b3Jfc3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6MTcsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL29wZXJhdG9ycy8yIn19LCJjcmVkZW50aWFsIjoidXJuOnV1aWQ6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDBjMDNkIn19.1wsAPBQH43VGD6SHU33aGS1x-2K_d7F3_CQTux9xHg6Qhmwo02Ag6AJq3QEH2Z-GweH8ISBVHLvryEGb9O50xA",
+          "clientId": "https://operator.example/agents/a7f3k2",
+          "dpopJkt": "mVA8zOH_BS6f3OwQl9HvWnbXUCAACfGvAJKgk3hVR10",
+          "expected": {
+            "decision": "deny",
+            "code": "AUTH_FAILED",
+            "reason": "STATUS_REVOKED"
+          }
+        },
+        {
+          "name": "allow-known-assistant",
+          "kind": "known-assistant",
+          "description": "Entry for Claude, matched by its CIMD URL",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "artefactOverrides": {},
+          "entry": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3Qva25vd24tYXNzaXN0YW50L3YxIiwianRpIjoidXJuOnV1aWQ6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDRkIiwic3ViIjoiaHR0cHM6Ly9jbGF1ZGUuYWkvb2F1dGgvY2xhdWRlLWNsaWVudC1tZXRhZGF0YS5qc29uIiwiaWF0IjoxNzk0MTI0ODAwLCJuYmYiOjE3OTQxMjQ4MDAsImV4cCI6MTc5NjcxNjgwMCwiY2xpZW50X21ldGFkYXRhX3VybHMiOlsiaHR0cHM6Ly9jbGF1ZGUuYWkvb2F1dGgvY2xhdWRlLWNsaWVudC1tZXRhZGF0YS5qc29uIiwiaHR0cHM6Ly9jbGF1ZGUuYWkvb2F1dGgvY2xhdWRlLWNvZGUtY2xpZW50LW1ldGFkYXRhLmpzb24iXSwib3BlcmF0b3IiOnsibmFtZSI6IkFudGhyb3BpYyBQQkMiLCJqdXJpc2RpY3Rpb24iOiJVUyIsInZlcmlmaWVkIjoiMjAyNi0xMS0wMSJ9LCJyZWRpcmVjdF9ob3N0cyI6WyJjbGF1ZGUuYWkiLCJjbGF1ZGUuY29tIl0sInRva2VuX2VuZHBvaW50X2F1dGgiOnsibWV0aG9kIjoibm9uZSJ9LCJtYXhfbGV2ZWwiOiJhcHByb3ZlZF9wYXllciIsInN0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2Fzc2lzdGFudHMvMSJ9fX0.e9Ty-hpqQGtxEuS8-FD0xyxuIsxOih5mYO1R8uwh0yJCl34WelgGT9JE5wEQLBcuj8lOoacpW_BNFFqe1uTB8A~",
+          "clientId": "https://claude.ai/oauth/claude-client-metadata.json",
+          "expected": {
+            "decision": "allow",
+            "code": null,
+            "reason": null
+          }
+        },
+        {
+          "name": "deny-known-assistant-other-client",
+          "kind": "known-assistant",
+          "description": "Entry does not list this client",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "artefactOverrides": {},
+          "entry": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3Qva25vd24tYXNzaXN0YW50L3YxIiwianRpIjoidXJuOnV1aWQ6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDRkIiwic3ViIjoiaHR0cHM6Ly9jbGF1ZGUuYWkvb2F1dGgvY2xhdWRlLWNsaWVudC1tZXRhZGF0YS5qc29uIiwiaWF0IjoxNzk0MTI0ODAwLCJuYmYiOjE3OTQxMjQ4MDAsImV4cCI6MTc5NjcxNjgwMCwiY2xpZW50X21ldGFkYXRhX3VybHMiOlsiaHR0cHM6Ly9jbGF1ZGUuYWkvb2F1dGgvY2xhdWRlLWNsaWVudC1tZXRhZGF0YS5qc29uIiwiaHR0cHM6Ly9jbGF1ZGUuYWkvb2F1dGgvY2xhdWRlLWNvZGUtY2xpZW50LW1ldGFkYXRhLmpzb24iXSwib3BlcmF0b3IiOnsibmFtZSI6IkFudGhyb3BpYyBQQkMiLCJqdXJpc2RpY3Rpb24iOiJVUyIsInZlcmlmaWVkIjoiMjAyNi0xMS0wMSJ9LCJyZWRpcmVjdF9ob3N0cyI6WyJjbGF1ZGUuYWkiLCJjbGF1ZGUuY29tIl0sInRva2VuX2VuZHBvaW50X2F1dGgiOnsibWV0aG9kIjoibm9uZSJ9LCJtYXhfbGV2ZWwiOiJhcHByb3ZlZF9wYXllciIsInN0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2Fzc2lzdGFudHMvMSJ9fX0.GakAA8xTbqzbXAP3FLtgVRhd3Nb3LrW7YbxBr1JOV4qH8zAQGse6XNxDUEpbCKPdvpFgDaoi5xPBP6YutIuvYw~",
+          "clientId": "https://chatgpt.com/oauth/client.json",
+          "expected": {
+            "decision": "deny",
+            "code": "AUTH_FAILED",
+            "reason": "ASSISTANT_NOT_LISTED"
+          }
+        },
+        {
+          "name": "deny-known-assistant-suspended",
+          "kind": "known-assistant",
+          "description": "The kill switch: the entry is SUSPENDED",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "artefactOverrides": {
+            "https://status.veridact.example/org/assistants/1": "eyJ0eXAiOiJzdGF0dXNsaXN0K2p3dCIsImtpZCI6Im9yZy0yMDI2Yi0zIiwiYWxnIjoiRVMyNTYifQ.eyJzdWIiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9hc3Npc3RhbnRzLzEiLCJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJpYXQiOjE3OTQyMTExNDAsImV4cCI6MTc5NDIyNTU0MCwidHRsIjozMDAsInN0YXR1c19saXN0Ijp7ImJpdHMiOjIsImxzdCI6ImVOcnR3UUVCQUFBQWdxQ21PNzBqUUFNQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFEb1BBQUlFIn19.Uk80YsytO_o6X5bGtnPBNhQdkEYJSN1coU3kSjklI4VVAnNM4exTCQ1Zv5vjEOhji46OHhohOh3o1UOKyasPqg"
+          },
+          "entry": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3Qva25vd24tYXNzaXN0YW50L3YxIiwianRpIjoidXJuOnV1aWQ6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDRkIiwic3ViIjoiaHR0cHM6Ly9jbGF1ZGUuYWkvb2F1dGgvY2xhdWRlLWNsaWVudC1tZXRhZGF0YS5qc29uIiwiaWF0IjoxNzk0MTI0ODAwLCJuYmYiOjE3OTQxMjQ4MDAsImV4cCI6MTc5NjcxNjgwMCwiY2xpZW50X21ldGFkYXRhX3VybHMiOlsiaHR0cHM6Ly9jbGF1ZGUuYWkvb2F1dGgvY2xhdWRlLWNsaWVudC1tZXRhZGF0YS5qc29uIiwiaHR0cHM6Ly9jbGF1ZGUuYWkvb2F1dGgvY2xhdWRlLWNvZGUtY2xpZW50LW1ldGFkYXRhLmpzb24iXSwib3BlcmF0b3IiOnsibmFtZSI6IkFudGhyb3BpYyBQQkMiLCJqdXJpc2RpY3Rpb24iOiJVUyIsInZlcmlmaWVkIjoiMjAyNi0xMS0wMSJ9LCJyZWRpcmVjdF9ob3N0cyI6WyJjbGF1ZGUuYWkiLCJjbGF1ZGUuY29tIl0sInRva2VuX2VuZHBvaW50X2F1dGgiOnsibWV0aG9kIjoibm9uZSJ9LCJtYXhfbGV2ZWwiOiJhcHByb3ZlZF9wYXllciIsInN0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2Fzc2lzdGFudHMvMSJ9fX0.qx3D4cCVFe6EnHLXgupvQ2JHWKONPeSaD8mk5wyaQxSpyiY_HEkhkdaO6v66ZXwhn2z4D2gGfNZTEZevOea3Vg~",
+          "clientId": "https://claude.ai/oauth/claude-client-metadata.json",
+          "expected": {
+            "decision": "deny",
+            "code": "AUTH_FAILED",
+            "reason": "STATUS_SUSPENDED"
+          }
+        }
+      ]
+    },
+    {
+      "name": "domain-tier",
+      "governanceKeys": {
+        "gov-test-2026a": {
+          "kty": "EC",
+          "crv": "P-256",
+          "x": "l1KG9JgssMPL53Sf9MshXs-KH3ypavgjWMZ2sG2Po4M",
+          "y": "-5u65oVPyskMrSmnIb14EcreqryFdb33Rr3AFv2yJKA"
+        }
+      },
+      "artefacts": {
+        "https://veridact.example/.well-known/jwt-vc-issuer/issuers/org-2026b": "{\"issuer\": \"https://veridact.example/issuers/org-2026b\", \"jwks\": {\"keys\": [{\"kty\": \"EC\", \"crv\": \"P-256\", \"x\": \"ZM_B4zJfu6cM_XGG9hFXLN70w4331aQRQ2qTmVAiLFQ\", \"y\": \"tWq_lNXzf7bMU_UJbgyqZRylLaS6XGgYNe8g6hMRqCE\", \"kid\": \"org-2026b-3\", \"use\": \"sig\", \"alg\": \"ES256\"}]}}",
+        "https://rogue.example/.well-known/jwt-vc-issuer/issuers/x": "{\"issuer\": \"https://rogue.example/issuers/x\", \"jwks\": {\"keys\": [{\"kty\": \"EC\", \"crv\": \"P-256\", \"x\": \"pgDcWAc0gEdr7B1XqDr03jtx6BaRxy3s5bdITxkHrbQ\", \"y\": \"9v-ytgXiuIdwcjIAnDHLZhdy6Mw17pQhQEYbnB7hYZE\", \"kid\": \"x-1\", \"use\": \"sig\", \"alg\": \"ES256\"}]}}",
+        "https://trust.veridact.example/trust-list.jwt": "eyJ0eXAiOiJ0cnVzdC1saXN0K2p3dCIsImtpZCI6Imdvdi10ZXN0LTIwMjZhIiwiYWxnIjoiRVMyNTYifQ.eyJpc3MiOiJodHRwczovL3RydXN0LnZlcmlkYWN0LmV4YW1wbGUiLCJ2ZXJzaW9uIjoiMjAyNi4xMS4xIiwiaWF0IjoxNzk0MTI0ODAwLCJleHAiOjE3OTQ4MTYwMDAsImlzc3VlcnMiOlt7ImlkIjoiaHR0cHM6Ly92ZXJpZGFjdC5leGFtcGxlL2lzc3VlcnMvb3JnLTIwMjZiIiwidGllcnMiOlsiZG9tYWluIiwib3JnYW5pc2F0aW9uIl0sInZjdHMiOlsiaHR0cHM6Ly92ZXJpZGFjdC5uZXQvdmN0L2FnZW50L3YxIiwiaHR0cHM6Ly92ZXJpZGFjdC5uZXQvdmN0L29wZXJhdG9yL3YxIiwiaHR0cHM6Ly92ZXJpZGFjdC5uZXQvdmN0L2tub3duLWFzc2lzdGFudC92MSJdLCJrZXlzIjpbeyJraWQiOiJvcmctMjAyNmItMyIsImprdCI6ImxLZlJpUk9FLXBLMU9YV3lQa04zdjZta3RDczNMaV9jZWxfd2Jvc3Q5NFkiLCJub3RCZWZvcmUiOjE3ODkwMjcyMDAsIm5vdEFmdGVyIjoxNzk2ODAzMjAwfV19XSwic2NvcGVzIjpbImZzOmNsYWltczpyZWFkLXN0YXR1cyIsImZzOnF1b3RlczpjcmVhdGUiLCJmczpwYXltZW50czppbml0aWF0ZSJdLCJwb2xpY3kiOnsidGllck9yZGVyIjpbImRvbWFpbiIsIm9yZ2FuaXNhdGlvbiJdLCJhZ2VudENyZWRlbnRpYWxNYXhMaWZldGltZSI6ODY0MDAsInByZXNlbnRhdGlvbk1heExpZmV0aW1lIjoxMjAsIm9wZXJhdG9yQ3JlZGVudGlhbE1heExpZmV0aW1lIjp7ImRvbWFpbiI6Nzc3NjAwMCwib3JnYW5pc2F0aW9uIjozMTYyMjQwMH0sImtub3duQXNzaXN0YW50TWF4TGlmZXRpbWUiOjc3NzYwMDB9fQ.97noRLvK4iWkjvJ0EOgUuLie5LiWvs3AwzYA_QoehGhFz2MCQvUJ4Eo9Rc12Ran0hpK-sUeCWLx6uW1K5ijakA",
+        "https://status.veridact.example/org/agents/7": "eyJ0eXAiOiJzdGF0dXNsaXN0K2p3dCIsImtpZCI6Im9yZy0yMDI2Yi0zIiwiYWxnIjoiRVMyNTYifQ.eyJzdWIiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9hZ2VudHMvNyIsImlzcyI6Imh0dHBzOi8vdmVyaWRhY3QuZXhhbXBsZS9pc3N1ZXJzL29yZy0yMDI2YiIsImlhdCI6MTc5NDIxMTE0MCwiZXhwIjoxNzk0MjI1NTQwLCJ0dGwiOjMwMCwic3RhdHVzX2xpc3QiOnsiYml0cyI6MiwibHN0IjoiZU5ydHdRRUJBQUFBZ0pELXItNElDZ0FBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBWWdBQUFBUSJ9fQ.pFtHpRgCZO3ckpyGA9k4j5rjAco12OqUKGvT7wcDeILGDyq5-_qzbjfweOmhghEGzfTDn-pYkiOeBUXPQiDvDA",
+        "https://status.veridact.example/org/operators/2": "eyJ0eXAiOiJzdGF0dXNsaXN0K2p3dCIsImtpZCI6Im9yZy0yMDI2Yi0zIiwiYWxnIjoiRVMyNTYifQ.eyJzdWIiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiIsImlzcyI6Imh0dHBzOi8vdmVyaWRhY3QuZXhhbXBsZS9pc3N1ZXJzL29yZy0yMDI2YiIsImlhdCI6MTc5NDIxMTE0MCwiZXhwIjoxNzk0MjI1NTQwLCJ0dGwiOjMwMCwic3RhdHVzX2xpc3QiOnsiYml0cyI6MiwibHN0IjoiZU5ydHdRRUJBQUFBZ0pELXItNElDZ0FBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBWWdBQUFBUSJ9fQ.Rm5GmRZLaJRKxjrmz-hf7Y8heiFfPTHOU3iC32k3QH4lDbZ285r3mBG__FIyvnjxkd1yRLqHaIDCRFvR-NMb3w",
+        "https://status.veridact.example/org/assistants/1": "eyJ0eXAiOiJzdGF0dXNsaXN0K2p3dCIsImtpZCI6Im9yZy0yMDI2Yi0zIiwiYWxnIjoiRVMyNTYifQ.eyJzdWIiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9hc3Npc3RhbnRzLzEiLCJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJpYXQiOjE3OTQyMTExNDAsImV4cCI6MTc5NDIyNTU0MCwidHRsIjozMDAsInN0YXR1c19saXN0Ijp7ImJpdHMiOjIsImxzdCI6ImVOcnR3UUVCQUFBQWdKRC1yLTRJQ2dBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQVlnQUFBQVEifX0.67Lhbeyu7zxZW0zmb5CmB_ZQsTHoEsXtcdQ2Q46jYekonfTn7sQujgNawoU29LWBHSrymQSYTPEyrD23dz85Rw"
+      },
+      "cases": [
+        {
+          "name": "deny-tier-too-low",
+          "kind": "presentation",
+          "description": "Domain-tier agent on a route needing Organisation tier",
+          "policy": {
+            "audience": "https://api.bank.example",
+            "minTier": "organisation"
+          },
+          "request": {},
+          "presentation": "eyJ0eXAiOiJkYytzZC1qd3QiLCJraWQiOiJvcmctMjAyNmItMyIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJodHRwczovL3ZlcmlkYWN0LmV4YW1wbGUvaXNzdWVycy9vcmctMjAyNmIiLCJ2Y3QiOiJodHRwczovL3ZlcmlkYWN0Lm5ldC92Y3QvYWdlbnQvdjEiLCJqdGkiOiJ1cm46dXVpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMGMwM2QiLCJzdWIiOiJodHRwczovL29wZXJhdG9yLmV4YW1wbGUvYWdlbnRzL2E3ZjNrMiIsImlhdCI6MTc5NDIwNzYwMCwibmJmIjoxNzk0MjA3NjAwLCJleHAiOjE3OTQyMzY0MDAsIm9wZXJhdG9yIjoiaHR0cHM6Ly9vcGVyYXRvci5leGFtcGxlIiwib3BlcmF0b3JfY3JlZGVudGlhbCI6InVybjp1dWlkOjAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMSIsIm9wZXJhdG9yX3N0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjE3LCJ1cmkiOiJodHRwczovL3N0YXR1cy52ZXJpZGFjdC5leGFtcGxlL29yZy9vcGVyYXRvcnMvMiJ9fSwidGllciI6ImRvbWFpbiIsInNjb3BlcyI6WyJmczpjbGFpbXM6cmVhZC1zdGF0dXMiLCJmczpxdW90ZXM6Y3JlYXRlIl0sImFjY291bnRhYmxlX3JvbGUiOiJIZWFkIG9mIERpZ2l0YWwgQ2xhaW1zIiwiY25mIjp7Imp3ayI6eyJrdHkiOiJFQyIsImNydiI6IlAtMjU2IiwieCI6IkNuOVBDWV9DeWNvUnRvbFlOSDVoUVVJQll0VXlLUUVDQ2RRR3RFeXZqTmMiLCJ5IjoiWVI2cGN1ZC1KcGppbWZjcEtmV1Z1ai1FTmVSd21JbDZNV29pQ1h2OHFxNCJ9fSwiY25mX2V2ZW50IjoidmVyaWRhY3QtbG9nLTIwMjYvMDAwMDAwNDU2Iiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6NDgyMTMsInVyaSI6Imh0dHBzOi8vc3RhdHVzLnZlcmlkYWN0LmV4YW1wbGUvb3JnL2FnZW50cy83In19LCJfc2QiOlsiQXlLUGZyamlxQ0w4cGNaZGZBN2lNazh5aHhsVTZrN3BINk1USkRPYkxYdyIsIlJzZXJSYmZHWkp2cDVOM2diVmllb2I1S1FmTG9INXdneHJfZ0lhcnJlRDgiLCJYalNsZ0EzdkloNVRqTlQxRy02dVctTXMxd3BuME9YUGJ2NG9zNGhWZXVNIiwid0ZrS2otRk9Ea3Z4U3BkY2ZfbUdyVG50QmtGOTJNR1BtLUpLUFBOVVdpSSIsInhyei0zN0c0T0NRWXRSdXBiOXg1WHA0eDJtNWVBcTlnWVQwVFgtQkpoVG8iXSwiX3NkX2FsZyI6InNoYS0yNTYifQ.Zn9fyChykgPQKo7V3T3-56lnINXUQ-GRgNcsFLw8FbUMv_g0Hkxkv5ZkoT9EVm56h-3ZfIWy2lu9-O1eDu04MA~WyJnXzR4MGpqSDRYbnVuVExvTlNfMUtnIiwib3BlcmF0b3JfbGVnYWxfbmFtZSIsIk9wZXJhdG9yIEV4YW1wbGUgKFB0eSkgTHRkIl0~WyJWcFNqam9YZkhYa1JuOEtRRGQwWkt3Iiwib3BlcmF0b3JfcmVnaXN0cmF0aW9uIiwiMjAxOS8xMjM0NTYvMDciXQ~WyJJcTVLZTRBVTBWdEhJbC05WTJyZFhnIiwib3BlcmF0b3JfanVyaXNkaWN0aW9uIiwiWkEiXQ~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2FwaS5iYW5rLmV4YW1wbGUiLCJub25jZSI6IjlmMmM0MWQwYTdlM2I1ZjhhMWMyZDNlNGY1YTZiN2M4IiwiaWF0IjoxNzk0MjExMTk1LCJzZF9oYXNoIjoid0IzbHkzWXE5azcwZlAydmRfckRIVEFxVWJ5cUZsZzlHbnA2dndRZ0pIayJ9.XyDEJ9zDXHm6SCA8JA8ZiigntUk_3QhaoXg6aP0-X-4SeNZ7scC-KDgKDnkPzC6IV2PTLAfH6qkpqCNhCzc5Fg",
+          "expected": {
+            "decision": "deny",
+            "code": "TIER_TOO_LOW",
+            "reason": "TIER_TOO_LOW"
+          }
+        }
+      ]
+    }
+  ]
+}

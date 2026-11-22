@@ -1,6 +1,6 @@
-"""Generate the Veridact verifier conformance vectors.
+"""Generate the Veridact verifier conformance vectors (specification v0.5).
 
-    python conformance/generate.py            # writes conformance/vectors/verifier-v0.2.json
+    python conformance/generate.py            # writes conformance/vectors/verifier-v0.5.json
 
 The vectors are frozen: keys and signatures are random, so regenerating replaces
 every value. Commit the output; implementations test against the committed file.
@@ -14,212 +14,240 @@ from pathlib import Path
 
 from cryptography.hazmat.primitives.asymmetric import ec
 
-from veridact_verify.testing.mock_network import (
-    AUDIENCE,
-    NOW,
-    TRUST_LIST_URL,
-    MockNetwork,
-    make_party,
-)
+from veridact_verify import jose, sdjwt, status
+from veridact_verify.testing.mock_network import AUDIENCE, CLAUDE_CIMD, NOW, TRUST_LIST_URL, MockNetwork
 
-OUT = Path(__file__).parent / "vectors" / "verifier-v0.2.json"
+OUT = Path(__file__).parent / "vectors" / "verifier-v0.5.json"
 NONCE = "9f2c41d0a7e3b5f8a1c2d3e4f5a6b7c8"
-LIMITS = {"currency": "ZAR", "perPayment": "500.00", "perDay": "2000.00"}
+LIMITS = {"currency": "ZAR", "per_payment": "500.00", "per_day": "2000.00"}
+DENY, ALLOW, ASK, CHALLENGE = "deny", "allow", "ask_person", "challenge"
 
 
-def build_cases(net: MockNetwork):
-    """Yield (name, description, build, request, expected). ``build`` may change
-    published artefacts; the generator records those changes per case."""
-    a, o = net.agent_credential, net.operator_credential
+def presentation_cases(net: MockNetwork):
+    """Yield (name, description, build, request, expected, policy extras)."""
+    a = net.agent_credential
 
     def vp(**kw):
         return lambda: net.presentation(NONCE, **kw)
 
-    def creds(agent=None, operator=None):
-        return [agent or a(), operator or o()]
+    def cred(**kw):
+        return vp(credential=a(**kw))
 
-    yield ("allow-basic", "Valid presentation at Organisation tier",
-           vp(), {"scopes": ["fs:claims:read-status"]}, ("allow", None, None))
-    yield ("allow-no-scopes-requested", "Grants all held scopes when the route requests none",
-           vp(), {}, ("allow", None, None))
-    yield ("deny-vp-typ", "Presentation typ is not vp+jwt",
-           vp(header={"typ": "JWT"}), {}, ("deny", "AUTH_FAILED", "VP_TYP"))
-    yield ("deny-vp-audience", "aud names another relying party",
-           vp(aud="https://other.example"), {}, ("deny", "AUTH_FAILED", "VP_AUDIENCE"))
+    yield ("allow-basic", "Valid SD-JWT+KB at Organisation tier, every disclosure shown",
+           vp(), {"scopes": ["fs:claims:read-status"]}, (ALLOW, None, None), {})
+    yield ("allow-no-disclosures", "The agent withholds every selectively disclosable claim",
+           vp(disclose=[]), {}, (ALLOW, None, None), {})
+    yield ("allow-required-disclosure-shown", "The route needs operator_legal_name and gets it",
+           vp(disclose=["operator_legal_name"]), {"disclose": ["operator_legal_name"]}, (ALLOW, None, None), {})
+    yield ("deny-required-disclosure-withheld", "The route needs operator_legal_name; it is withheld",
+           vp(disclose=["operator_jurisdiction"]), {"disclose": ["operator_legal_name"]},
+           (DENY, "AUTH_FAILED", "CLAIMS_NOT_DISCLOSED"), {})
+    yield ("deny-policy-disclosure-withheld", "The relying party's policy needs operator_registration",
+           vp(disclose=[]), {}, (DENY, "AUTH_FAILED", "CLAIMS_NOT_DISCLOSED"),
+           {"requiredDisclosures": ["operator_registration"]})
+    yield ("deny-no-key-binding", "An SD-JWT with no KB-JWT",
+           lambda: a(), {}, (DENY, "AUTH_FAILED", "KB_MISSING"), {})
+    yield ("deny-kb-typ", "KB-JWT typ is not kb+jwt",
+           vp(header={"typ": "JWT"}), {}, (DENY, "AUTH_FAILED", "KB_TYP"), {})
+    yield ("deny-kb-audience", "KB-JWT aud names another relying party",
+           vp(aud="https://other.example"), {}, (DENY, "AUTH_FAILED", "KB_AUDIENCE"), {})
     yield ("challenge-nonce-unknown", "Nonce was not issued by this relying party",
-           lambda: net.presentation("0" * 32), {}, ("challenge", "CHALLENGE_REQUIRED", "NONCE_UNKNOWN"))
-    yield ("challenge-vp-expired", "Presentation expired",
-           vp(iat=NOW - 200, lifetime=100), {}, ("challenge", "CHALLENGE_REQUIRED", "VP_EXPIRED"))
-    yield ("deny-vp-lifetime", "Presentation lifetime above 120 seconds",
-           vp(lifetime=121), {}, ("deny", "AUTH_FAILED", "VP_LIFETIME"))
-    yield ("deny-vp-signature", "Presentation signed by a key not in the agent DID",
-           vp(key=ec.generate_private_key(ec.SECP256R1())), {}, ("deny", "AUTH_FAILED", "VP_SIGNATURE"))
+           lambda: net.presentation("0" * 32), {}, (CHALLENGE, "CHALLENGE_REQUIRED", "NONCE_UNKNOWN"), {})
+    yield ("challenge-kb-expired", "KB-JWT signed 200 seconds ago",
+           vp(iat=NOW - 200), {}, (CHALLENGE, "CHALLENGE_REQUIRED", "KB_EXPIRED"), {})
+    yield ("deny-sd-hash", "KB-JWT sd_hash does not cover the presented disclosures",
+           vp(mutate=lambda p: p.update(sd_hash="AAAA")), {}, (DENY, "AUTH_FAILED", "SD_HASH_MISMATCH"), {})
 
-    def tampered_log():
-        log = net.fetcher.files[net.agent.log_url].decode()
-        net.fetcher.put(net.agent.log_url, log.replace("authentication", "assertionMethod"))
-        return net.presentation(NONCE)
-    yield ("deny-did-log-tampered", "Agent DID log edited after signing",
-           tampered_log, {}, ("deny", "AUTH_FAILED", "HOLDER_DID_UNRESOLVABLE"))
-
-    yield ("deny-operator-credential-missing", "Presentation carries only the Agent Credential",
-           vp(credentials=[a()]), {}, ("deny", "AUTH_FAILED", "VC_MISSING"))
+    def dropped_disclosure():
+        full = sdjwt.parse(net.presentation(NONCE))
+        return sdjwt.serialize(full.jws.raw, [d.raw for d in full.disclosures[1:]], full.kb_jwt)
+    yield ("deny-disclosure-dropped-after-binding", "A disclosure removed after the KB-JWT was signed",
+           dropped_disclosure, {}, (DENY, "AUTH_FAILED", "SD_HASH_MISMATCH"), {})
+    yield ("deny-kb-signature", "KB-JWT signed by a key other than cnf.jwk",
+           vp(key=ec.generate_private_key(ec.SECP256R1())), {}, (DENY, "AUTH_FAILED", "KB_SIGNATURE"), {})
 
     def forged():
-        h, p, s = a().split(".")
-        from veridact_verify.jose import b64url_decode, b64url_encode
-        body = b64url_decode(p).replace(b"fs:quotes:create", b"fs:payments:initiate")
-        return net.presentation(NONCE, credentials=[".".join([h, b64url_encode(body), s]), o()])
+        jwt, *rest = a().split("~")
+        h, p, s = jwt.split(".")
+        body = jose.b64url_decode(p).replace(b"fs:quotes:create", b"fs:payments:initiate")
+        return net.presentation(NONCE, credential="~".join([".".join([h, jose.b64url_encode(body), s]), *rest]))
     yield ("deny-agent-credential-tampered", "Scope added to a signed Agent Credential",
-           forged, {}, ("deny", "AUTH_FAILED", "VC_SIGNATURE"))
+           forged, {}, (DENY, "AUTH_FAILED", "VC_SIGNATURE"), {})
+
+    def fake_disclosure():
+        parsed = sdjwt.parse(a())
+        fake = sdjwt.Disclosure.create("operator_legal_name", "Big Bank Ltd")
+        return net.presentation(NONCE, credential=sdjwt.serialize(parsed.jws.raw, [fake.raw]))
+    yield ("deny-disclosure-forged", "A disclosure the issuer never signed a digest for",
+           fake_disclosure, {}, (DENY, "AUTH_FAILED", "DISCLOSURE_INVALID"), {})
     yield ("deny-issuer-unlisted", "Agent Credential from an issuer not in the trust list",
-           vp(credentials=creds(agent=a(signer=net.rogue_issuer))), {},
-           ("deny", "ISSUER_UNTRUSTED", "ISSUER_NOT_LISTED"))
+           cred(signer=net.rogue_issuer), {}, (DENY, "ISSUER_UNTRUSTED", "ISSUER_NOT_LISTED"), {})
+
+    def metadata_key_swapped():
+        rogue = ec.generate_private_key(ec.SECP256R1())
+        net.publish_issuer_metadata(net.issuer, mutate=lambda d: d["jwks"]["keys"][0].update(
+            jose.key_to_jwk(rogue.public_key())))
+        return net.presentation(NONCE)
+    yield ("deny-metadata-key-not-pinned", "Issuer metadata serves a key the trust list does not pin",
+           metadata_key_swapped, {}, (DENY, "ISSUER_UNTRUSTED", "ISSUER_KEY_NOT_LISTED"), {})
 
     def tier_not_accredited():
         net.publish_trust_list(lambda p: p["issuers"][0].update(tiers=["domain"]))
         return net.presentation(NONCE)
     yield ("deny-issuer-tier", "Issuer accredited for Domain tier only",
-           tier_not_accredited, {}, ("deny", "ISSUER_UNTRUSTED", "ISSUER_NOT_ACCREDITED_FOR_TIER"))
+           tier_not_accredited, {}, (DENY, "ISSUER_UNTRUSTED", "ISSUER_NOT_ACCREDITED_FOR_TIER"), {})
 
     def untrusted_list():
         net.publish_trust_list(key=ec.generate_private_key(ec.SECP256R1()))
         return net.presentation(NONCE)
     yield ("deny-trust-list-signature", "Trust list signed by a key that is not pinned",
-           untrusted_list, {}, ("deny", "VERIFICATION_UNAVAILABLE", "TRUST_LIST_UNAVAILABLE"))
-
-    yield ("deny-agent-credential-expired", "Agent Credential past validUntil",
-           vp(credentials=creds(agent=a(valid_from=NOW - 9 * 3600))), {},
-           ("deny", "CREDENTIAL_EXPIRED", "VC_EXPIRED"))
+           untrusted_list, {}, (DENY, "VERIFICATION_UNAVAILABLE", "TRUST_LIST_UNAVAILABLE"), {})
+    yield ("deny-agent-credential-expired", "Agent Credential past exp",
+           cred(valid_from=NOW - 9 * 3600), {}, (DENY, "CREDENTIAL_EXPIRED", "VC_EXPIRED"), {})
     yield ("deny-agent-credential-lifetime", "Agent Credential lifetime 25 hours",
-           vp(credentials=creds(agent=a(lifetime=25 * 3600))), {},
-           ("deny", "AUTH_FAILED", "VC_LIFETIME"))
+           cred(lifetime=25 * 3600), {}, (DENY, "AUTH_FAILED", "VC_LIFETIME"), {})
 
-    def revoked_agent():
-        net.revoke(net.agent_status_url, 48213)
-        return net.presentation(NONCE)
-    yield ("deny-agent-revoked", "Agent Credential's revocation bit is set",
-           revoked_agent, {}, ("deny", "AUTH_FAILED", "STATUS_REVOKED"))
-
-    def revoked_operator():
-        net.revoke(net.operator_status_url, 17)
-        return net.presentation(NONCE)
-    yield ("deny-operator-revoked", "Operator Credential's revocation bit is set",
-           revoked_operator, {}, ("deny", "AUTH_FAILED", "STATUS_REVOKED"))
+    def set_status(url, index, value):
+        def build():
+            net.set_status(url, index, value)
+            return net.presentation(NONCE)
+        return build
+    yield ("deny-agent-revoked", "Agent Credential's status entry is INVALID",
+           set_status(net.agent_status_url, 48213, status.INVALID), {}, (DENY, "AUTH_FAILED", "STATUS_REVOKED"), {})
+    yield ("deny-agent-suspended", "Agent Credential's status entry is SUSPENDED",
+           set_status(net.agent_status_url, 48213, status.SUSPENDED), {},
+           (DENY, "AUTH_FAILED", "STATUS_SUSPENDED"), {})
+    yield ("deny-operator-revoked", "The operator_status entry is INVALID",
+           set_status(net.operator_status_url, 17, status.INVALID), {},
+           (DENY, "AUTH_FAILED", "OPERATOR_REVOKED"), {})
+    yield ("allow-neighbour-revoked", "Entries either side of the agent's are INVALID",
+           lambda: (net.set_status(net.agent_status_url, 48212), net.set_status(net.agent_status_url, 48214),
+                    net.presentation(NONCE))[-1], {}, (ALLOW, None, None), {})
 
     def rogue_status():
         net.publish_status_list(net.agent_status_url, signer=net.rogue_issuer)
         return net.presentation(NONCE)
     yield ("deny-status-list-signer", "Status list signed by another issuer",
-           rogue_status, {}, ("deny", "VERIFICATION_UNAVAILABLE", "STATUS_UNAVAILABLE"))
+           rogue_status, {}, (DENY, "VERIFICATION_UNAVAILABLE", "STATUS_UNAVAILABLE"), {})
 
-    def stale_list(iat_offset, risk):
-        def build():
-            net.publish_status_list(net.agent_status_url, mutate=lambda p: p.update(
-                iat=NOW - iat_offset, exp=NOW - iat_offset + 4 * 3600))
-            return net.presentation(NONCE)
-        return build
-    yield ("allow-status-list-cached-low-risk", "Status list signed an hour ago; low-risk route",
-           stale_list(3600, "low"), {"risk": "low"}, ("allow", None, None))
-    yield ("deny-status-list-stale-high-risk", "Status list signed an hour ago; high-risk route",
-           stale_list(3600, "high"), {"risk": "high"},
-           ("deny", "VERIFICATION_UNAVAILABLE", "STATUS_STALE"))
-
-    def no_exp_list():
-        net.publish_status_list(net.agent_status_url, mutate=lambda p: p.pop("exp"))
+    def stale_list():
+        net.publish_status_list(net.agent_status_url, iat=NOW - 3600)
         return net.presentation(NONCE)
-    yield ("deny-status-list-without-exp", "Status list carries no exp",
-           no_exp_list, {}, ("deny", "VERIFICATION_UNAVAILABLE", "STATUS_UNAVAILABLE"))
-
-    yield ("deny-cnf-mismatch", "cnf names a key other than the one that signed",
-           vp(credentials=creds(agent=a(mutate=lambda p: p["credentialSubject"]["cnf"].update(
-               kid=net.agent.did + "#key-2")))), {}, ("deny", "AUTH_FAILED", "CNF_MISMATCH"))
-
-    other = make_party("operator.example:agents:zz9", "authentication")
-
-    def other_agent():
-        net.fetcher.put(other.log_url, other.log)
-        cred = a(mutate=lambda p: p["credentialSubject"].update(id=other.did, cnf={"kid": other.kid}))
-        return net.presentation(NONCE, credentials=[cred, o()])
-    yield ("deny-holder-mismatch", "Agent presents a credential issued to another agent",
-           other_agent, {}, ("deny", "AUTH_FAILED", "HOLDER_MISMATCH"))
-
-    yield ("deny-operator-mismatch", "Operator Credential for a different operator",
-           vp(credentials=creds(operator=o(mutate=lambda p: p["credentialSubject"].update(
-               id="did:webvh:Qmother:other.example")))), {},
-           ("deny", "AUTH_FAILED", "OPERATOR_MISMATCH"))
+    yield ("allow-status-list-hour-old-low-risk", "Status list signed an hour ago; low-risk route",
+           stale_list, {"risk": "low"}, (ALLOW, None, None), {})
+    yield ("deny-status-list-stale-high-risk", "Status list signed an hour ago; high-risk route",
+           stale_list, {"risk": "high"}, (DENY, "VERIFICATION_UNAVAILABLE", "STATUS_STALE"), {})
+    yield ("deny-cnf-not-logged", "The cnf key has no logged add event (cnf_event missing)",
+           cred(mutate=lambda c: c.pop("cnf_event")), {}, (DENY, "AUTH_FAILED", "KEY_NOT_LOGGED"), {})
     yield ("deny-scope-not-held", "Route needs a scope the agent was not delegated",
-           vp(), {"scopes": ["fs:payments:initiate"]}, ("deny", "SCOPE_NOT_HELD", "SCOPE_NOT_HELD"))
+           vp(), {"scopes": ["fs:payments:initiate"]}, (DENY, "SCOPE_NOT_HELD", "SCOPE_NOT_HELD"), {})
 
-    pay = creds(agent=a(scopes=["fs:payments:initiate"], limits=LIMITS))
+    pay = cred(scopes=["fs:payments:initiate"], limits=LIMITS)
     yield ("allow-payment-within-limits", "R499.99 with R1,000 already paid today",
-           vp(credentials=pay),
-           {"scopes": ["fs:payments:initiate"],
-            "payment": {"amount": "499.99", "currency": "ZAR", "spentToday": "1000"}},
-           ("allow", None, None))
+           pay, {"scopes": ["fs:payments:initiate"],
+                 "payment": {"amount": "499.99", "currency": "ZAR", "spentToday": "1000"}},
+           (ALLOW, None, None), {})
     yield ("ask-person-per-payment", "R500.01 against a R500 per-payment limit",
-           vp(credentials=pay),
-           {"scopes": ["fs:payments:initiate"], "payment": {"amount": "500.01", "currency": "ZAR"}},
-           ("ask_person", "LIMIT_PER_PAYMENT", "LIMIT_PER_PAYMENT"))
+           pay, {"scopes": ["fs:payments:initiate"], "payment": {"amount": "500.01", "currency": "ZAR"}},
+           (ASK, "LIMIT_PER_PAYMENT", "LIMIT_PER_PAYMENT"), {})
     yield ("ask-person-per-day", "R400 with R1,700 already paid against R2,000 a day",
-           vp(credentials=pay),
-           {"scopes": ["fs:payments:initiate"],
-            "payment": {"amount": "400", "currency": "ZAR", "spentToday": "1700"}},
-           ("ask_person", "LIMIT_PER_DAY", "LIMIT_PER_DAY"))
+           pay, {"scopes": ["fs:payments:initiate"],
+                 "payment": {"amount": "400", "currency": "ZAR", "spentToday": "1700"}},
+           (ASK, "LIMIT_PER_DAY", "LIMIT_PER_DAY"), {})
 
 
-def tier_case(name, description, policy, request, expected):
-    """Cases that need a Domain-tier network."""
-    net = MockNetwork(tier="domain")
-    op = net.operator_credential(lifetime=60 * 86400)
-    vp = net.presentation(NONCE, credentials=[net.agent_credential(), op])
-    return net, {"name": name, "description": description, "policy": policy,
-                 "request": request, "presentation": vp, "expected": expected}
+def attestation_cases(net: MockNetwork):
+    """Pattern C. Each yields (name, description, build -> (attestation, clientId, dpopJkt), request, expected)."""
+    ok = (net.agent.id, net.agent.jkt)
+    yield ("allow-client-attestation", "Attestation for this client, bound to its DPoP key",
+           lambda: (net.client_attestation(), *ok), {"scopes": ["fs:quotes:create"]}, (ALLOW, None, None))
+    yield ("deny-attestation-other-client", "Attestation names another client_id",
+           lambda: (net.client_attestation(), "https://operator.example/agents/other", net.agent.jkt), {},
+           (DENY, "AUTH_FAILED", "CLIENT_MISMATCH"))
+    yield ("deny-attestation-other-dpop-key", "The DPoP proof was made with a different key",
+           lambda: (net.client_attestation(), net.agent.id, "x" * 43), {},
+           (DENY, "AUTH_FAILED", "DPOP_KEY_MISMATCH"))
+
+    def revoked():
+        net.set_status(net.agent_status_url, 48213)
+        return (net.client_attestation(), *ok)
+    yield ("deny-attestation-revoked", "Revoking the Agent Credential revokes its attestation",
+           revoked, {}, (DENY, "AUTH_FAILED", "STATUS_REVOKED"))
+
+
+def assistant_cases(net: MockNetwork):
+    """Known-assistant entries. Each yields (name, description, build -> (entry, clientId), expected)."""
+    yield ("allow-known-assistant", "Entry for Claude, matched by its CIMD URL",
+           lambda: (net.known_assistant(), CLAUDE_CIMD), (ALLOW, None, None))
+    yield ("deny-known-assistant-other-client", "Entry does not list this client",
+           lambda: (net.known_assistant(), "https://chatgpt.com/oauth/client.json"),
+           (DENY, "AUTH_FAILED", "ASSISTANT_NOT_LISTED"))
+
+    def suspended():
+        net.set_status(net.assistant_status_url, 3, status.SUSPENDED)
+        return (net.known_assistant(), CLAUDE_CIMD)
+    yield ("deny-known-assistant-suspended", "The kill switch: the entry is SUSPENDED",
+           suspended, (DENY, "AUTH_FAILED", "STATUS_SUSPENDED"))
 
 
 def main() -> int:
     net = MockNetwork()
     base = net.snapshot()
-    cases = []
-    for name, description, build, request, (decision, code, reason) in build_cases(net):
-        presentation = build()
-        now_files = net.snapshot()
-        overrides = {u: b for u, b in now_files.items() if base.get(u) != b}
+
+    def capture(build):
+        result = build()
+        overrides = {u: b for u, b in net.snapshot().items() if base.get(u) != b}
         net.fetcher.files = {u: b.encode() for u, b in base.items()}
-        net.revoked = {u: set() for u in net.revoked}
-        cases.append({
-            "name": name,
-            "description": description,
-            "policy": {"audience": AUDIENCE, "minTier": "organisation"},
-            "request": request,
-            "artefactOverrides": overrides,
-            "presentation": presentation,
-            "expected": {"decision": decision, "code": code, "reason": reason},
-        })
+        net.status_values = {u: {} for u in net.status_values}
+        return result, overrides
+
+    def expected(triple):
+        decision, code, reason = triple
+        return {"decision": decision, "code": code, "reason": reason}
+
+    cases = []
+    for name, description, build, request, result, extra in presentation_cases(net):
+        presentation, overrides = capture(build)
+        cases.append({"name": name, "kind": "presentation", "description": description,
+                      "policy": {"audience": AUDIENCE, "minTier": "organisation", **extra},
+                      "request": request, "artefactOverrides": overrides,
+                      "presentation": presentation, "expected": expected(result)})
+    for name, description, build, request, result in attestation_cases(net):
+        (attestation, client_id, jkt), overrides = capture(build)
+        cases.append({"name": name, "kind": "client-attestation", "description": description,
+                      "policy": {"audience": AUDIENCE, "minTier": "organisation"},
+                      "request": request, "artefactOverrides": overrides,
+                      "attestation": attestation, "clientId": client_id, "dpopJkt": jkt,
+                      "expected": expected(result)})
+    for name, description, build, result in assistant_cases(net):
+        (entry, client_id), overrides = capture(build)
+        cases.append({"name": name, "kind": "known-assistant", "description": description,
+                      "policy": {"audience": AUDIENCE, "minTier": "organisation"}, "request": {},
+                      "artefactOverrides": overrides, "entry": entry, "clientId": client_id,
+                      "expected": expected(result)})
 
     # Domain tier: a separate network, so it carries its own full artefact set.
-    domain_net, low = tier_case(
-        "deny-tier-too-low", "Domain-tier agent on a route needing Organisation tier",
-        {"audience": AUDIENCE, "minTier": "organisation"}, {},
-        {"decision": "deny", "code": "TIER_TOO_LOW", "reason": "TIER_TOO_LOW"})
-    domain_bundle = {
-        "governanceKeys": domain_net.governance_keys,
-        "artefacts": domain_net.snapshot(),
-        "cases": [low],
-    }
+    domain = MockNetwork(tier="domain")
+    low = {"name": "deny-tier-too-low", "kind": "presentation",
+           "description": "Domain-tier agent on a route needing Organisation tier",
+           "policy": {"audience": AUDIENCE, "minTier": "organisation"}, "request": {},
+           "presentation": domain.presentation(NONCE),
+           "expected": {"decision": DENY, "code": "TIER_TOO_LOW", "reason": "TIER_TOO_LOW"}}
 
     doc = {
-        "about": ("Veridact verifier conformance vectors for specification v0.2. Every case runs at 'now', "
-                  "with 'nonce' issued by the relying party and unused. 'code' is normative; "
-                  "'reason' is the reference library's internal code and is informative. "
-                  "'request.risk' defaults to medium."),
+        "about": ("Veridact verifier conformance vectors for specification v0.5 (SD-JWT VC, Token Status "
+                  "List, HTTPS identifiers). Every case runs at 'now', with 'nonce' issued by the relying "
+                  "party and unused. 'kind' says which verification to run. 'code' is normative; 'reason' "
+                  "is the reference library's internal code and is informative. 'request.risk' defaults "
+                  "to medium."),
         "now": NOW,
         "nonce": NONCE,
         "trustListUrl": TRUST_LIST_URL,
         "bundles": [
-            {"name": "organisation-tier", "governanceKeys": net.governance_keys,
-             "artefacts": base, "cases": cases},
-            {"name": "domain-tier", **domain_bundle},
+            {"name": "organisation-tier", "governanceKeys": net.governance_keys, "artefacts": base,
+             "cases": cases},
+            {"name": "domain-tier", "governanceKeys": domain.governance_keys,
+             "artefacts": domain.snapshot(), "cases": [low]},
         ],
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
