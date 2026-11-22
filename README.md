@@ -60,7 +60,7 @@ to an allowed call, a denied scope and a revocation. [`deploy/`](deploy) also ha
 
 ## Related project
 
-[**Veridact Valet**](https://github.com/richard-craig/veridact-valet) lets bank customers give AI agents scoped,
+[**Veridact Valet**](https://github.com/veridactlabs/veridact-valet) lets bank customers give AI agents scoped,
 revocable access to their accounts. Veridact answers *which agent is this, and is it still trusted?*; Valet
 answers *what did the customer allow?* Both run beside a bank's own systems: the Veridact verifier (this repo's
 sidecar) next to the bank's authorisation server, and the Valet decision service next to its MCP server and APIs.

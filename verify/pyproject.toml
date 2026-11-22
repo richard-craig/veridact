@@ -27,7 +27,7 @@ dependencies = [
 test = ["pytest==8.*", "pytest-asyncio==0.*"]
 
 [project.urls]
-Specification = "https://github.com/richard-craig/veridact/blob/main/docs/specification.md"
+Specification = "https://github.com/veridactlabs/veridact/blob/main/docs/specification.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/veridact_verify"]

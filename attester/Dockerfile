@@ -1,7 +1,7 @@
 # The known-assistant attester. Built from the repository root (it needs verify/ for JOSE):
 #   docker build -f attester/Dockerfile -t veridact-attester .
 # or straight from GitHub, as the Valet demo does:
-#   docker build -f attester/Dockerfile https://github.com/richard-craig/veridact.git#main
+#   docker build -f attester/Dockerfile https://github.com/veridactlabs/veridact.git#main
 FROM python:3.13-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1
 WORKDIR /src
