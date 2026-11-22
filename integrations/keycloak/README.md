@@ -20,7 +20,7 @@ realm trusts.
 
 ## Why a bridge
 
-Keycloak cannot verify a Veridact presentation itself: each agent signs with its own did:webvh key, the
+Keycloak cannot verify a Veridact presentation itself: it is an SD-JWT+KB bound to the agent's own key, the
 credentials need status-list and trust-list checks, and the nonce is single-use. A Java token-exchange provider
 could do it inside Keycloak, but it would build on Keycloak's internal token-exchange classes, which change
 between releases. The bridge runs the reference verifier, then hands Keycloak something it already understands.
@@ -34,9 +34,14 @@ between releases. The bridge runs the reference verifier, then hands Keycloak so
 - **Scopes**: the assertion carries only the scopes the agent holds (intersected with what it asked for), and
   Keycloak adds only those that exist as client scopes on the bridge's client.
 - **One Keycloak user per agent**, created and linked on its first verified presentation:
-  username `agent-<hash of the DID>`, federated identity = the agent DID, attributes `veridactOperator`,
+  username `agent-<hash of the agent URL>`, federated identity = the agent URL, attributes `veridactOperator`,
   `veridactOperatorDomains`, `veridactTier`, `veridactAccountableRole`. Keycloak's grant requires the user to
   exist; disable the user to block the agent at the bank regardless of its credentials.
+
+**Pattern C.** `grant_type=client_credentials` with `client_id` (the agent URL), the Client Attestation in an
+`OAuth-Client-Attestation` header and a DPoP proof (`attest_jwt_client_auth_dpop`): the bridge checks the
+attestation names this client and is bound to the DPoP key, then continues as for pattern A. Assertions carry
+`act` (`sub`: the agent URL, `sub_profile`: `ai_agent`).
 
 Public Veridact codes map to OAuth errors: `SCOPE_NOT_HELD` → `invalid_scope`, `VERIFICATION_UNAVAILABLE` → `503
 temporarily_unavailable`, everything else → `invalid_grant` with the code as `error_description`.

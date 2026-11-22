@@ -1,8 +1,8 @@
-"""A mock Veridact network: governance, an issuer, an operator and an agent.
+"""A mock Veridact network (specification v0.5): governance, an issuer, an operator and an agent.
 
-Everything a relying party would read is published into a StaticFetcher, at the
-URLs the real artefacts would have. Every builder accepts ``mutate`` hooks so tests
-and conformance vectors can produce precisely broken inputs.
+Everything a relying party would read is published into a StaticFetcher, at the URLs
+the real artefacts would have. Every builder accepts ``mutate`` hooks so tests and
+conformance vectors can produce precisely broken inputs.
 """
 
 from __future__ import annotations
@@ -11,76 +11,63 @@ import copy
 import uuid
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from typing import Any
 
 from cryptography.hazmat.primitives.asymmetric import ec
-from did_webvh.askar import AskarSigningKey
-from did_webvh.const import SCID_PLACEHOLDER
-from did_webvh.history import did_base_url
-from did_webvh.provision import provision_did
 
-from .. import jose
+from .. import jose, sdjwt, status
 from ..fetch import StaticFetcher
-from ..status import MIN_LIST_BITS, encode_bitstring
+from ..identifiers import (
+    CLIENT_ATTESTATION_TYP,
+    VCT_AGENT,
+    VCT_KNOWN_ASSISTANT,
+    VCT_OPERATOR,
+    issuer_metadata_document,
+    issuer_metadata_url,
+)
 
 # Fixed clock for reproducible vectors: 2026-11-09T08:00:00Z
 NOW = 1794211200
-DID_TIME = datetime(2026, 11, 1, tzinfo=timezone.utc)
 
-VC_CONTEXT = ["https://www.w3.org/ns/credentials/v2", "https://veridact.net/ns/v1"]
-DID_CONTEXT = ["https://www.w3.org/ns/did/v1", "https://w3id.org/security/multikey/v1"]
 AUDIENCE = "https://api.bank.example"
 TRUST_LIST_URL = "https://trust.veridact.example/trust-list.jwt"
 GOV_KID = "gov-test-2026a"
 SCOPES = ["fs:claims:read-status", "fs:quotes:create", "fs:payments:initiate"]
+CLAUDE_CIMD = "https://claude.ai/oauth/claude-client-metadata.json"
 
 Mutate = Callable[[dict], None] | None
 
 
-def iso(epoch: int) -> str:
-    return datetime.fromtimestamp(epoch, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+@dataclass
+class Issuer:
+    id: str
+    kid: str
+    key: ec.EllipticCurvePrivateKey
+
+    @property
+    def jkt(self) -> str:
+        return jose.jwk_thumbprint(jose.key_to_jwk(self.key.public_key()))
+
+    def sign(self, header: dict, payload: dict) -> str:
+        return jose.sign({**header, "kid": self.kid}, payload, self.key)
 
 
 @dataclass
-class Party:
-    """A DID with one P-256 signing key, published as a did:webvh log."""
-
-    did: str
+class Holder:
+    id: str
     key: ec.EllipticCurvePrivateKey
-    kid: str
-    log: str
-    update_key: Any = None
 
     @property
-    def log_url(self) -> str:
-        return did_base_url(self.did) + "did.jsonl"
+    def jwk(self) -> dict[str, str]:
+        return jose.key_to_jwk(self.key.public_key())
+
+    @property
+    def jkt(self) -> str:
+        return jose.jwk_thumbprint(self.jwk)
 
 
-def make_party(domain_path: str, relationship: str, *, key_fragment: str = "key-1",
-               extra_keys: dict[str, ec.EllipticCurvePrivateKey] | None = None) -> Party:
-    update_key = AskarSigningKey.generate("ed25519")
-    key = ec.generate_private_key(ec.SECP256R1())
-    placeholder = f"did:webvh:{SCID_PLACEHOLDER}:{domain_path}"
-    keys = {key_fragment: key, **(extra_keys or {})}
-    doc = {
-        "@context": DID_CONTEXT,
-        "id": placeholder,
-        "verificationMethod": [
-            {
-                "id": f"{placeholder}#{frag}",
-                "type": "Multikey",
-                "controller": placeholder,
-                "publicKeyMultibase": jose.key_to_multikey(k.public_key()),
-            }
-            for frag, k in keys.items()
-        ],
-        relationship: [f"{placeholder}#{frag}" for frag in keys],
-    }
-    state = provision_did(doc, params={"updateKeys": [update_key.multikey]}, timestamp=DID_TIME)
-    state.proofs.append(state.create_proof(update_key, timestamp=state.timestamp))
-    did = state.document_id
-    return Party(did, key, f"{did}#{key_fragment}", state.history_json() + "\n", update_key)
+def _key() -> ec.EllipticCurvePrivateKey:
+    return ec.generate_private_key(ec.SECP256R1())
 
 
 @dataclass
@@ -89,29 +76,35 @@ class MockNetwork:
     tier: str = "organisation"
 
     def __post_init__(self) -> None:
-        self.governance_key = ec.generate_private_key(ec.SECP256R1())
-        self.issuer = make_party("veridact.example:issuers:org-2026b", "assertionMethod",
-                                 key_fragment="key-3")
-        self.rogue_issuer = make_party("rogue.example:issuers:x", "assertionMethod")
-        self.operator = make_party("operator.example", "assertionMethod")
-        self.agent = make_party("operator.example:agents:a7f3k2", "authentication")
-        self.operator_domain = "operator.example"
+        self.governance_key = _key()
+        self.issuer = Issuer("https://veridact.example/issuers/org-2026b", "org-2026b-3", _key())
+        self.rogue_issuer = Issuer("https://rogue.example/issuers/x", "x-1", _key())
+        self.operator = Holder("https://operator.example", _key())
+        self.agent = Holder("https://operator.example/agents/a7f3k2", _key())
         self.operator_credential_id = f"urn:uuid:{uuid.UUID(int=1)}"
-        self.agent_status_url = "https://status.veridact.example/org/2026-11/7"
-        self.operator_status_url = "https://status.veridact.example/operators/2026-11/1"
-        self.revoked: dict[str, set[int]] = {self.agent_status_url: set(),
-                                            self.operator_status_url: set()}
-        for party in (self.issuer, self.rogue_issuer, self.operator, self.agent):
-            self.fetcher.put(party.log_url, party.log)
+        self.agent_status_url = "https://status.veridact.example/org/agents/7"
+        self.operator_status_url = "https://status.veridact.example/org/operators/2"
+        self.assistant_status_url = "https://status.veridact.example/org/assistants/1"
+        self.status_values: dict[str, dict[int, int]] = {
+            self.agent_status_url: {}, self.operator_status_url: {}, self.assistant_status_url: {}}
+        for issuer in (self.issuer, self.rogue_issuer):
+            self.publish_issuer_metadata(issuer)
         self.publish_trust_list()
-        for url in self.revoked:
+        for url in self.status_values:
             self.publish_status_list(url)
 
-    # -- governance --------------------------------------------------------------
+    # -- governance and issuers ---------------------------------------------------------
 
     @property
     def governance_keys(self) -> dict[str, dict]:
         return {GOV_KID: jose.key_to_jwk(self.governance_key.public_key())}
+
+    def publish_issuer_metadata(self, issuer: Issuer, mutate: Mutate = None) -> None:
+        doc = issuer_metadata_document(issuer.id, {issuer.kid: issuer.key.public_key()})
+        if mutate:
+            mutate(doc)
+        import json
+        self.fetcher.put(issuer_metadata_url(issuer.id), json.dumps(doc))
 
     def trust_list_payload(self) -> dict[str, Any]:
         return {
@@ -121,11 +114,11 @@ class MockNetwork:
             "exp": NOW + 7 * 86400,
             "issuers": [
                 {
-                    "id": self.issuer.did,
+                    "id": self.issuer.id,
                     "tiers": ["domain", "organisation"],
-                    "credentialTypes": ["VeridactAgentCredential", "VeridactOperatorCredential"],
-                    "keys": [{"kid": self.issuer.kid, "notBefore": NOW - 60 * 86400,
-                              "notAfter": NOW + 30 * 86400}],
+                    "vcts": [VCT_AGENT, VCT_OPERATOR, VCT_KNOWN_ASSISTANT],
+                    "keys": [{"kid": self.issuer.kid, "jkt": self.issuer.jkt,
+                              "notBefore": NOW - 60 * 86400, "notAfter": NOW + 30 * 86400}],
                 }
             ],
             "scopes": SCOPES,
@@ -133,8 +126,8 @@ class MockNetwork:
                 "tierOrder": ["domain", "organisation"],
                 "agentCredentialMaxLifetime": 86400,
                 "presentationMaxLifetime": 120,
-                "operatorCredentialMaxLifetime": {"domain": 90 * 86400,
-                                                  "organisation": 366 * 86400},
+                "operatorCredentialMaxLifetime": {"domain": 90 * 86400, "organisation": 366 * 86400},
+                "knownAssistantMaxLifetime": 90 * 86400,
             },
         }
 
@@ -142,145 +135,146 @@ class MockNetwork:
         payload = self.trust_list_payload()
         if mutate:
             mutate(payload)
-        token = jose.sign({"typ": "trust-list+jwt", "kid": GOV_KID}, payload,
-                          key or self.governance_key)
+        token = jose.sign({"typ": "trust-list+jwt", "kid": GOV_KID}, payload, key or self.governance_key)
         self.fetcher.put(TRUST_LIST_URL, token)
         return token
 
-    # -- status lists ------------------------------------------------------------
+    # -- status lists ---------------------------------------------------------------------
 
-    def publish_status_list(self, url: str, *, signer: Party | None = None,
-                            mutate: Mutate = None) -> str:
-        bits = bytearray(MIN_LIST_BITS // 8)
-        for index in self.revoked[url]:
-            bits[index // 8] |= 0x80 >> (index % 8)
+    def publish_status_list(self, url: str, *, signer: Issuer | None = None,
+                            mutate: Mutate = None, iat: int = NOW - 60) -> str:
+        entries = status.empty()
+        for index, value in self.status_values[url].items():
+            status.put(entries, index, value)
         signer = signer or self.issuer
-        payload = {
-            "@context": VC_CONTEXT[:1],
-            "id": url,
-            "type": ["VerifiableCredential", "BitstringStatusListCredential"],
-            "issuer": signer.did,
-            "validFrom": iso(NOW - 60),
-            "validUntil": iso(NOW - 60 + 4 * 3600),
-            "iat": NOW - 60,
-            "exp": NOW - 60 + 4 * 3600,
-            "credentialSubject": {
-                "id": url + "#list",
-                "type": "BitstringStatusList",
-                "statusPurpose": "revocation",
-                "encodedList": encode_bitstring(bytes(bits)),
-            },
-        }
+        payload = status.status_list_payload(url, signer.id, bytes(entries), iat)
         if mutate:
             mutate(payload)
-        token = jose.sign({"typ": "vc+jwt", "kid": signer.kid}, payload, signer.key)
+        token = signer.sign({"typ": status.STATUS_LIST_TYP}, payload)
         self.fetcher.put(url, token)
         return token
 
-    def revoke(self, url: str, index: int) -> None:
-        self.revoked[url].add(index)
+    def set_status(self, url: str, index: int, value: int = status.INVALID) -> None:
+        self.status_values[url][index] = value
         self.publish_status_list(url)
 
-    # -- credentials ---------------------------------------------------------------
+    def revoke(self, url: str, index: int) -> None:
+        self.set_status(url, index, status.INVALID)
 
-    def _sign_vc(self, payload: dict, signer: Party, mutate: Mutate, header: dict | None = None) -> str:
-        if mutate:
-            mutate(payload)
-        hdr = {"typ": "vc+jwt", "kid": signer.kid, **(header or {})}
-        return jose.sign(hdr, payload, signer.key)
+    # -- credentials ----------------------------------------------------------------------
 
-    def operator_credential(self, *, mutate: Mutate = None, signer: Party | None = None,
-                            header: dict | None = None, valid_from: int = NOW - 8 * 86400,
-                            lifetime: int = 365 * 86400) -> str:
-        signer = signer or self.issuer
-        payload = {
-            "@context": VC_CONTEXT,
-            "id": self.operator_credential_id,
-            "type": ["VerifiableCredential", "VeridactOperatorCredential"],
-            "issuer": signer.did,
-            "validFrom": iso(valid_from),
-            "validUntil": iso(valid_from + lifetime),
-            "iat": valid_from,
-            "exp": valid_from + lifetime,
-            "credentialSubject": {
-                "id": self.operator.did,
-                "domains": [self.operator_domain],
-                "tier": self.tier,
-                "legalEntity": {"name": "Operator Example (Pty) Ltd",
-                                "cipcNumber": "2019/123456/07"},
-                "transparencyLogEntry": "veridact-log-2026/000000123",
-            },
-            "credentialStatus": {
-                "type": "BitstringStatusListEntry",
-                "statusPurpose": "revocation",
-                "statusListIndex": "17",
-                "statusListCredential": self.operator_status_url,
-            },
-        }
-        return self._sign_vc(payload, signer, mutate, header)
-
-    def agent_credential(self, *, mutate: Mutate = None, signer: Party | None = None,
-                         header: dict | None = None, valid_from: int = NOW - 3600,
-                         lifetime: int = 8 * 3600, status_index: int = 48213,
-                         scopes: list[str] | None = None,
-                         limits: dict | None = None) -> str:
-        signer = signer or self.issuer
-        subject = {
-            "id": self.agent.did,
-            "operator": self.operator.did,
-            "operatorCredential": self.operator_credential_id,
+    def agent_claims(self, *, valid_from: int, lifetime: int, status_index: int,
+                     scopes: list[str] | None, limits: dict | None) -> dict[str, Any]:
+        claims: dict[str, Any] = {
+            "iss": self.issuer.id,
+            "vct": VCT_AGENT,
+            "jti": f"urn:uuid:{uuid.UUID(int=status_index + 1000)}",
+            "sub": self.agent.id,
+            "iat": valid_from, "nbf": valid_from, "exp": valid_from + lifetime,
+            "operator": self.operator.id,
+            "operator_credential": self.operator_credential_id,
+            "operator_status": status.ref_claim(17, self.operator_status_url),
             "tier": self.tier,
             "scopes": scopes if scopes is not None else ["fs:claims:read-status", "fs:quotes:create"],
-            "accountableRole": "Head of Digital Claims",
-            "cnf": {"kid": self.agent.kid},
+            "accountable_role": "Head of Digital Claims",
+            "cnf": {"jwk": self.agent.jwk},
+            "cnf_event": "veridact-log-2026/000000456",
+            "status": status.ref_claim(status_index, self.agent_status_url),
         }
         if limits is not None:
-            subject["limits"] = limits
-        payload = {
-            "@context": VC_CONTEXT,
-            "id": f"urn:uuid:{uuid.UUID(int=status_index + 1000)}",
-            "type": ["VerifiableCredential", "VeridactAgentCredential"],
-            "issuer": signer.did,
-            "validFrom": iso(valid_from),
-            "validUntil": iso(valid_from + lifetime),
-            "iat": valid_from,
-            "exp": valid_from + lifetime,
-            "credentialSubject": subject,
-            "credentialStatus": {
-                "type": "BitstringStatusListEntry",
-                "statusPurpose": "revocation",
-                "statusListIndex": str(status_index),
-                "statusListCredential": self.agent_status_url,
-            },
-        }
-        return self._sign_vc(payload, signer, mutate, header)
+            claims["limits"] = limits
+        return claims
 
-    # -- presentations -------------------------------------------------------------
+    def agent_credential(self, *, mutate: Mutate = None, signer: Issuer | None = None,
+                         header: dict | None = None, valid_from: int = NOW - 3600,
+                         lifetime: int = 8 * 3600, status_index: int = 48213,
+                         scopes: list[str] | None = None, limits: dict | None = None,
+                         disclosable: dict | None = None) -> str:
+        """The Agent Credential as the issuer hands it over: an SD-JWT with every disclosure."""
+        signer = signer or self.issuer
+        claims = self.agent_claims(valid_from=valid_from, lifetime=lifetime,
+                                   status_index=status_index, scopes=scopes, limits=limits)
+        claims["iss"] = signer.id
+        if disclosable is None:
+            disclosable = {"operator_legal_name": "Operator Example (Pty) Ltd",
+                           "operator_registration": "2019/123456/07",
+                           "operator_jurisdiction": "ZA"}
+        if mutate:
+            mutate(claims)
+        return sdjwt.issue(header or {}, claims, disclosable, signer.sign, decoys=2)
 
-    def presentation(self, nonce: str, *, credentials: list[str] | None = None,
-                     aud: str | list[str] = AUDIENCE, iat: int = NOW - 5, lifetime: int = 60,
-                     mutate: Mutate = None, header: dict | None = None,
-                     key: ec.EllipticCurvePrivateKey | None = None) -> str:
-        if credentials is None:
-            credentials = [self.agent_credential(), self.operator_credential()]
-        payload = {
-            "@context": VC_CONTEXT[:1],
-            "type": ["VerifiablePresentation"],
-            "holder": self.agent.did,
-            "verifiableCredential": [
-                {"@context": VC_CONTEXT[:1], "type": "EnvelopedVerifiableCredential",
-                 "id": "data:application/vc+jwt," + c}
-                for c in credentials
-            ],
-            "aud": aud,
-            "nonce": nonce,
-            "iat": iat,
-            "exp": iat + lifetime,
+    def operator_credential(self, *, mutate: Mutate = None, signer: Issuer | None = None,
+                            valid_from: int = NOW - 8 * 86400, lifetime: int = 365 * 86400) -> str:
+        signer = signer or self.issuer
+        claims = {
+            "iss": signer.id, "vct": VCT_OPERATOR, "jti": self.operator_credential_id,
+            "sub": self.operator.id, "iat": valid_from, "nbf": valid_from, "exp": valid_from + lifetime,
+            "tier": self.tier, "domains": ["operator.example"], "log_entry": "veridact-log-2026/000000123",
+            "cnf": {"jwk": self.operator.jwk},
+            "status": status.ref_claim(17, self.operator_status_url),
         }
         if mutate:
+            mutate(claims)
+        return sdjwt.issue({}, claims, {"legal_name": "Operator Example (Pty) Ltd",
+                                        "registration": "2019/123456/07", "jurisdiction": "ZA"},
+                           signer.sign)
+
+    # -- presentations ----------------------------------------------------------------------
+
+    def presentation(self, nonce: str, *, credential: str | None = None,
+                     disclose: list[str] | None = None, aud: str | list[str] = AUDIENCE,
+                     iat: int = NOW - 5, mutate: Mutate = None, header: dict | None = None,
+                     key: ec.EllipticCurvePrivateKey | None = None) -> str:
+        """An SD-JWT+KB. ``disclose`` None keeps every disclosure."""
+        parsed = sdjwt.parse(credential or self.agent_credential())
+        if disclose is not None:
+            parsed = parsed.select(disclose)
+        payload = {"aud": aud, "nonce": nonce, "iat": iat, "sd_hash": parsed.sd_hash}
+        if mutate:
             mutate(payload)
-        hdr = {"typ": "vp+jwt", "kid": self.agent.kid, **(header or {})}
-        return jose.sign(hdr, payload, key or self.agent.key)
+        kb = jose.sign({"typ": sdjwt.KB_TYP, **(header or {})}, payload, key or self.agent.key)
+        return sdjwt.serialize(parsed.jws.raw, [d.raw for d in parsed.disclosures], kb)
+
+    # -- pattern C and known assistants ----------------------------------------------------------
+
+    def client_attestation(self, *, mutate: Mutate = None, signer: Issuer | None = None,
+                           valid_from: int = NOW - 3600, lifetime: int = 8 * 3600,
+                           status_index: int = 48213, limits: dict | None = None) -> str:
+        signer = signer or self.issuer
+        claims = {
+            "iss": signer.id, "sub": self.agent.id, "iat": valid_from, "exp": valid_from + lifetime,
+            "cnf": {"jwk": self.agent.jwk},
+            "status": status.ref_claim(status_index, self.agent_status_url),
+            "veridact": {
+                "operator": self.operator.id, "tier": self.tier,
+                "scopes": ["fs:claims:read-status", "fs:quotes:create"],
+                "accountable_role": "Head of Digital Claims",
+                "operator_status": status.ref_claim(17, self.operator_status_url),
+                "credential": f"urn:uuid:{uuid.UUID(int=status_index + 1000)}",
+                **({"limits": limits} if limits else {}),
+            },
+        }
+        if mutate:
+            mutate(claims)
+        return signer.sign({"typ": CLIENT_ATTESTATION_TYP}, claims)
+
+    def known_assistant(self, *, mutate: Mutate = None, signer: Issuer | None = None,
+                        valid_from: int = NOW - 86400, lifetime: int = 30 * 86400,
+                        status_index: int = 3) -> str:
+        signer = signer or self.issuer
+        claims = {
+            "iss": signer.id, "vct": VCT_KNOWN_ASSISTANT, "jti": f"urn:uuid:{uuid.UUID(int=77)}",
+            "sub": CLAUDE_CIMD, "iat": valid_from, "nbf": valid_from, "exp": valid_from + lifetime,
+            "client_metadata_urls": [CLAUDE_CIMD, "https://claude.ai/oauth/claude-code-client-metadata.json"],
+            "operator": {"name": "Anthropic PBC", "jurisdiction": "US", "verified": "2026-11-01"},
+            "redirect_hosts": ["claude.ai", "claude.com"],
+            "token_endpoint_auth": {"method": "none"},
+            "max_level": "approved_payer",
+            "status": status.ref_claim(status_index, self.assistant_status_url),
+        }
+        if mutate:
+            mutate(claims)
+        return sdjwt.issue({}, claims, {}, signer.sign)
 
     def snapshot(self) -> dict[str, str]:
         """All published artefacts, url -> text."""

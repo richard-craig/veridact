@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "veridact-lambda-authoriser"
-version = "0.1.0a1"
+version = "0.5.0a1"
 description = "API Gateway (REST) Lambda authoriser for Veridact agent presentations, with DynamoDB nonces."
 readme = "README.md"
 license = "Apache-2.0"
@@ -12,8 +12,8 @@ requires-python = ">=3.11"
 authors = [{ name = "Richard Craig" }]
 # boto3 is in the Lambda runtime; it is a dependency here so tests and local runs work.
 dependencies = [
-  "veridact-verify==0.1.0a1",
-  "veridact-sidecar==0.1.0a1",
+  "veridact-verify==0.5.0a1",
+  "veridact-sidecar==0.5.0a1",
   "boto3>=1.34",
 ]
 

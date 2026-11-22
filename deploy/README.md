@@ -1,6 +1,6 @@
 # Running the staging stack
 
-Four pieces: the **issuer** (ACME-A), an **operator's website** (where vbot's DID files are published), **vbot**,
+Four pieces: the **issuer** (ACME-A), an **operator's website** (where vbot's veridact-operator.json and any self-hosted agent metadata are published), **vbot**,
 and the **sandbox** relying party.
 
 Every artefact carries the https URL it would have in production (`https://staging.veridact.test/...`). Locally

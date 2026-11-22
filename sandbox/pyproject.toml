@@ -4,15 +4,15 @@ build-backend = "hatchling.build"
 
 [project]
 name = "veridact-sandbox"
-version = "0.1.0a1"
+version = "0.5.0a1"
 description = "Veridact Insurance: a sandbox relying party that challenges agents and explains every decision."
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.11"
 authors = [{ name = "Richard Craig" }]
 dependencies = [
-  "veridact-verify==0.1.0a1",
-  "veridact-sidecar==0.1.0a1",
+  "veridact-verify==0.5.0a1",
+  "veridact-sidecar==0.5.0a1",
   "aiohttp==3.14.5",
 ]
 

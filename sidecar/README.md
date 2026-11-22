@@ -43,11 +43,12 @@ Then verify the retry:
 
 ```http
 POST /v1/verify
-{"authorization": "Veridact vp=\"eyJ…\"", "scopes": ["fs:claims:read-status"], "risk": "low"}
+{"authorization": "Veridact sd-jwt=\"eyJ…~…~eyJ…\"", "scopes": ["fs:claims:read-status"], "risk": "low"}
 
 200 {"decision": "allow", "public": {"decision": "allow"}, "allowed": true,
-     "agent": "did:webvh:…", "operator": "did:webvh:…", "operatorDomains": ["operator.example"],
-     "tier": "domain", "scopesGranted": ["fs:claims:read-status"], "agentKeyId": "did:webvh:…#key-1",
+     "agent": "https://operator.example/agents/a7f3k2", "operator": "https://operator.example",
+     "operatorDomains": ["operator.example"], "tier": "domain", "scopesGranted": ["fs:claims:read-status"],
+     "agentKeyId": "<RFC 7638 thumbprint of cnf.jwk>", "disclosed": {"operator_legal_name": "…"},
      "accountableRole": "Head of Digital Claims", "flags": [], "log": {…}}
 ```
 
@@ -55,13 +56,23 @@ Return only `public` to the caller. `log` is the full explanation (which check, 
 logs. For payments, add `"payment": {"amount": "350.00", "currency": "ZAR", "spentToday": "0.00"}`; over the
 delegated limits the decision is `ask_person` with an `intent`.
 
-**Pattern A (token exchange).** Verify the `subject_token` the same way (`"presentation": "<VP-JWT>"`). On
+**Pattern A (token exchange).** Verify the `subject_token` the same way (`"presentation": "<SD-JWT+KB>"`). On
 `allow`, issue a DPoP-bound access token with `scopesGranted` (intersected with customer consent), bound to
 `agentKeyId`.
+
+**Pattern C (client attestation).** Check the DPoP proof yourself, then `POST /v1/client-attestation` with
+`{"attestation", "clientId", "dpopJkt", "scopes"}`. The decision has the same shape.
+
+**Known assistants.** `POST /v1/known-assistant` with `{"entry", "clientId"}` at client registration and on every
+token request. The answer adds `operatorDetails` (the verified operator, for the consent screen) and `maxLevel`; a
+suspended entry returns `AUTH_FAILED` (logged as `STATUS_SUSPENDED`).
+
+Set `required_disclosures` in the config, or `"disclose": [...]` per request, to require selectively disclosable
+claims such as `operator_legal_name`.
 
 ## Deployment notes
 
 - **One instance per nonce store.** Nonces are in memory, so a challenge issued by one instance cannot be
   verified by another. Behind a load balancer, use sticky sessions or a shared `NonceStore` (planned).
-- **Egress.** The verifier fetches the agent's DID log from the operator's domain. Allow outbound HTTPS, or set
-  `mirror_url` to a member mirror.
+- **Egress.** The verifier fetches only the trust list, issuer metadata and status lists, and only for issuers the
+  trust list names. Allow outbound HTTPS to those hosts, or set `mirror_url` to a member mirror.

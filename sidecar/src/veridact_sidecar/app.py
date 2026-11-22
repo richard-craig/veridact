@@ -2,10 +2,17 @@
 
     POST /v1/challenge   {"scopes": [...], "risk": "low", "minTier": "domain", "realm": "claims-api"}
                       -> {"nonce": "...", "wwwAuthenticate": "Veridact realm=..., nonce=..."}
-    POST /v1/verify      {"authorization": "Veridact vp=\"...\"" | "presentation": "<VP-JWT>",
-                          "scopes": [...], "risk": "...", "payment": {"amount", "currency", "spentToday"}}
+    POST /v1/verify      {"authorization": "Veridact sd-jwt=\"...\"" | "presentation": "<SD-JWT+KB>",
+                          "scopes": [...], "risk": "...", "disclose": [...],
+                          "payment": {"amount", "currency", "spentToday"}}
                       -> {"decision": "allow"|"deny"|"ask_person"|"challenge", "code": ..., "public": {...},
-                          "agent", "operator", "scopesGranted", ..., "log": {...}}
+                          "agent", "operator", "scopesGranted", "agentKeyId", "disclosed", ..., "log": {...}}
+    POST /v1/client-attestation
+                         {"attestation": "<Client Attestation>", "clientId": "...", "dpopJkt": "...",
+                          "scopes": [...], ...}   (pattern C: check the DPoP proof yourself first)
+    POST /v1/known-assistant
+                         {"entry": "<known-assistant SD-JWT VC>", "clientId": "..."}
+                      -> {"decision", ..., "operator": "<verified operator name>", "maxLevel": ...}
     GET  /healthz
 
 The response's ``public`` object is what you may pass back to the caller. Everything else,
@@ -70,13 +77,38 @@ def create_app(config: VerifierConfig, *, verifier: Verifier | None = None,
         if vp is None:
             vp = Verifier.presentation_from_authorization(data.get("authorization"))
         if not isinstance(vp, str) or not vp:
-            raise ConfigError("give presentation (a VP-JWT) or authorization (the header value)")
+            raise ConfigError("give presentation (an SD-JWT+KB) or authorization (the header value)")
         started = time.perf_counter()
         decision = await verifier.verify(vp, parse_request(data))
+        return respond(decision, started)
+
+    def respond(decision, started: float, **extra) -> web.Response:
         record = decision.log_record()
         record["ms"] = round((time.perf_counter() - started) * 1000, 1)
         log.info(json.dumps(record))
-        return web.json_response({**decision_body(decision), "public": decision.public()})
+        return web.json_response({**decision_body(decision), **extra, "public": decision.public()})
+
+    def text(data: dict, name: str) -> str:
+        value = data.get(name)
+        if not isinstance(value, str) or not value:
+            raise ConfigError(f"{name} is required")
+        return value
+
+    async def client_attestation(request: web.Request) -> web.Response:
+        data = await body(request)
+        started = time.perf_counter()
+        decision = await verifier.verify_client_attestation(
+            text(data, "attestation"), client_id=text(data, "clientId"), dpop_jkt=text(data, "dpopJkt"),
+            request=parse_request(data))
+        return respond(decision, started)
+
+    async def known_assistant(request: web.Request) -> web.Response:
+        data = await body(request)
+        started = time.perf_counter()
+        decision = await verifier.verify_known_assistant(text(data, "entry"), client_id=text(data, "clientId"))
+        ctx = decision.context
+        return respond(decision, started, platform=ctx.get("platform"), maxLevel=ctx.get("maxLevel"),
+                       operatorDetails=ctx.get("operator"))
 
     async def healthz(request: web.Request) -> web.Response:
         return web.json_response({"status": "ok", "audience": config.audience})
@@ -84,6 +116,8 @@ def create_app(config: VerifierConfig, *, verifier: Verifier | None = None,
     app.add_routes([
         web.post("/v1/challenge", challenge),
         web.post("/v1/verify", verify),
+        web.post("/v1/client-attestation", client_attestation),
+        web.post("/v1/known-assistant", known_assistant),
         web.get("/healthz", healthz),
     ])
 

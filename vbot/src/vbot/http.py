@@ -1,7 +1,9 @@
 """Calling a Veridact-protected API (spec: Verification, pattern B).
 
 The API answers 401 with ``WWW-Authenticate: Veridact realm=…, nonce=…``. vbot signs a
-presentation for that nonce and retries with ``Authorization: Veridact vp="…"``.
+presentation (an SD-JWT+KB) for that nonce and retries with
+``Authorization: Veridact sd-jwt="…"``. A ``disclose`` parameter in the challenge names the
+selectively disclosable claims the API needs; vbot discloses those and nothing else.
 """
 
 from __future__ import annotations
@@ -63,7 +65,8 @@ async def call(bot: Vbot, url: str, *, agent_id: str, method: str = "GET",
             challenge = parse_challenge(resp.headers.get("WWW-Authenticate"))
             if resp.status != 401 or challenge is None:
                 return CallResult(resp.status, dict(resp.headers), body, None)
-        auth = bot.authorization(agent_id, aud=audience_for(url), nonce=challenge["nonce"])
+        disclose = challenge.get("disclose", "").split()
+        auth = bot.authorization(agent_id, aud=audience_for(url), nonce=challenge["nonce"], disclose=disclose)
         async with session.request(method, target, json=json_body,
                                    headers={"Authorization": auth}) as resp:
             return CallResult(resp.status, dict(resp.headers), await resp.read(), challenge)
@@ -75,7 +78,7 @@ async def call(bot: Vbot, url: str, *, agent_id: str, method: str = "GET",
 # -- pattern A: token exchange --------------------------------------------------------------
 
 TOKEN_EXCHANGE = "urn:ietf:params:oauth:grant-type:token-exchange"
-VP_TOKEN_TYPE = "urn:veridact:params:oauth:token-type:vp+jwt"
+SD_JWT_KB_TOKEN_TYPE = "urn:veridact:params:oauth:token-type:sd-jwt-kb"
 
 
 def dpop_proof(bot: Vbot, agent_id: str, *, method: str, url: str,
@@ -131,8 +134,10 @@ async def exchange(bot: Vbot, bridge_url: str, *, agent_id: str, scopes: list[st
             nonce = resp.headers.get("Veridact-Nonce")
             if not nonce:
                 return TokenResult(resp.status, await resp.json(content_type=None))
-        vp = bot.presentation(agent_id, aud=meta["veridact_audience"], nonce=nonce)
-        form.update(subject_token=vp, subject_token_type=VP_TOKEN_TYPE)
+        disclose = meta.get("veridact_disclose")
+        presentation = bot.presentation(agent_id, aud=meta["veridact_audience"], nonce=nonce,
+                                        disclose=disclose if isinstance(disclose, list) else [])
+        form.update(subject_token=presentation, subject_token_type=SD_JWT_KB_TOKEN_TYPE)
         headers = {"DPoP": dpop_proof(bot, agent_id, method="POST", url=meta["dpop_htu"])}
         async with session.post(token_url, data=form, headers=headers) as resp:
             return TokenResult(resp.status, await resp.json(content_type=None))

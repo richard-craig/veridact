@@ -1,8 +1,11 @@
 """Issuer keys and identity.
 
-Month 1 keeps software keys on disk (mode 0600) behind a ``Signer`` interface.
-Month 2 swaps in AWS KMS / CloudHSM: the spec requires HSM-backed, non-exportable
-credential signing keys before any production listing.
+Software keys on disk (mode 0600) sit behind a ``Signer`` interface; production swaps in
+an HSM or cloud KMS (the specification requires non-exportable credential signing keys
+before any production listing).
+
+Since v0.5 the issuer is an HTTPS identifier, ``{base_url}/issuers/{name}``. Its keys are
+published as JWT VC Issuer Metadata and pinned, by thumbprint, in the trust list.
 """
 
 from __future__ import annotations
@@ -16,11 +19,10 @@ from typing import Any, Protocol
 
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
-from veridact_verify import jose, provision
+from veridact_verify import jose
+from veridact_verify.identifiers import issuer_metadata_document
 
 from .config import IssuerConfig
-
-SIGNING_FRAGMENT = "key-1"
 
 
 class Signer(Protocol):
@@ -67,15 +69,22 @@ def _load_or_create_ec(path: Path) -> ec.EllipticCurvePrivateKey:
 
 @dataclass
 class IssuerIdentity:
-    """The issuer DID, its signing key and, in staging, the governance key."""
+    """The issuer identifier, its signing key and, in staging, the governance key."""
 
-    did: str
-    did_log: str
+    id: str
     signer: Signer
     key_not_before: int
     key_not_after: int
     governance_kid: str | None = None
     governance_key: ec.EllipticCurvePrivateKey | None = None
+
+    @property
+    def jkt(self) -> str:
+        return jose.jwk_thumbprint(jose.key_to_jwk(self.signer.public_key()))
+
+    def metadata(self) -> dict[str, Any]:
+        """JWT VC Issuer Metadata (draft-ietf-oauth-sd-jwt-vc)."""
+        return issuer_metadata_document(self.id, {self.signer.kid: self.signer.public_key()})
 
     @property
     def governance_jwks(self) -> dict[str, dict[str, str]]:
@@ -92,38 +101,23 @@ def load_or_create_identity(config: IssuerConfig, *, now: float | None = None) -
     signing_key = _load_or_create_ec(keys_dir / "credential-signing.pem")
     if meta_path.exists():
         meta = json.loads(meta_path.read_text())
-        if meta.get("issuerDidPath") != config.issuer_did_path:
-            raise ValueError(
-                f"data_dir holds the identity for {meta.get('issuerDidPath')}, "
-                f"not {config.issuer_did_path}; use a new data_dir")
+        if "issuerDidPath" in meta:
+            raise ValueError("data_dir holds a v0.4 (did:webvh) issuer; v0.5 is a clean cut: use a new data_dir")
+        if meta.get("issuer") != config.issuer_url:
+            raise ValueError(f"data_dir holds the identity for {meta.get('issuer')}, "
+                             f"not {config.issuer_url}; use a new data_dir")
     else:
-        update_key = provision.new_update_key()
-        next_update_key = provision.new_update_key()
-        made = provision.provision(
-            config.issuer_did_path,
-            {SIGNING_FRAGMENT: signing_key.public_key()},
-            {"assertionMethod": [SIGNING_FRAGMENT]},
-            update_key,
-            next_update_key=next_update_key,
-        )
-        _write_secret(keys_dir / "did-update-keys.json", json.dumps({
-            "current": provision.update_key_to_jwk(update_key),
-            "next": provision.update_key_to_jwk(next_update_key),
-        }).encode())
         meta = {
-            "issuerDidPath": config.issuer_did_path,
-            "did": made.did,
+            "issuer": config.issuer_url,
+            "kid": f"{config.issuer_name}-1",
             "keyNotBefore": now,
             "keyNotAfter": now + config.signing_key_lifetime,
         }
-        (keys_dir / "did.jsonl").write_text(made.log)
+        keys_dir.mkdir(parents=True, exist_ok=True)
         meta_path.write_text(json.dumps(meta, indent=2))
-    did = meta["did"]
-    did_log = (keys_dir / "did.jsonl").read_text()
     identity = IssuerIdentity(
-        did=did,
-        did_log=did_log,
-        signer=SoftwareSigner(f"{did}#{SIGNING_FRAGMENT}", signing_key),
+        id=meta["issuer"],
+        signer=SoftwareSigner(meta["kid"], signing_key),
         key_not_before=meta["keyNotBefore"],
         key_not_after=meta["keyNotAfter"],
     )

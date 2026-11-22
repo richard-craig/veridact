@@ -45,6 +45,9 @@ class RelyingPartyPolicy:
     degraded_mode: DegradedModePolicy = field(default_factory=DegradedModePolicy)
     clock_skew_seconds: int = 30
     require_operator_status: bool = True
+    # Selectively disclosable claims every presentation to this relying party must carry,
+    # for example {"operator_legal_name"} for a consent screen (specification v0.5, check 7).
+    required_disclosures: frozenset[str] = frozenset()
 
 
 @dataclass(frozen=True)
@@ -68,3 +71,4 @@ class Request:
     risk: Risk = Risk.MEDIUM
     payment: Payment | None = None
     min_tier: str | None = None  # overrides the policy's minimum for this route
+    disclose: frozenset[str] = frozenset()  # disclosures this route needs, on top of the policy's

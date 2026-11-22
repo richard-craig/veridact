@@ -2,8 +2,8 @@
 
   vbot init --issuer https://staging.veridact.net/directory --domain example.com
   # publish the files under ~/.vbot/publish/ at https://example.com/
-  vbot operator                          # Operator Credential (did-config-01 or dns-01)
-  vbot agent new                         # agent key + DID (hosted by the issuer)
+  vbot operator                          # Operator Credential (operator-keys-01 or dns-01)
+  vbot agent new                         # agent key + client metadata (hosted by the issuer)
   vbot delegate --scope fs:claims:read-status --role "Head of Digital Claims"
   vbot issue                             # Agent Credential, valid for hours
   vbot call https://sandbox.veridact.net/claims/CLM-1001/status
@@ -56,7 +56,7 @@ async def run(args: argparse.Namespace) -> int:
         bot = Vbot.create(home, args.issuer, _routes(args.route))
         await bot.register([f"mailto:{args.email}"] if args.email else None)
         made = bot.create_operator(args.domain)
-        print(f"Operator DID: {made['did']}\n")
+        print(f"Operator: {made['operator']}\n")
         print(f"Serve these files at https://{args.domain}/ (paths as shown):")
         for path in made["files"]:
             print(f"  {path}")
@@ -68,25 +68,25 @@ async def run(args: argparse.Namespace) -> int:
     if cmd == "operator":
         op = await bot.obtain_operator_credential(challenge=args.challenge,
                                                   before_respond=_wait_for_dns)
-        _print({"operator": op["did"], "credential": op["credentialId"], "logEntry": op.get("receipt")})
+        _print({"operator": op["id"], "credential": op["credentialId"], "logEntry": op.get("receipt")})
     elif cmd == "agent":
         made = await bot.create_agent(hosted=not args.on_domain, agent_id=args.id)
         _print(made)
         if args.on_domain:
-            print(f"Serve {made['logUrl']} from {bot.publish_dir}", file=sys.stderr)
+            print(f"Serve {made['client_id']} from {bot.publish_dir}", file=sys.stderr)
     elif cmd == "delegate":
         limits = None
         if args.per_payment or args.per_day:
             if not (args.per_payment and args.per_day):
                 raise VbotError("give both --per-payment and --per-day")
-            limits = {"currency": args.currency, "perPayment": args.per_payment, "perDay": args.per_day}
+            limits = {"currency": args.currency, "per_payment": args.per_payment, "per_day": args.per_day}
         agent_id = args.agent or bot.default_agent()
         bot.delegate(agent_id, args.scope, role=args.role, days=args.days,
                      max_lifetime=args.max_lifetime, limits=limits, audiences=args.audience)
         _print({"agent": agent_id, "scopes": sorted(set(args.scope)), "days": args.days})
     elif cmd == "issue":
         agent_id = args.agent or bot.default_agent()
-        agent = await bot.issue(agent_id, lifetime=args.lifetime)
+        agent = await bot.issue(agent_id, lifetime=args.lifetime, attestation=args.attestation)
         _print({"agent": agent_id, "credential": agent["credentialId"],
                 "expires": bot.status()["agents"][agent_id]["credentialExpires"]})
     elif cmd == "run":
@@ -110,7 +110,8 @@ async def run(args: argparse.Namespace) -> int:
                 return 0
             await asyncio.sleep(wait)
     elif cmd == "present":
-        print(bot.presentation(args.agent or bot.default_agent(), aud=args.aud, nonce=args.nonce))
+        print(bot.presentation(args.agent or bot.default_agent(), aud=args.aud, nonce=args.nonce,
+                               disclose=args.disclose))
     elif cmd == "call":
         body = json.loads(args.json) if args.json else None
         result = await call(bot, args.url, agent_id=args.agent or bot.default_agent(),
@@ -130,6 +131,8 @@ async def run(args: argparse.Namespace) -> int:
     elif cmd == "revoke":
         await bot.revoke(args.target, args.reason)
         print(f"revoked {args.target}", file=sys.stderr)
+    elif cmd == "retire-key":
+        _print(await bot.retire_key(args.target, compromised=args.compromised))
     elif cmd == "status":
         _print(bot.status())
     return 0
@@ -141,7 +144,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--home", default=os.environ.get("VBOT_HOME", "~/.vbot"))
     sub = parser.add_subparsers(dest="command", required=True)
 
-    p = sub.add_parser("init", help="create an account and the operator DID")
+    p = sub.add_parser("init", help="create an account, the operator key and veridact-operator.json")
     p.add_argument("--issuer", required=True, help="ACME-A directory URL")
     p.add_argument("--domain", required=True, help="the operator's domain")
     p.add_argument("--email")
@@ -149,13 +152,13 @@ def main(argv: list[str] | None = None) -> int:
                    help="development: reach https://HOST at URL")
 
     p = sub.add_parser("operator", help="obtain the Operator Credential")
-    p.add_argument("--challenge", choices=["did-config-01", "dns-01"], default="did-config-01")
+    p.add_argument("--challenge", choices=["operator-keys-01", "dns-01"], default="operator-keys-01")
 
-    p = sub.add_parser("agent", help="create an agent key and DID")
+    p = sub.add_parser("agent", help="create an agent key and its client metadata")
     p.add_argument("action", choices=["new"])
     p.add_argument("--id", help="agent id (default: random, so it leaks nothing)")
     p.add_argument("--on-domain", action="store_true",
-                   help="host the agent DID on your domain instead of the issuer's")
+                   help="serve the agent's client metadata from your domain instead of the issuer")
 
     p = sub.add_parser("delegate", help="sign a Delegation Credential for an agent")
     p.add_argument("--agent")
@@ -171,6 +174,8 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("issue", help="obtain or renew the Agent Credential")
     p.add_argument("--agent")
     p.add_argument("--lifetime", type=duration)
+    p.add_argument("--attestation", action="store_true",
+                   help="also obtain the Client Attestation form (pattern C)")
 
     p = sub.add_parser("run", help="keep agent credentials renewed")
     p.add_argument("--agent", action="append")
@@ -180,6 +185,8 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--agent")
     p.add_argument("--aud", required=True)
     p.add_argument("--nonce", required=True)
+    p.add_argument("--disclose", action="append", default=None,
+                   help="a selectively disclosable claim to show (repeat); default: all")
 
     p = sub.add_parser("call", help="call a Veridact-protected API")
     p.add_argument("url")
@@ -195,6 +202,10 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("revoke", help="revoke an agent's credential, or 'operator'")
     p.add_argument("target")
     p.add_argument("--reason", default="unspecified")
+
+    p = sub.add_parser("retire-key", help="retire an agent's or the operator's key (revokes its credentials)")
+    p.add_argument("target", help="an agent id, or 'operator'")
+    p.add_argument("--compromised", action="store_true")
 
     sub.add_parser("status", help="show the operator and agents")
 

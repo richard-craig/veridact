@@ -4,8 +4,9 @@ The governance keys are the one thing a relying party configures by hand. They a
 pinned as JWKs, never resolved, so compromising a DID host or a CDN cannot change
 whom the relying party trusts.
 
-The trust list schema here is a v0.2 proposal; see
-docs/proposals/0.2-verifier-gaps.md.
+Since v0.5 issuers are HTTPS identifiers, accredited per ``vct``, and every issuer key
+is pinned here by its RFC 7638 thumbprint (``jkt``). A key must appear both here and in
+the issuer's JWT VC Issuer Metadata before the verifier will use it.
 """
 
 from __future__ import annotations
@@ -30,13 +31,14 @@ class IssuerKey:
     kid: str
     not_before: int
     not_after: int
+    jkt: str = ""
 
 
 @dataclass(frozen=True)
 class AccreditedIssuer:
-    did: str
+    id: str
     tiers: frozenset[str]
-    credential_types: frozenset[str]
+    vcts: frozenset[str]
     keys: tuple[IssuerKey, ...]
 
     def key(self, kid: str) -> IssuerKey | None:
@@ -55,6 +57,7 @@ class TrustPolicy:
         default_factory=lambda: {"domain": 90 * 86400, "organisation": 366 * 86400}
     )
     delegation_max_lifetime: int = 90 * 86400
+    known_assistant_max_lifetime: int = 90 * 86400
 
     def tier_rank(self, tier: str) -> int:
         try:
@@ -72,8 +75,8 @@ class TrustList:
     policy: TrustPolicy
     scopes: frozenset[str]
 
-    def issuer(self, did: str) -> AccreditedIssuer | None:
-        return self.issuers.get(did)
+    def issuer(self, issuer_id: str) -> AccreditedIssuer | None:
+        return self.issuers.get(issuer_id)
 
 
 def _int(obj: dict, name: str) -> int:
@@ -88,16 +91,21 @@ def parse_trust_list(payload: dict[str, Any]) -> TrustList:
     for entry in payload.get("issuers", []):
         if not isinstance(entry, dict) or not isinstance(entry.get("id"), str):
             raise TrustListError("issuer entry needs an id")
-        keys = tuple(
-            IssuerKey(k["kid"], _int(k, "notBefore"), _int(k, "notAfter"))
-            for k in entry.get("keys", [])
-            if isinstance(k, dict) and isinstance(k.get("kid"), str)
-        )
+        if not entry["id"].startswith("https://"):
+            raise TrustListError("issuer ids are https URLs (specification v0.5)")
+        keys = []
+        for k in entry.get("keys", []):
+            if not isinstance(k, dict) or not isinstance(k.get("kid"), str):
+                continue
+            jkt = k.get("jkt")
+            if not isinstance(jkt, str) or not jkt:
+                raise TrustListError("every issuer key is pinned by its jkt")
+            keys.append(IssuerKey(k["kid"], _int(k, "notBefore"), _int(k, "notAfter"), jkt))
         issuers[entry["id"]] = AccreditedIssuer(
-            did=entry["id"],
+            id=entry["id"],
             tiers=frozenset(entry.get("tiers", [])),
-            credential_types=frozenset(entry.get("credentialTypes", [])),
-            keys=keys,
+            vcts=frozenset(entry.get("vcts", [])),
+            keys=tuple(keys),
         )
     raw_policy = payload.get("policy", {}) or {}
     defaults = TrustPolicy()
@@ -116,6 +124,9 @@ def parse_trust_list(payload: dict[str, Any]) -> TrustList:
         ),
         delegation_max_lifetime=int(
             raw_policy.get("delegationMaxLifetime", defaults.delegation_max_lifetime)
+        ),
+        known_assistant_max_lifetime=int(
+            raw_policy.get("knownAssistantMaxLifetime", defaults.known_assistant_max_lifetime)
         ),
     )
     return TrustList(

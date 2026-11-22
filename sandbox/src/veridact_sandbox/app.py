@@ -78,7 +78,7 @@ def create_app(config: VerifierConfig, *, verifier: Verifier | None = None,
                            extra: dict[str, Any] | None = None) -> web.Response:
         _, header = verifier.challenge(request_spec, realm=realm)
         body = {"decision": "challenge", "code": "CHALLENGE_REQUIRED",
-                "hint": "Sign a presentation for this nonce and retry with Authorization: Veridact vp=\"...\". "
+                "hint": "Sign a presentation for this nonce and retry with Authorization: Veridact sd-jwt=\"...\". "
                         "`vbot call <url>` does it for you.", **(extra or {})}
         return web.json_response(body, status=status, headers={"WWW-Authenticate": header})
 
@@ -167,7 +167,7 @@ def create_app(config: VerifierConfig, *, verifier: Verifier | None = None,
         if vp is None:
             return challenge_response(spec)
         # The ledger is keyed by agent, which only the verified presentation tells us. Peek at the
-        # holder to look up what was spent; verification below still checks everything.
+        # credential's subject to look up what was spent; verification below still checks everything.
         holder = _holder(vp)
         payment = Payment(amount, currency, ledger.spent(holder, currency) if holder else Decimal(0))
         decision, denied = await guarded(request, spec, payment_of=payment)
@@ -208,10 +208,10 @@ async def _json(request: web.Request) -> dict[str, Any]:
     return data if isinstance(data, dict) else {}
 
 
-def _holder(vp: str) -> str | None:
-    from veridact_verify import jose
+def _holder(presentation: str) -> str | None:
+    from veridact_verify import sdjwt
     try:
-        holder = jose.parse(vp).payload.get("holder")
-    except jose.JoseError:
+        holder = sdjwt.parse(presentation).jws.payload.get("sub")
+    except sdjwt.SdJwtError:
         return None
     return holder if isinstance(holder, str) else None

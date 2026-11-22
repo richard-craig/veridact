@@ -1,9 +1,11 @@
-"""Everything the issuer publishes for relying parties: status lists, the trust list
+"""Everything the issuer publishes for relying parties: Token Status Lists, the trust list
 (staging only) and the transparency log.
 
-Status lists follow spec v0.2: 131,072 entries each, indexes allocated at random so
-a list's position says nothing about issuance order, re-signed at least every
-5 minutes with ``exp`` at most 4 hours after ``iat``, and naming their own URL.
+Status lists follow specification v0.5: Token Status Lists with 2 bits per entry,
+131,072 entries each, indexes allocated at random so a list's position says nothing
+about issuance order, re-signed at least every 5 minutes (and at once on any change)
+with ``exp`` at most 4 hours after ``iat``, naming their own URI in ``sub``. One
+credential type per list.
 """
 
 from __future__ import annotations
@@ -14,7 +16,8 @@ import secrets
 from datetime import datetime, timezone
 from typing import Any
 
-from veridact_verify.status import MIN_LIST_BITS, encode_bitstring
+from veridact_verify import status as tsl
+from veridact_verify.identifiers import VCT_AGENT, VCT_KNOWN_ASSISTANT, VCT_OPERATOR
 
 from .config import IssuerConfig
 from .keys import IssuerIdentity
@@ -23,8 +26,8 @@ from .store import Store
 STATUS_RESIGN_SECONDS = 240  # under the 5-minute ceiling, with margin for clock skew
 STATUS_LIST_LIFETIME = 4 * 3600
 LIST_FULL_FRACTION = 0.5  # open a new list once half the indexes are used
-VC_CONTEXT_V2 = "https://www.w3.org/ns/credentials/v2"
-KINDS = ("agents", "operators")
+KINDS = ("agents", "operators", "assistants")
+ENTRIES = tsl.MIN_LIST_ENTRIES
 
 
 def iso(epoch: int) -> str:
@@ -46,16 +49,16 @@ class StatusLists:
             raise ValueError(kind)
         lists = self.store.status_lists(kind)
         current = next((sl for sl in reversed(lists)
-                        if sl["used_count"] < MIN_LIST_BITS * LIST_FULL_FRACTION), None)
+                        if sl["used_count"] < ENTRIES * LIST_FULL_FRACTION), None)
         if current is None:
             number = (lists[-1]["number"] + 1) if lists else 1
             url = self.url(kind, number)
-            self.store.create_status_list(url, kind, number, MIN_LIST_BITS // 8)
+            self.store.create_status_list(url, kind, number, ENTRIES * tsl.BITS // 8, ENTRIES // 8)
             current = self.store.status_list(url)
         assert current is not None
         used = bytearray(current["used"])
         while True:
-            index = secrets.randbelow(MIN_LIST_BITS)
+            index = secrets.randbelow(ENTRIES)
             if not used[index // 8] & (0x80 >> (index % 8)):
                 break
         used[index // 8] |= 0x80 >> (index % 8)
@@ -63,16 +66,22 @@ class StatusLists:
                                     used_count=current["used_count"] + 1)
         return current["url"], index
 
-    def set_bit(self, url: str, index: int) -> None:
+    def set_value(self, url: str, index: int, value: int) -> None:
         row = self.store.status_list(url)
         if row is None:
             raise KeyError(url)
-        bits = bytearray(row["bits"])
-        bits[index // 8] |= 0x80 >> (index % 8)
-        self.store.save_status_list(url, bits=bytes(bits), dirty=True)
+        entries = bytearray(row["bits"])
+        tsl.put(entries, index, value)
+        self.store.save_status_list(url, bits=bytes(entries), dirty=True)
+
+    def value(self, url: str, index: int) -> int:
+        row = self.store.status_list(url)
+        if row is None:
+            raise KeyError(url)
+        return tsl.get(row["bits"], index)
 
     def signed(self, url: str, now: int) -> str | None:
-        """The current signed list, re-signed when stale or changed."""
+        """The current Status List Token, re-signed when stale or changed."""
         row = self.store.status_list(url)
         if row is None:
             return None
@@ -80,23 +89,9 @@ class StatusLists:
                  and now - row["signed_at"] < STATUS_RESIGN_SECONDS)
         if fresh:
             return row["jwt"]
-        payload = {
-            "@context": [VC_CONTEXT_V2],
-            "id": url,
-            "type": ["VerifiableCredential", "BitstringStatusListCredential"],
-            "issuer": self.identity.did,
-            "validFrom": iso(now),
-            "validUntil": iso(now + STATUS_LIST_LIFETIME),
-            "iat": now,
-            "exp": now + STATUS_LIST_LIFETIME,
-            "credentialSubject": {
-                "id": url + "#list",
-                "type": "BitstringStatusList",
-                "statusPurpose": "revocation",
-                "encodedList": encode_bitstring(row["bits"]),
-            },
-        }
-        jwt = self.identity.signer.sign({"typ": "vc+jwt"}, payload)
+        payload = tsl.status_list_payload(url, self.identity.id, row["bits"], now,
+                                          lifetime=STATUS_LIST_LIFETIME)
+        jwt = self.identity.signer.sign({"typ": tsl.STATUS_LIST_TYP}, payload)
         self.store.save_status_list(url, jwt=jwt, signed_at=now, dirty=False)
         return jwt
 
@@ -133,10 +128,10 @@ class TrustListPublisher:
             "iat": now,
             "exp": now + c.trust_list_lifetime,
             "issuers": [{
-                "id": self.identity.did,
+                "id": self.identity.id,
                 "tiers": list(c.tiers),
-                "credentialTypes": ["VeridactAgentCredential", "VeridactOperatorCredential"],
-                "keys": [{"kid": self.identity.signer.kid,
+                "vcts": [VCT_AGENT, VCT_OPERATOR, VCT_KNOWN_ASSISTANT],
+                "keys": [{"kid": self.identity.signer.kid, "jkt": self.identity.jkt,
                           "notBefore": self.identity.key_not_before,
                           "notAfter": self.identity.key_not_after}],
             }],
@@ -146,6 +141,7 @@ class TrustListPublisher:
                 "agentCredentialMaxLifetime": c.agent_credential_max_lifetime,
                 "presentationMaxLifetime": 120,
                 "operatorCredentialMaxLifetime": dict(c.operator_credential_lifetime),
+                "knownAssistantMaxLifetime": c.known_assistant_lifetime,
             },
         }
 
@@ -187,9 +183,12 @@ class TransparencyLog:
     def entry_id_for(self, index: int) -> str:
         return f"{self.LOG_ID}/{index:09d}"
 
-    def append(self, credential_jwt: str, entry: dict[str, Any], now: int,
+    def append(self, credential_jwt: str | None, entry: dict[str, Any], now: int,
                expect_index: int | None = None) -> dict[str, Any]:
-        entry = {**entry, "credentialHash": self._h(credential_jwt.encode())}
+        """Append an entry. With a credential, its hash is recorded (``type`` names its vct);
+        a key event has none."""
+        if credential_jwt is not None:
+            entry = {**entry, "credentialHash": self._h(credential_jwt.encode())}
         leaf = self._h(json.dumps(entry, sort_keys=True, separators=(",", ":")).encode())
         tail = self.store.tlog_tail()
         prev = tail["chain_hash"] if tail else "0" * 64

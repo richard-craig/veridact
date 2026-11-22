@@ -6,7 +6,8 @@ Veridact is a draft specification, and the most useful contributions are reviews
   something that shouldn't verify. Security problems go through [SECURITY.md](SECURITY.md), not public issues.
 - **Check the standards use.** Places where the profile misuses or diverges from SD-JWT VC, the Token Status
   List, attestation-based client authentication, Client ID Metadata Documents or ACME (v0.5, see the
-  [proposal](docs/proposals/0.5-sd-jwt-vc.md)); v0.4 profiles did:webvh, VC-JOSE-COSE and Bitstring Status List.
+  [proposal](docs/proposals/0.5-sd-jwt-vc.md)). Up to v0.4 the profile used did:webvh, VC-JOSE-COSE and Bitstring
+  Status List.
 - **Implementer feedback.** Anything that would be hard to build in a bank's API gateway, authorisation server or
   agent framework.
 

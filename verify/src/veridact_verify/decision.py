@@ -40,11 +40,16 @@ class Decision:
     issuers: list[str] = field(default_factory=list)
     scopes_held: list[str] = field(default_factory=list)
     scopes_granted: list[str] = field(default_factory=list)
-    agent_key_id: str | None = None
+    agent_key_id: str | None = None  # RFC 7638 thumbprint of the agent's cnf key
+    agent_jwk: dict[str, Any] | None = None
     agent_credential_id: str | None = None
     agent_credential_expires: int | None = None
     flags: list[str] = field(default_factory=list)
     context: dict[str, Any] = field(default_factory=dict)
+    # Selectively disclosed claims the agent chose to show (operator_legal_name, ...).
+    disclosed: dict[str, Any] = field(default_factory=dict)
+    limits: dict[str, Any] | None = None
+    credential_type: str | None = None
 
     @property
     def allowed(self) -> bool:
@@ -88,6 +93,8 @@ class Decision:
             "scopesGranted": self.scopes_granted,
             "agentKeyId": self.agent_key_id,
             "agentCredentialId": self.agent_credential_id,
+            "credentialType": self.credential_type,
+            "disclosed": sorted(self.disclosed),
             "flags": self.flags,
             "context": self.context,
         }

@@ -7,14 +7,13 @@ backends plug into. Month 1 ships the software store: PEM files, mode 0600.
 
 from __future__ import annotations
 
-import json
 import os
 from pathlib import Path
 from typing import Any, Protocol
 
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
-from veridact_verify import jose, provision
+from veridact_verify import jose
 
 
 class Key(Protocol):
@@ -44,6 +43,11 @@ class SoftwareKey:
     @property
     def jwk(self) -> dict[str, str]:
         return jose.key_to_jwk(self.public_key())
+
+    @property
+    def jkt(self) -> str:
+        """RFC 7638 thumbprint: the key's id everywhere in Veridact v0.5."""
+        return jose.jwk_thumbprint(self.jwk)
 
 
 def _write_secret(path: Path, data: bytes) -> None:
@@ -83,10 +87,3 @@ class SoftwareKeyStore:
         if not self._path(name, "pem").exists():
             raise KeyError(name)
         return self.get_or_create(name)
-
-    def save_update_keys(self, name: str, current, nxt) -> None:
-        """DID update keys (Ed25519): the current one and the pre-rotated next one."""
-        _write_secret(self._path(name, "update.json"), json.dumps({
-            "current": provision.update_key_to_jwk(current),
-            "next": provision.update_key_to_jwk(nxt),
-        }).encode())

@@ -34,7 +34,7 @@ async def test_payment_limits_and_ask_person(network: Network):
     sandbox = await network.start_sandbox()
     bot, agent_id = await onboard(network)
     bot.delegate(agent_id, ["fs:payments:initiate"], role="Claims Payments Lead",
-                 limits={"currency": "ZAR", "perPayment": "500.00", "perDay": "800.00"})
+                 limits={"currency": "ZAR", "per_payment": "500.00", "per_day": "800.00"})
     await bot.issue(agent_id)
 
     async def pay(amount: str):
@@ -78,7 +78,7 @@ async def test_revoking_the_operator_stops_every_agent(network: Network):
     bot, agent_id = await onboard(network)
     await bot.revoke("operator", "offboarded")
     denied = await call(bot, f"{sandbox}/claims/CLM-1001/status", agent_id=agent_id)
-    assert denied.json()["explain"]["reason"] == "STATUS_REVOKED"
+    assert denied.json()["explain"]["reason"] == "OPERATOR_REVOKED"
     # And the issuer refuses new agent credentials under it.
     import pytest
     from vbot import AcmeError
@@ -105,7 +105,8 @@ async def test_sidecar_challenge_and_verify(network: Network):
         assert decision["decision"] == "allow", decision
         assert decision["public"] == {"decision": "allow"}
         assert decision["scopesGranted"] == ["fs:quotes:create"]
-        assert decision["agentKeyId"] == bot.agent(agent_id)["kid"]
+        assert decision["agentKeyId"] == bot.agent(agent_id)["jkt"]
+        assert decision["agent"] == bot.agent(agent_id)["id"]
 
         # Replaying the same presentation fails: the nonce is single use.
         async with http.post(f"{sidecar}/v1/verify", headers=auth,
@@ -113,6 +114,17 @@ async def test_sidecar_challenge_and_verify(network: Network):
             replay = await r.json()
         assert replay["public"] == {"decision": "challenge", "code": "CHALLENGE_REQUIRED"}
         assert "log" in replay  # for the relying party's own logs, never the caller
+
+        # Pattern C: the attestation form, bound to the key that made the DPoP proof.
+        agent = await bot.issue(agent_id, attestation=True)
+        body = {"attestation": agent["attestation"], "clientId": agent["id"], "dpopJkt": agent["jkt"],
+                "scopes": ["fs:quotes:create"]}
+        async with http.post(f"{sidecar}/v1/client-attestation", headers=auth, json=body) as r:
+            admitted = await r.json()
+        assert admitted["decision"] == "allow", admitted
+        async with http.post(f"{sidecar}/v1/client-attestation", headers=auth,
+                             json={**body, "dpopJkt": "another-key"}) as r:
+            assert (await r.json())["log"]["reason"] == "DPOP_KEY_MISMATCH"
 
 
 async def test_cli_end_to_end(network: Network, capsys):

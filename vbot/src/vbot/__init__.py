@@ -11,4 +11,4 @@ from .http import audience_for, call, dpop_proof, exchange, parse_challenge
 
 __all__ = ["AcmeClient", "AcmeError", "Vbot", "VbotError", "audience_for", "call", "dpop_proof", "exchange",
            "parse_challenge"]
-__version__ = "0.1.0a1"
+__version__ = "0.5.0a1"

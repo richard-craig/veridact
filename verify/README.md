@@ -14,18 +14,26 @@ first failure.
 
 | # | Check | Typical public codes |
 |---|-------|----------------------|
-| 1 | Compact JWS, `typ: vp+jwt`, `aud` is this relying party, nonce issued here and live, lifetime ≤ 120 s | `CHALLENGE_REQUIRED`, `AUTH_FAILED` |
-| 2 | Resolve the agent's did:webvh log, verify its hash chain and proofs, verify the presentation with an `authentication` key; consume the nonce | `AUTH_FAILED` |
-| 3 | Unwrap the enveloped Agent and Operator Credentials; verify each with an `assertionMethod` key of its issuer | `AUTH_FAILED` |
-| 4 | Trust list accredits each issuer for the credential type and tier, and lists the signing key for its signing time | `ISSUER_UNTRUSTED` |
-| 5 | Validity windows and lifetime caps; revocation status of both credentials; degraded-mode policy | `CREDENTIAL_EXPIRED`, `AUTH_FAILED`, `VERIFICATION_UNAVAILABLE` |
-| 6 | The Agent Credential's subject is the holder, and its `cnf` key signed the presentation | `AUTH_FAILED` |
-| 7 | The Agent Credential names the Operator Credential's subject and id | `AUTH_FAILED` |
+| 1 | An SD-JWT+KB: the KB-JWT is `kb+jwt`, its `aud` is this relying party, its nonce was issued here and is live, its `iat` is within 120 s, and `sd_hash` covers the SD-JWT as presented | `CHALLENGE_REQUIRED`, `AUTH_FAILED` |
+| 2 | The trust list names the credential's `iss`, before anything is fetched | `ISSUER_UNTRUSTED`, `VERIFICATION_UNAVAILABLE` |
+| 3 | `typ: dc+sd-jwt` and the agent `vct`; the issuer's signature with a key pinned in the trust list *and* served in its JWT VC Issuer Metadata; every disclosure; the KB-JWT signature with `cnf.jwk`; then the nonce is consumed | `AUTH_FAILED` |
+| 4 | The trust list accredits the issuer for the `vct` and tier, and lists the signing key for its `iat` | `ISSUER_UNTRUSTED` |
+| 5 | `iat` ≤ `nbf` < `exp`, lifetime caps; Token Status List entries for `status` and `operator_status`; degraded-mode policy | `CREDENTIAL_EXPIRED`, `AUTH_FAILED`, `VERIFICATION_UNAVAILABLE` |
+| 6 | Key binding: the KB-JWT is signed by `cnf.jwk`, and `cnf_event` names the key's logged add event | `AUTH_FAILED` |
+| 7 | Disclosure: every claim the policy or route requires (`required_disclosures`, `Request.disclose`) is disclosed | `AUTH_FAILED` |
 | 8 | Relying-party policy: minimum tier, allowed operators, scopes, payment limits | `TIER_TOO_LOW`, `OPERATOR_NOT_ALLOWED`, `SCOPE_NOT_HELD`, `LIMIT_PER_PAYMENT`, `LIMIT_PER_DAY` |
 
-did:webvh log verification (SCID, hash chain, eddsa-jcs-2022 proofs, pre-rotation, witness rules) is delegated
-to the [did-webvh](https://pypi.org/project/did-webvh/) reference library. All Veridact signatures are ES256.
-Every other `alg` is refused before parsing goes further.
+SD-JWT parsing and disclosure checks ([RFC 9901](https://www.rfc-editor.org/rfc/rfc9901)) and Token Status Lists
+are implemented in this package (`sdjwt.py`, `status.py`), small and ES256-only: every other `alg` is refused before
+parsing goes further.
+
+Two more entry points serve authorisation servers:
+
+- `verify_client_attestation(attestation, client_id=…, dpop_jkt=…)`: pattern C, a Veridact Client Attestation
+  presented with `attest_jwt_client_auth_dpop`. Check the DPoP proof yourself, then pass its key thumbprint.
+- `verify_known_assistant(entry, client_id=…)`: a known-assistant entry (Claude, ChatGPT, …) matched to the OAuth
+  client it describes; the decision carries the verified operator and `context["maxLevel"]`. A suspended entry is
+  the kill switch.
 
 ## Use
 
@@ -43,9 +51,9 @@ route = Request(scopes=frozenset({"fs:claims:read-status"}), risk=Risk.LOW)
 nonce, www_authenticate = verifier.challenge(route, realm="claims-api")
 # -> 401, WWW-Authenticate: Veridact realm="claims-api", nonce="…", tier="organisation", scope="…"
 
-# The agent retries with: Authorization: Veridact vp="<VP-JWT>"
-vp = Verifier.presentation_from_authorization(headers["Authorization"])
-decision = await verifier.verify(vp, route)
+# The agent retries with: Authorization: Veridact sd-jwt="<SD-JWT+KB>"
+presentation = Verifier.presentation_from_authorization(headers["Authorization"])
+decision = await verifier.verify(presentation, route)
 
 if decision.allowed:
     ...                                  # decision.scopes_granted, decision.operator, decision.tier
@@ -55,7 +63,9 @@ audit_log.info(decision.log_record())    # full explanation, for your logs only
 
 For pattern A (token exchange), verify the `subject_token` the same way. If the decision is `allow`, issue a
 DPoP-bound access token with `decision.scopes_granted` intersected with customer consent, bound to
-`decision.agent_key_id`.
+`decision.agent_key_id` (the RFC 7638 thumbprint of the credential's `cnf.jwk`; compare it with the DPoP proof's
+key). `decision.disclosed` holds the selectively disclosed claims the agent showed, for example
+`operator_legal_name` for a consent screen.
 
 Payments: pass `Request(payment=Payment(amount, "ZAR", spent_today))`. The verifier is stateless about money:
 `spent_today` comes from your own ledger. A payment over the delegated limits returns `ask_person`, with the
@@ -66,11 +76,11 @@ exact action in `decision.context["intent"]`.
 - **Trust anchor.** `governance_keys` is the only thing you configure by hand. Pin it like a root CA.
 - **Nonces.** `InMemoryNonceStore` suits one process. Behind a load balancer, implement `NonceStore` on a shared
   store with an atomic consume (a Redis `GETDEL`, or a DynamoDB conditional delete).
-- **Outbound fetching.** The agent's DID is chosen by the caller, so the verifier fetches from the agent's
+- **Outbound fetching.** The verifier fetches only issuer metadata and status lists, and only for issuers the
+  trust list names, so a presentation cannot make it fetch arbitrary URLs. Nothing is fetched from the agent's or
   operator's domain. It fetches over HTTPS only, without redirects, under a size cap. Run it with an egress
   allowlist or behind a member mirror (`FallbackFetcher([MirrorFetcher(mirror_url, HttpFetcher()), HttpFetcher()])`).
-  Issuer DIDs are resolved only if the trust list names them.
-- **Caching.** DID documents and status lists are cached for 5 minutes and the trust list for 1 hour. On refresh
+- **Caching.** Issuer metadata and status lists are cached for 5 minutes and the trust list for 1 hour. On refresh
   failure, the last good copy is used within the degraded-mode policy. A status list's age is measured from its
   `iat` (default: flag medium-risk actions after 5 minutes, block high-risk; block everything after 4 hours). A file that fails verification is never cached, so a
   tampered mirror cannot displace a good copy.
@@ -86,12 +96,11 @@ pytest
 ```
 
 `veridact_verify.testing.MockNetwork` builds a complete mock network for tests: governance key, issuer, operator,
-agent, did:webvh logs, status lists and trust list. The language-neutral
+agent, issuer metadata, Token Status Lists, a client attestation, a known-assistant entry and the trust list. The language-neutral
 [conformance vectors](../conformance) run as part of the suite.
 
 ## Not yet
 
-- HTTP sidecar with a `/verify` endpoint, and reference integrations (Lambda authoriser, token-exchange handler)
 - Transparency log inclusion proofs (spec: "Relying parties may require one at Organisation tier")
-- Witness requirements for issuer DIDs taken from the trust list
+- Sub-agent grants (`veridact_grants`) and Verification Records
 - Trust Registry Query Protocol lookups, as an alternative to the downloaded list

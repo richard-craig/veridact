@@ -79,14 +79,14 @@ def test_no_presentation_gets_a_challenge(net, dynamo):
 def test_valid_presentation_is_allowed_once(net, dynamo):
     auth = make(net, dynamo)
     nonce = nonce_of(auth(event()))
-    header = f'Veridact vp="{net.presentation(nonce)}"'
+    header = f'Veridact sd-jwt="{net.presentation(nonce)}"'
     allowed = auth(event(auth=header))
     assert effect(allowed) == "Allow", allowed
-    assert allowed["principalId"] == net.agent.did
+    assert allowed["principalId"] == net.agent.id
     ctx = allowed["context"]
-    assert ctx["veridactOperator"] == net.operator.did
+    assert ctx["veridactOperator"] == net.operator.id
     assert ctx["veridactScopes"] == "fs:claims:read-status"
-    assert ctx["veridactAgentKeyId"] == net.agent.kid
+    assert ctx["veridactAgentKeyId"] == net.agent.jkt
     assert all(isinstance(v, (str, int, float, bool)) for v in ctx.values())
     # The same presentation again: the nonce was consumed in DynamoDB.
     replay = auth(event(auth=header))
@@ -98,13 +98,13 @@ def test_valid_presentation_is_allowed_once(net, dynamo):
 def test_nonce_from_one_instance_works_on_another(net, dynamo):
     first, second = make(net, dynamo), make(net, dynamo)
     nonce = nonce_of(first(event()))
-    assert effect(second(event(auth=f'Veridact vp="{net.presentation(nonce)}"'))) == "Allow"
+    assert effect(second(event(auth=f'Veridact sd-jwt="{net.presentation(nonce)}"'))) == "Allow"
 
 
 def test_scope_not_held_is_denied_without_a_challenge(net, dynamo):
     auth = make(net, dynamo)
     nonce = nonce_of(auth(event("POST", "/payments")))
-    result = auth(event("POST", "/payments", auth=f'Veridact vp="{net.presentation(nonce)}"'))
+    result = auth(event("POST", "/payments", auth=f'Veridact sd-jwt="{net.presentation(nonce)}"'))
     assert effect(result) == "Deny"
     assert result["context"] == {"decision": "deny", "code": "SCOPE_NOT_HELD", "wwwAuthenticate": ""}
 
@@ -119,7 +119,7 @@ def test_tampered_presentation_is_auth_failed(net, dynamo):
     auth = make(net, dynamo)
     nonce = nonce_of(auth(event()))
     vp = net.presentation(nonce)
-    result = auth(event(auth=f'Veridact vp="{vp[:-4]}AAAA"'))
+    result = auth(event(auth=f'Veridact sd-jwt="{vp[:-4]}AAAA"'))
     assert effect(result) == "Deny"
     assert result["context"]["code"] == "AUTH_FAILED"
 

@@ -6,7 +6,7 @@ presentation, verifies the ones that come back, and passes the agent's identity 
 ```
 agent ── GET /claims/CLM-1/status ─────────────▶ API Gateway ──▶ authoriser: no presentation
       ◀─ 401  WWW-Authenticate: Veridact realm=…, nonce=…, scope=…        (Deny + challenge)
-agent ── GET … Authorization: Veridact vp="…" ─▶ API Gateway ──▶ authoriser: verify, consume nonce
+agent ── GET … Authorization: Veridact sd-jwt="…" ─▶ API Gateway ──▶ authoriser: verify, consume nonce
                                                               ──▶ backend, with $context.authorizer.veridact*
 ```
 

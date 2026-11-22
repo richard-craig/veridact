@@ -7,7 +7,7 @@
 #   deploy/local-demo.sh
 #
 # Canonical names are *.veridact.test; --route sends each one to a local port, so every
-# credential, DID and status list carries the https URL it would have in production.
+# credential, identifier and status list carries the https URL it would have in production.
 set -euo pipefail
 
 WORK="${WORK:-$(mktemp -d -t veridact-demo-XXXX)}"
@@ -45,23 +45,23 @@ veridact-sandbox --audience "https://$SANDBOX" --trust-list "https://$ISSUER/tru
   --status-ttl 0 --port "$SANDBOX_PORT" >"$WORK/sandbox.log" 2>&1 & PIDS+=($!)
 wait_for "http://127.0.0.1:$SANDBOX_PORT/healthz"
 
-step "vbot init: ACME-A account, operator DID, files to publish"
+step "vbot init: ACME-A account, operator key, veridact-operator.json to publish"
 vbot init --issuer "https://$ISSUER/directory" --domain "$DOMAIN" "${ROUTES[@]}"
 
-step "vbot operator: did-config-01, then the Operator Credential"
+step "vbot operator: operator-keys-01, then the Operator Credential (an SD-JWT VC)"
 vbot operator
 
-step "vbot agent new: agent key and DID, hosted by the issuer"
+step "vbot agent new: agent key and client metadata (CIMD), hosted by the issuer"
 vbot agent new
 
-step "vbot delegate: the operator authorises the agent"
+step "vbot delegate: the operator signs a Delegation Credential for the agent"
 vbot delegate --scope fs:claims:read-status --scope fs:quotes:create \
   --role "Head of Digital Claims" --per-payment 500.00 --per-day 2000.00
 
-step "vbot issue: an Agent Credential, valid for hours"
+step "vbot issue: an Agent Credential (SD-JWT VC), valid for hours"
 vbot issue
 
-step "vbot call: the sandbox challenges, vbot presents, the sandbox decides"
+step "vbot call: the sandbox challenges, vbot presents an SD-JWT+KB, the sandbox decides"
 vbot call "https://$SANDBOX/claims/CLM-1001/status"
 
 step "A scope the agent was not given (expect SCOPE_NOT_HELD)"
@@ -69,11 +69,11 @@ vbot call "https://$SANDBOX/payments" -X POST --json '{"amount": "100.00", "curr
 
 step "Revoke the agent, then try again (expect AUTH_FAILED, explain.reason STATUS_REVOKED)"
 vbot revoke "$(vbot status | python -c 'import json,sys; print(next(iter(json.load(sys.stdin)["agents"])))')"
-# The demo sandbox runs with --status-ttl 0. Production verifiers cache status lists for up to
-# 5 minutes, which is the revocation window the spec promises.
+# The demo sandbox runs with --status-ttl 0. Production verifiers cache Token Status Lists for up
+# to 5 minutes, which is the revocation window the spec promises.
 vbot call "https://$SANDBOX/claims/CLM-1001/status" || true
 
-step "Transparency log: every credential issued, in order"
+step "Transparency log: every key event and credential, in order"
 curl -fs "http://127.0.0.1:$ISSUER_PORT/log/entries?count=10" | python -m json.tool || true
 
 echo
