@@ -167,7 +167,7 @@ An agent's identifier is the URL of its Client ID Metadata Document. The documen
   "client_id": "https://operator.example/agents/a7f3k2",
   "client_name": "Claims assistant",
   "jwks": { "keys": [{ "kty": "EC", "crv": "P-256", "x": "…", "y": "…", "kid": "Ab3…", "use": "sig" }] },
-  "token_endpoint_auth_methods_supported": ["attest_jwt_client_auth", "private_key_jwt"],
+  "token_endpoint_auth_methods_supported": ["attest_jwt_client_auth_dpop", "private_key_jwt"],
   "grant_types": ["urn:ietf:params:oauth:grant-type:token-exchange", "client_credentials"]
 }
 ```
@@ -202,7 +202,7 @@ Every operator and agent key change is recorded in the transparency log before i
 | `time` | When the action takes effect. For `compromise`, the earliest time the key may have been exposed |
 | `account_sig` | A JWS over the other fields by the operator's ACME-A account key |
 
-Issuers append key events when an operator adds or retires a key through ACME-A ([§9.5](#95-key-events)). An issuer MUST NOT issue a credential bound to a key that has no `add` event, or that has a `retire` or `compromise` event. When a `retire` or `compromise` event is logged, the issuer MUST revoke every live credential bound to that key within 5 minutes.
+Issuers append key events when an operator adds or retires a key through ACME-A ([§9.5](#95-key-events)). An issuer MUST NOT issue a credential bound to a key that has no `add` event, or that has a `retire` or `compromise` event. It records the `add` event's log entry id in the Agent Credential as `cnf_event`. When a `retire` or `compromise` event is logged, the issuer MUST revoke every live credential bound to that key within 5 minutes.
 
 So a thief who edits a CIMD or an operator metadata document still cannot get a new key accepted without an ACME-A request from the operator's account, and that request is logged and monitored. Monitors alert the operator within minutes of any key event in its name.
 
@@ -296,7 +296,7 @@ An approver delegates to an agent by choosing a purpose, scopes, limits and a li
 - `environment` MUST match the issuer's, so a staging delegation cannot obtain production credentials.
 - `audiences` and `certificate_max_lifetime` are OPTIONAL.
 - `approvals` carries one entry per approver. The terms digest is the base64url SHA-256 of the JCS-canonical ([RFC 8785](https://www.rfc-editor.org/rfc/rfc8785)) object of `sub`, `scopes`, `limits`, `accountable_role`, `max_lifetime`, `environment`, `audiences` and `exp`.
-- A delegation whose `per_payment` exceeds R1,000 (or the equivalent the trust list sets for another currency) MUST carry two approvals from different approvers.
+- A delegation whose `per_payment` exceeds the issuer's two-person threshold (R1,000 for ZAR) MUST carry two approvals from different approvers.
 
 The Delegation Credential is never presented to a relying party. Its terms reach relying parties only through the Agent Credential the issuer derives from it.
 
@@ -314,6 +314,7 @@ The Agent Credential carries everything a relying party needs about the agent an
 | `limits` | Per-payment and daily limits from the delegation, capped by each approver's ceiling |
 | `accountable_role` | From the delegation |
 | `cnf` | `{ "jwk": … }`: the agent key |
+| `cnf_event` | The transparency log entry id of the `add` key event for the `cnf` key |
 | `status` | Its status entry, on an agent status list |
 | `operator_legal_name` (SD) | Copied from the Operator Credential |
 | `operator_registration` (SD) | Copied from the Operator Credential |
@@ -336,6 +337,7 @@ The Agent Credential carries everything a relying party needs about the agent an
   "accountable_role": "Head of Digital Claims",
   "limits": { "currency": "ZAR", "per_payment": "500.00", "per_day": "2000.00" },
   "cnf": { "jwk": { "kty": "EC", "crv": "P-256", "x": "…", "y": "…" } },
+  "cnf_event": "veridact-log-2026/000000456",
   "status": { "status_list": { "idx": 48213, "uri": "https://status.veridact.net/org/agents/7" } },
   "_sd": ["…", "…", "…"], "_sd_alg": "sha-256"
 }
@@ -412,7 +414,7 @@ ACME-A is a profile of ACME ([RFC 8555](https://www.rfc-editor.org/rfc/rfc8555))
 
 | Method and path | Purpose | Change from RFC 8555 |
 |---|---|---|
-| `GET /directory` | Endpoint discovery, terms of service, tiers offered | Adds `veridactTiers`, `trustList`, `veridactAgentHosting` and `keyEvent` |
+| `GET /directory` | Endpoint discovery, terms of service, tiers offered | Adds `veridactAgentMetadata` and `veridactKeyEvent`, and in `meta` `veridactSpecification`, `veridactTiers`, `veridactEnvironment`, `veridactIssuer`, `veridactAgentHosting`, `veridactScopes`, `veridactFormats` and `trustList` |
 | `HEAD /new-nonce` | Anti-replay nonce for every POST | None |
 | `POST /new-account` | Register the operator's account key | Adds optional `externalAccountBinding` for Organisation tier contracts |
 | `POST /new-order` | Request a credential for one identifier | New identifier type `agent`; `dns` used for operators |
@@ -422,8 +424,8 @@ ACME-A is a profile of ACME ([RFC 8555](https://www.rfc-editor.org/rfc/rfc8555))
 | `POST /cred/{id}` | Download the issued credential | Returns `application/dc+sd-jwt`, with the transparency log receipt in a `Veridact-Log-Receipt` header |
 | `POST /revoke-cred` | Revoke a credential | Sets its status list entry instead of updating a CRL |
 | `GET /renewal-info/{id}` | Suggested renewal window | ARI ([RFC 9773](https://www.rfc-editor.org/rfc/rfc9773)), keyed by the credential's `jti` |
-| `POST /key-event` | Add, retire or mark compromised an operator or agent key | New ([§9.5](#95-key-events)) |
-| `POST {veridactAgentHosting}/{agent id}` | Upload a Veridact-hosted agent's CIMD | New |
+| `POST {veridactKeyEvent}` | Add, retire or mark compromised an operator or agent key | New ([§9.5](#95-key-events)) |
+| `POST {veridactAgentMetadata}/{agent id}` | Upload a Veridact-hosted agent's CIMD, served under `veridactAgentHosting` | New |
 
 ### 9.2 Challenges
 
@@ -485,7 +487,7 @@ The nonce is the one in the outer JWS's protected header, so the proof cannot be
 
 **Orders, tiers and lifetimes.** An order carries one identifier. `new-order` takes an optional `tier` (default: the issuer's lowest), an optional `lifetime` in seconds, and optional `formats`: `dc+sd-jwt` (the default), `client-attestation` ([§10.3](#103-pattern-c-client-attestation)) and `x509` ([§15](#15-agent-certificates)), with an optional `certificateLifetime`. An Agent Credential's lifetime is the smallest of the request (default 8 hours), the delegation's `max_lifetime`, the trust list's maximum, and the time left on the delegation and on the Operator Credential. If that is under 5 minutes, the issuer MUST refuse.
 
-**Veridact-hosted agents.** The account POSTs `{"cimd": <document>}`, ACME-signed, to `{veridactAgentHosting}/{agent id}`. The issuer MUST serve only documents whose `client_id` is that URL, under the account's own slug, and whose keys all have a logged `add` event.
+**Veridact-hosted agents.** The account POSTs `{"metadata": <document>}`, ACME-signed, to `{veridactAgentMetadata}/{agent id}`, and the issuer serves it under `{veridactAgentHosting}/{account slug}/{agent id}`. The issuer MUST serve only documents whose `client_id` is that URL, under the account's own slug, and whose keys all have a logged `add` event.
 
 **Transparency log receipt.** The receipt travels in the `Veridact-Log-Receipt` response header as base64url JSON, and holds an inclusion proof. Log entry ids, including the one an Operator Credential carries, are `{log id}/{index, 9 digits}`. An Operator Credential names its entry before it is signed, so the issuer serialises issuance and signs the next index in.
 
@@ -542,7 +544,7 @@ The Client Attestation has no selective disclosure: it carries only what an auth
 
 The agent sends it in the `OAuth-Client-Attestation` header with a proof of possession of `cnf.jwk`, as draft-ietf-oauth-attestation-based-client-auth defines. Where the draft allows a DPoP proof to serve as that proof, the agent SHOULD use DPoP, so the same key binds the access token. The authorisation server runs checks 2 to 8 of [§11](#11-verification) on the attestation, with check 7 vacuous.
 
-> **Editorial note.** The token endpoint authentication method names and the DPoP combination follow the attestation draft, and will track it until it is published.
+> **Editorial note.** The method name `attest_jwt_client_auth_dpop` and the DPoP combination follow the attestation draft, and will track it until it is published.
 
 ### 10.4 Access tokens
 
@@ -592,7 +594,7 @@ The verifier library runs these checks in order and stops at the first failure.
 3. **Signatures.** Verify the Agent Credential with a key that is listed both in the trust list, for the credential's `iat`, and in the issuer's JWT VC Issuer Metadata. Verify every disclosure digest. Verify the KB-JWT with the `cnf` key or, for a sub-agent, verify each grant back to the first and the KB-JWT with the last grant's key. Only then consume the nonce, atomically, so nobody can burn a nonce with a junk presentation, and two parallel replays cannot both succeed.
 4. **Accreditation.** The trust list accredits the issuer for the credential's `vct` and `tier`.
 5. **Validity and status.** Check the validity window, that `nbf` equals `iat`, and the lifetime against the trust list's maxima. Check both `status` and `operator_status`, and apply degraded-mode policy to the status lists' age ([§18](#18-resilience)).
-6. **Key binding.** The KB-JWT is signed by `cnf.jwk`, or the grant rules hold ([§8](#8-sub-agents)): the last grant's key signed it, and every grant only narrows.
+6. **Key binding.** The Agent Credential carries `cnf_event`; without it the logged reason is `KEY_NOT_LOGGED` and the public code is `AUTH_FAILED`. The KB-JWT is signed by `cnf.jwk`, or the grant rules hold ([§8](#8-sub-agents)): the last grant's key signed it, and every grant only narrows.
 7. **Disclosure.** Every (SD) claim the route requires is disclosed. If one is missing, the logged reason is `CLAIMS_NOT_DISCLOSED` and the public code is `AUTH_FAILED`.
 8. **Relying-party policy.** Minimum tier, allowed operators, scopes requested against scopes held, and, for payments, the limits. For a sub-agent, scopes held and limits are the last grant's, and the root agent's `per_day` is checked as well.
 
@@ -797,12 +799,11 @@ The trust list is a compact JWS with `typ` `trust-list+jwt` and `alg` `ES256`. I
   "policy": {
     "tierOrder": ["domain", "organisation"],
     "agentCredentialMaxLifetime": 86400,
-    "presentationMaxAge": 120,
+    "presentationMaxLifetime": 120,
     "operatorCredentialMaxLifetime": { "domain": 7776000, "organisation": 31622400 },
     "maxSubAgentDepth": 2,
     "subAgentGrantMaxLifetime": 900,
     "agentCertificateMaxLifetime": 3600,
-    "twoPersonThreshold": { "ZAR": "1000.00" },
     "archiveRetention": 157680000
   }
 }
@@ -956,11 +957,11 @@ v0.5 moves Veridact from W3C VC Data Model 2.0 with did:webvh to the formats the
 | Verification | Eight checks, with Operator Credential matching | Eight checks, with disclosure in place of Operator Credential matching |
 | Claim names | camelCase | snake_case (`perPayment` is now `per_payment`) |
 
-Editorial choices made while writing v0.5 from the proposal, open for review:
+Choices made while writing v0.5 from the proposal:
 
-1. **Key events at verification time.** The proposal has verifiers refuse a key with no logged `add` event. v0.5 puts that check on the issuer at issuance, and requires the issuer to revoke every credential bound to a key within 5 minutes of a `retire` or `compromise` event. A verifier then needs only the status lists it already fetches, and keeps making no call to the log on the hot path.
-2. **Delegation signatures.** The proposal says "issued by approvers, countersigned by the operator". v0.5 makes the operator the `iss`, with each approver's passkey signature over a canonical terms digest in `approvals`.
-3. **The two-person threshold** moves into the trust list as `twoPersonThreshold`, so currencies other than ZAR can be set without a spec change.
+1. **Key events at issuance.** The issuer checks a key's `add` event before issuing, records it in the Agent Credential as `cnf_event`, and revokes every credential bound to a key within 5 minutes of a `retire` or `compromise` event. A verifier checks that `cnf_event` is present and otherwise relies on the status lists it already fetches, with no call to the log on the hot path. The reference code implements this.
+2. **Delegation signatures** (open for review). The proposal says "issued by approvers, countersigned by the operator". v0.5 makes the operator the `iss`, with each approver's passkey signature over a canonical terms digest in `approvals`. The reference issuer does not accept approver chains yet, so it refuses delegations above the two-person threshold.
+3. **The two-person threshold** is issuer policy: R1,000 a payment in ZAR in the reference issuer.
 
 **Moving the code.** The staging network is alpha, so v0.5 is a clean cut: staging is reset, and no v0.4 credential is accepted. The reference packages moved together, with the conformance vectors, `verify`, `issuer`, `vbot`, the sidecar, the integrations, `e2e` and `deploy` on v0.5 ([#9](https://github.com/veridactlabs/veridact/pull/9)). The Veridact adapter in Veridact Valet is still to come.
 
