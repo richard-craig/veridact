@@ -44,7 +44,8 @@ issuance. Veridact works the same way.
 - [**Proposals**](docs/proposals): [v0.2](docs/proposals/0.2-verifier-gaps.md) (gaps found building the verifier,
   accepted), [v0.3](docs/proposals/0.3-issuer-gaps.md) (gaps found building the issuer, vbot and the
   integrations, accepted) and [v0.4](docs/proposals/0.4-iiw42-proposals.md) (sub-agents, actor claims, Agent
-  Certificates and archival verification, from IIW 42, accepted).
+  Certificates and archival verification, from IIW 42, accepted) and
+  [v0.5](docs/proposals/0.5-sd-jwt-vc.md) (SD-JWT VC, OAuth-native identifiers and known assistants, proposed).
 
 ## Try it
 
@@ -60,16 +61,26 @@ to an allowed call, a denied scope and a revocation. [`deploy/`](deploy) also ha
 ## Related project
 
 [**Veridact Valet**](https://github.com/richard-craig/veridact-valet) lets bank customers give AI agents scoped,
-revocable access to their accounts. Valet's agent registry can use Veridact credentials to know which agent is
-calling.
+revocable access to their accounts. Veridact answers *which agent is this, and is it still trusted?*; Valet
+answers *what did the customer allow?* Both run beside a bank's own systems: the Veridact verifier (this repo's
+sidecar) next to the bank's authorisation server, and the Valet decision service next to its MCP server and APIs.
 
 ## Status
 
-Specification v0.4, a draft for review. The reference code implements v0.3: sub-agent grants, actor claims,
+Specification v0.4, a draft for review. **v0.5 is proposed** ([SD-JWT VC, OAuth-native identifiers and known
+assistants](docs/proposals/0.5-sd-jwt-vc.md)): it moves credentials from W3C VC with did:webvh to SD-JWT VC with
+HTTPS identifiers, and the code will follow it package by package. The reference code implements v0.3: sub-agent grants, actor claims,
 Agent Certificates and Verification Records are specified but not built yet. The issuer, vbot, sidecar and
 sandbox are alpha and run as a staging network; nothing here is accredited for production use yet. Feedback is welcome: see [CONTRIBUTING.md](CONTRIBUTING.md), and report
 security problems in the design through [SECURITY.md](SECURITY.md).
 
+## Governance and support
+
+Veridact is run as an open project: [GOVERNANCE.md](GOVERNANCE.md) sets out how decisions are made and how
+contributors become maintainers, with the aim of maintainers from at least three organisations and no single
+organisation holding a majority ([MAINTAINERS.md](MAINTAINERS.md)). Commercial support, integration help and
+assurance are available from IAME (IAM Experts); nobody needs a contract to use the code or the specification.
+
 ## Licence
 
-Apache License 2.0. See [LICENSE](LICENSE).
+Apache License 2.0. See [LICENSE](LICENSE). The project's names are covered separately in [TRADEMARKS.md](TRADEMARKS.md).
