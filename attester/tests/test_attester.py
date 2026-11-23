@@ -88,3 +88,29 @@ def test_disclosures_are_bound_by_their_digest():
     salt, name, value = json.loads(base64.urlsafe_b64decode(d + "=" * (-len(d) % 4)))
     assert (name, value) == ("jurisdiction", "US") and salt
     assert h == jose.b64url_encode(hashlib.sha256(d.encode()).digest())
+
+
+async def test_chatgpt_has_its_own_entry_and_status_bit(client):
+    keys = await _keys(client)
+    raw = await (await client.get("/known-assistants/chatgpt")).text()
+    jws = jose.parse(raw.split("~")[0])
+    jose.verify(jws, keys[jws.kid])
+    c = jws.payload
+    assert c["sub"] == "chatgpt" and c["vct"] == VCT and "https://chatgpt.com/oauth/client.json" in c["client_metadata_urls"]
+    claude = jose.parse((await (await client.get("/known-assistants/claude")).text()).split("~")[0]).payload
+    assert c["status"]["status_list"]["idx"] != claude["status"]["status_list"]["idx"]
+
+
+def test_existing_state_gains_new_default_entries_and_keeps_its_own(tmp_path):
+    from veridact_attester.app import Attester
+    cfg = Config(issuer="https://veridact.test", data_dir=tmp_path, admin_secret=SECRET, ttl=10)
+    first = Attester(cfg)
+    first.state["entries"]["claude"]["status"] = "suspended"
+    first.state["entries"].pop("chatgpt")
+    first._save()
+    claude_idx = first.state["entries"]["claude"]["idx"]
+    again = Attester(cfg)
+    assert again.state["entries"]["claude"]["status"] == "suspended"
+    assert again.state["entries"]["claude"]["idx"] == claude_idx
+    assert again.state["entries"]["chatgpt"]["status"] == "valid"
+    assert again.state["entries"]["chatgpt"]["idx"] != claude_idx

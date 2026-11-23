@@ -38,7 +38,7 @@ VERIDACT_ISSUER=http://localhost:8100 VERIDACT_ADMIN_SECRET=change-me veridact-a
 ## What this is not
 
 A demonstration and pilot attester, not the production service. Its keys are software keys on disk, its state is a
-JSON file, and its one entry (Claude, operated by Anthropic PBC) is seeded for the Veridact Valet demo, not a statement
+JSON file, and its two entries (Claude, operated by Anthropic PBC; ChatGPT, operated by OpenAI OpCo, LLC) are seeded for the Veridact Valet demo, not a statement
 made by or with Anthropic. A production attester keeps its keys in an HSM, is named in the governance-signed trust
 list, validates operators by documentary review with a published procedure, tells a platform before withdrawing its
 entry where possible, and logs every issuance and status change to the transparency log.

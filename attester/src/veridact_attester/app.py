@@ -43,7 +43,7 @@ LIST_SIZE = 131_072                     # herd privacy (§7): indexes are random
 ENTRY_LIFETIME = 30 * 86400             # up to 90 days (§2)
 log = logging.getLogger("veridact.attester")
 
-# The demo's one entry. A statement by this attester ABOUT a platform; the platform takes no part (§6).
+# The demo's entries. Each is a statement by this attester ABOUT a platform; the platform takes no part (§6).
 DEFAULT_ENTRIES: dict[str, dict[str, Any]] = {
     "claude": {
         "sub": "claude",            # the bank registers Claude's client itself, so the identifier is a stable name
@@ -53,6 +53,17 @@ DEFAULT_ENTRIES: dict[str, dict[str, Any]] = {
                      "verification": "documentary review (reference attester, demonstration only)"},
         "redirect_hosts": ["claude.ai", "claude.com"],
         "token_endpoint_auth": {"method": "client_secret", "note": "a bank-registered confidential client"},
+        "max_level": "approved_payer",
+    },
+    "chatgpt": {
+        "sub": "chatgpt",           # likewise a bank-registered client; OpenAI's CIMD URL is listed for banks that use it
+        "name": "ChatGPT",
+        "client_metadata_urls": ["https://chatgpt.com/oauth/client.json"],
+        "operator": {"name": "OpenAI OpCo, LLC", "jurisdiction": "US", "verified_on": "2026-11-23",
+                     "verification": "documentary review (reference attester, demonstration only)"},
+        "redirect_hosts": ["chatgpt.com"],
+        "token_endpoint_auth": {"method": "client_secret", "note": "a bank-registered confidential client; OpenAI's "
+                                "metadata document can also declare private_key_jwt with an OpenAI-managed JWKS"},
         "max_level": "approved_payer",
     },
 }
@@ -98,19 +109,24 @@ class Attester:
         return key, "ka-" + thumb[:16]
 
     def _load(self) -> dict[str, Any]:
-        if self.state_file.exists():
-            return json.loads(self.state_file.read_text())
-        used: set[int] = set()
-        entries = {}
+        """The saved state. A default entry a newer release adds (e.g. ChatGPT) is issued into existing state on start;
+        entries already there, their status indexes and their history are never changed."""
+        state = json.loads(self.state_file.read_text()) if self.state_file.exists() else {"entries": {}}
+        entries = state["entries"]
+        used = {e["idx"] for e in entries.values()}
+        added = False
         for eid, claims in DEFAULT_ENTRIES.items():
+            if eid in entries:
+                continue
             idx = secrets.randbelow(LIST_SIZE)
             while idx in used:
                 idx = secrets.randbelow(LIST_SIZE)
             used.add(idx)
             entries[eid] = {"claims": claims, "idx": idx, "status": "valid", "jti": f"urn:uuid:{_uuid()}",
                             "history": [{"at": int(time.time()), "status": "valid", "reason": "issued"}]}
-        state = {"entries": entries}
-        self._save(state)
+            added = True
+        if added or not self.state_file.exists():
+            self._save(state)
         return state
 
     def _save(self, state: dict[str, Any] | None = None) -> None:
